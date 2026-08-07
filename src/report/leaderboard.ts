@@ -1,0 +1,128 @@
+import { uniq } from "es-toolkit";
+import type { SuiteId } from "../config.js";
+import type { Benchmark, BenchmarkEntry } from "./benchmark.js";
+
+// Renders a Benchmark straight to the markdown an operator reads. The ranking
+// already happened in benchmark.ts; this file only formats what it produced.
+
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+function trimZero(text: string): string {
+  return text.replace(/\.0$/, "");
+}
+
+/** Under 1000 verbatim; K/M above that, so the column stays narrow at any scale. */
+export function humanTokens(value: number): string {
+  const count = Math.round(value);
+  if (count < 1_000) return String(count);
+  if (count < 1_000_000) return `${trimZero((count / 1_000).toFixed(1))}K`;
+  return `${trimZero((count / 1_000_000).toFixed(1))}M`;
+}
+
+function pad2(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+/** Drops the smaller unit once a bigger one is in play: "1h02m", never "1h02m03s". */
+export function humanDuration(ms: number): string {
+  const totalSeconds = Math.round(ms / 1_000);
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  if (totalSeconds < 3_600) return `${Math.floor(totalSeconds / 60)}m${pad2(totalSeconds % 60)}s`;
+  const hours = Math.floor(totalSeconds / 3_600);
+  const minutes = Math.floor((totalSeconds % 3_600) / 60);
+  return `${hours}h${pad2(minutes)}m`;
+}
+
+function passRateCell(entry: BenchmarkEntry): string {
+  const pct = `${(entry.meanPassRate * 100).toFixed(1)}%`;
+  return entry.stddevPassRate === null ? pct : `${pct} ±${(entry.stddevPassRate * 100).toFixed(1)}`;
+}
+
+/** null is a cost nobody knows, which is not the same as free, so it never prints as a number. */
+export function usd(value: number | null): string {
+  return value === null ? "—" : `$${value.toFixed(4)}`;
+}
+
+function notesCell(entry: BenchmarkEntry): string {
+  const failed = entry.terminal.endpoint_error + entry.terminal.sandbox_error;
+  return failed > 0 ? `⚠ ${failed} failed runs` : "";
+}
+
+/** Medals go to the first three rows in table order. */
+function rankCell(position: number): string {
+  const medal = MEDALS[position - 1] ?? null;
+  return medal ? `${position} ${medal}` : `${position}`;
+}
+
+export const LEADERBOARD_COLUMNS: readonly string[] = [
+  "#",
+  "Model",
+  "Cases",
+  "Pass rate",
+  "Avg time",
+  "Avg tokens",
+  "Cost",
+  "Tool calls",
+  "Notes",
+];
+
+/**
+ * One cell array per entry, aligned to LEADERBOARD_COLUMNS and ranked by
+ * position in `entries`, which must already be one suite's ranked rows. The
+ * markdown table and the dashboard's HTML table both render from this alone.
+ */
+export function suiteRows(entries: BenchmarkEntry[]): string[][] {
+  return entries.map((entry, index) => [
+    rankCell(index + 1),
+    entry.model,
+    `${entry.cases.passed}/${entry.cases.total}`,
+    passRateCell(entry),
+    humanDuration(entry.avgDurationMs),
+    `${humanTokens(entry.avgTokens.in)} / ${humanTokens(entry.avgTokens.out)}`,
+    usd(entry.totalCostUsd),
+    entry.avgToolCalls.toFixed(1),
+    notesCell(entry),
+  ]);
+}
+
+function tableRow(cells: readonly string[]): string {
+  return `| ${cells.join(" | ")} |`;
+}
+
+function suiteTable(entries: BenchmarkEntry[]): string {
+  const rows = suiteRows(entries).map((cells) => tableRow(cells));
+  const separator = LEADERBOARD_COLUMNS.map(() => "---");
+  return [tableRow(LEADERBOARD_COLUMNS), tableRow(separator), ...rows].join("\n");
+}
+
+function suiteSection(suite: SuiteId, entries: BenchmarkEntry[]): string {
+  const rows = entries.filter((entry) => entry.suite === suite);
+  return `## ${suite}\n\n${suiteTable(rows)}`;
+}
+
+function identityBlock(benchmark: Benchmark): string {
+  const { identity, config } = benchmark;
+  return [
+    `oled \`${identity.oledVersion}\` · tarball \`${identity.tarballSha256.slice(0, 12)}\` · ` +
+      `skill \`${identity.skillVersion}\` \`${identity.skillSha256.slice(0, 12)}\` · eval \`${identity.evalVersion}\``,
+    `suites: ${config.suites.join(", ")} · trials: ${config.trials} · concurrency: ${config.concurrency}`,
+  ].join("\n");
+}
+
+function skippedSection(skipped: Benchmark["skippedModels"]): string {
+  if (skipped.length === 0) return "";
+  const lines = skipped.map((model) => `- ${model.id} — ${model.reason}`);
+  return `\n\n## Skipped models\n\n${lines.join("\n")}`;
+}
+
+/** Suite order follows first appearance in entries, which buildBenchmark already ranked by config.suites. */
+export function renderLeaderboard(benchmark: Benchmark): string {
+  const sections = uniq(benchmark.entries.map((entry) => entry.suite)).map((suite) =>
+    suiteSection(suite, benchmark.entries),
+  );
+  return (
+    `# openledger eval — ${benchmark.identity.startedAt}\n\n${identityBlock(benchmark)}\n\n` +
+    sections.join("\n\n") +
+    skippedSection(benchmark.skippedModels)
+  );
+}
