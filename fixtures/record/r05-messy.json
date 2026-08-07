@@ -1,0 +1,233 @@
+{
+  "id": "r05-messy",
+  "input": "r05-messy.txt",
+  "maxCalls": 26,
+  "currency": "THB",
+  "needsLedger": null,
+  "accounts": [
+    { "id": "thb:asset:bank:kbank", "name": "KBank current" },
+    { "id": "thb:asset:bank:scb", "name": "SCB savings" },
+    { "id": "thb:liability:card:visa", "name": "Visa credit card" },
+    { "id": "thb:income:freelance", "name": "Freelance income" },
+    { "id": "thb:expense:food:groceries", "name": "Groceries" },
+    { "id": "thb:expense:food:restaurants", "name": "Restaurants" },
+    { "id": "thb:expense:food:coffee", "name": "Coffee" },
+    { "id": "thb:expense:transport", "name": "Transport" },
+    { "id": "thb:expense:utilities", "name": "Utilities" },
+    { "id": "thb:expense:subscriptions", "name": "Subscriptions and streaming" },
+    { "id": "thb:expense:health", "name": "Health" },
+    { "id": "thb:expense:household", "name": "Household" }
+  ],
+  "rows": [
+    {
+      "date": "2026-06-01",
+      "description": "Big C weekly shop",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 640.0
+    },
+    {
+      "date": "2026-06-02",
+      "description": "Cafe Amazon latte",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 65.0
+    },
+    {
+      "date": "2026-06-02",
+      "description": "Grab ride to Asok",
+      "debit": "thb:expense:transport",
+      "credit": "thb:liability:card:visa",
+      "amount": 120.0
+    },
+    {
+      "date": "2026-06-03",
+      "description": "Dinner at Som Tam Nua",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:liability:card:visa",
+      "amount": 385.0
+    },
+    {
+      "date": "2026-06-03",
+      "description": "MEA electricity bill",
+      "debit": "thb:expense:utilities",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 1250.0
+    },
+    {
+      "date": "2026-06-04",
+      "description": "Boots allergy tablets",
+      "debit": "thb:expense:health",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 480.0
+    },
+    {
+      "date": "2026-06-05",
+      "description": "Freelance invoice cleared",
+      "debit": "thb:asset:bank:kbank",
+      "credit": "thb:income:freelance",
+      "amount": 18000.0
+    },
+    {
+      "date": "2026-06-05",
+      "description": "Transfer KBank to SCB savings",
+      "debit": "thb:asset:bank:scb",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 5000.0
+    },
+    {
+      "date": "2026-06-06",
+      "description": "HomePro curtain rail",
+      "debit": "thb:expense:household",
+      "credit": "thb:liability:card:visa",
+      "amount": 899.0
+    },
+    {
+      "date": "2026-06-07",
+      "description": "7-Eleven snack run",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 88.0
+    },
+    {
+      "date": "2026-06-08",
+      "description": "Cafe Amazon latte",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 65.0
+    },
+    {
+      "date": "2026-06-08",
+      "description": "MWA water bill",
+      "debit": "thb:expense:utilities",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 310.0
+    },
+    {
+      "date": "2026-06-09",
+      "description": "Grab ride to Silom",
+      "debit": "thb:expense:transport",
+      "credit": "thb:liability:card:visa",
+      "amount": 145.0
+    },
+    {
+      "date": "2026-06-10",
+      "description": "Tops groceries",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 520.0
+    },
+    {
+      "date": "2026-06-10",
+      "description": "Boots allergy tablets",
+      "debit": "thb:expense:health",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 480.0
+    },
+    {
+      "date": "2026-06-11",
+      "description": "Starbucks flat white",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:liability:card:visa",
+      "amount": 135.0
+    },
+    {
+      "date": "2026-06-11",
+      "description": "Grab khao soi delivery",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:liability:card:visa",
+      "amount": 210.0
+    },
+    {
+      "date": "2026-06-12",
+      "description": "BTS Rabbit card top-up",
+      "debit": "thb:expense:transport",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 300.0
+    },
+    {
+      "date": "2026-06-12",
+      "description": "Netflix monthly",
+      "debit": "thb:expense:subscriptions",
+      "credit": "thb:liability:card:visa",
+      "amount": 419.0
+    },
+    {
+      "date": "2026-06-13",
+      "description": "Big C groceries",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 705.0
+    },
+    {
+      "date": "2026-06-14",
+      "description": "Yindee noodles lunch",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 95.0
+    },
+    {
+      "date": "2026-06-14",
+      "description": "Grab ride home",
+      "debit": "thb:expense:transport",
+      "credit": "thb:liability:card:visa",
+      "amount": 160.0
+    },
+    {
+      "date": "2026-06-15",
+      "description": "Visa card payment",
+      "debit": "thb:liability:card:visa",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 3000.0
+    },
+    {
+      "date": "2026-06-16",
+      "description": "Lotus's shop",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 430.0
+    },
+    {
+      "date": "2026-06-17",
+      "description": "iCloud storage",
+      "debit": "thb:expense:subscriptions",
+      "credit": "thb:liability:card:visa",
+      "amount": 129.0
+    },
+    {
+      "date": "2026-06-18",
+      "description": "Cafe Amazon latte",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 75.0
+    },
+    {
+      "date": "2026-06-19",
+      "description": "Dentist cleaning",
+      "debit": "thb:expense:health",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 1200.0
+    },
+    {
+      "date": "2026-06-20",
+      "description": "Grab ride to airport",
+      "debit": "thb:expense:transport",
+      "credit": "thb:liability:card:visa",
+      "amount": 465.0
+    },
+    {
+      "date": "2026-06-21",
+      "description": "Dinner at Peppina",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:liability:card:visa",
+      "amount": 560.0
+    },
+    {
+      "date": "2026-06-22",
+      "description": "True condo internet",
+      "debit": "thb:expense:utilities",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 800.0
+    }
+  ]
+}

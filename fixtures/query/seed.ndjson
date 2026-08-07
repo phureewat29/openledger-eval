@@ -1,0 +1,40 @@
+{"date":"2026-04-21","description":"Big C weekly shop","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":620,"merchant":{"canonical_name":"Big C"}}
+{"date":"2026-04-22","description":"Iced latte","debit_account":"thb:expense:food:coffee","credit_account":"thb:asset:bank:kbank","amount":60,"merchant":{"canonical_name":"Cafe Amazon"}}
+{"date":"2026-04-24","description":"Grab ride to Asok","debit_account":"thb:expense:transport","credit_account":"thb:asset:bank:kbank","amount":200,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-04-25","description":"Dinner with Nok","debit_account":"thb:expense:food:restaurants","credit_account":"thb:liability:card:visa","amount":390,"merchant":{"canonical_name":"Som Tam Nua"}}
+{"date":"2026-04-27","description":"Tops top-up shop","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":380,"merchant":{"canonical_name":"Tops"}}
+{"date":"2026-04-28","description":"Figma seat","debit_account":"usd:expense:software","credit_account":"usd:asset:bank:wise","amount":15,"merchant":{"canonical_name":"Figma"}}
+{"date":"2026-04-29","description":"7-Eleven snacks","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":145,"merchant":{"canonical_name":"7-Eleven"}}
+{"date":"2026-04-30","description":"April salary","debit_account":"thb:asset:bank:kbank","credit_account":"thb:income:salary","amount":85000}
+{"date":"2026-05-01","description":"OpenAI API credits","debit_account":"usd:expense:software","credit_account":"usd:asset:bank:wise","amount":20,"merchant":{"canonical_name":"OpenAI"}}
+{"date":"2026-05-02","description":"Grab food, pad thai","debit_account":"thb:expense:food:restaurants","credit_account":"thb:liability:card:visa","amount":420,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-05-03","description":"Big C weekly shop","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":700,"merchant":{"canonical_name":"Big C"}}
+{"date":"2026-05-04","description":"Morning latte","debit_account":"thb:expense:food:coffee","credit_account":"thb:asset:bank:kbank","amount":95,"merchant":{"canonical_name":"Starbucks"}}
+{"date":"2026-05-05","description":"Visa card payment","debit_account":"thb:liability:card:visa","credit_account":"thb:asset:bank:kbank","amount":3000}
+{"date":"2026-05-06","description":"Grab ride to Silom","debit_account":"thb:expense:transport","credit_account":"thb:liability:card:visa","amount":260,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-05-07","description":"Electricity bill","debit_account":"thb:expense:utilities","credit_account":"thb:asset:bank:kbank","amount":1250,"merchant":{"canonical_name":"MEA"}}
+{"date":"2026-05-08","description":"Water bill","debit_account":"thb:expense:utilities","credit_account":"thb:asset:bank:kbank","amount":320,"merchant":{"canonical_name":"MWA"}}
+{"date":"2026-05-09","description":"Grab food, khao soi","debit_account":"thb:expense:food:restaurants","credit_account":"thb:liability:card:visa","amount":380,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-05-10","description":"Big C weekly shop","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":540,"merchant":{"canonical_name":"Big C"}}
+{"date":"2026-05-11","description":"Morning latte","debit_account":"thb:expense:food:coffee","credit_account":"thb:asset:bank:kbank","amount":85,"merchant":{"canonical_name":"Starbucks"}}
+{"date":"2026-05-12","description":"Grab ride to Ari","debit_account":"thb:expense:transport","credit_account":"thb:asset:bank:kbank","amount":240,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-05-13","description":"Home internet","debit_account":"thb:expense:utilities","credit_account":"thb:liability:card:visa","amount":799,"merchant":{"canonical_name":"AIS"}}
+{"date":"2026-05-14","description":"Netflix subscription","debit_account":"thb:expense:entertainment","credit_account":"thb:liability:card:visa","amount":419,"merchant":{"canonical_name":"Netflix"}}
+{"date":"2026-05-15","description":"Cinema tickets","debit_account":"thb:expense:entertainment","credit_account":"thb:liability:card:visa","amount":560,"merchant":{"canonical_name":"Major Cineplex"}}
+{"date":"2026-05-16","description":"Grab food, biryani","debit_account":"thb:expense:food:restaurants","credit_account":"thb:asset:bank:kbank","amount":350,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-05-17","description":"Tops top-up shop","debit_account":"thb:expense:food:groceries","credit_account":"thb:liability:card:visa","amount":520,"merchant":{"canonical_name":"Tops"}}
+{"date":"2026-05-18","description":"Morning latte","debit_account":"thb:expense:food:coffee","credit_account":"thb:asset:bank:kbank","amount":75,"merchant":{"canonical_name":"Starbucks"}}
+{"date":"2026-05-18","description":"GitHub Copilot","debit_account":"usd:expense:software","credit_account":"usd:asset:bank:wise","amount":10,"merchant":{"canonical_name":"GitHub"}}
+{"date":"2026-05-19","description":"Grab ride home","debit_account":"thb:expense:transport","credit_account":"thb:asset:bank:kbank","amount":150,"merchant":{"canonical_name":"Grab"}}
+{"date":"2026-05-20","description":"Cinema tickets","debit_account":"thb:expense:entertainment","credit_account":"thb:asset:bank:kbank","amount":480,"merchant":{"canonical_name":"SF Cinema"}}
+{"date":"2026-05-21","description":"Lunch with Ploy","debit_account":"thb:expense:food:restaurants","credit_account":"thb:asset:bank:kbank","amount":480,"merchant":{"canonical_name":"Som Tam Nua"}}
+{"date":"2026-05-22","description":"BTS travel card top-up","debit_account":"thb:expense:transport","credit_account":"thb:asset:bank:kbank","amount":320,"merchant":{"canonical_name":"BTS"}}
+{"date":"2026-05-23","description":"Spotify subscription","debit_account":"thb:expense:entertainment","credit_account":"thb:liability:card:visa","amount":199,"merchant":{"canonical_name":"Spotify"}}
+{"date":"2026-05-24","description":"Tops top-up shop","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":430,"merchant":{"canonical_name":"Tops"}}
+{"date":"2026-05-25","description":"Iced americano","debit_account":"thb:expense:food:coffee","credit_account":"thb:asset:bank:kbank","amount":65,"merchant":{"canonical_name":"Cafe Amazon"}}
+{"date":"2026-05-26","description":"Vercel Pro","debit_account":"usd:expense:software","credit_account":"usd:asset:bank:wise","amount":20,"merchant":{"canonical_name":"Vercel"}}
+{"date":"2026-05-27","description":"Bolt ride to Thonglor","debit_account":"thb:expense:transport","credit_account":"thb:liability:card:visa","amount":180,"merchant":{"canonical_name":"Bolt"}}
+{"date":"2026-05-28","description":"MK dinner, family","debit_account":"thb:expense:food:restaurants","credit_account":"thb:liability:card:visa","amount":970,"merchant":{"canonical_name":"MK Restaurant"}}
+{"date":"2026-05-29","description":"Filter coffee","debit_account":"thb:expense:food:coffee","credit_account":"thb:asset:bank:kbank","amount":55,"merchant":{"canonical_name":"Roots"}}
+{"date":"2026-05-30","description":"7-Eleven snacks","debit_account":"thb:expense:food:groceries","credit_account":"thb:asset:bank:kbank","amount":180,"merchant":{"canonical_name":"7-Eleven"}}
+{"date":"2026-05-31","description":"May salary","debit_account":"thb:asset:bank:kbank","credit_account":"thb:income:salary","amount":85000}

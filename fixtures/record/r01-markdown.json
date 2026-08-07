@@ -1,0 +1,204 @@
+{
+  "id": "r01-markdown",
+  "input": "r01-markdown.md",
+  "maxCalls": 32,
+  "currency": "THB",
+  "needsLedger": null,
+  "accounts": [
+    { "id": "thb:asset:bank:kbank", "name": "KBank Current" },
+    { "id": "thb:asset:bank:scb-savings", "name": "SCB Savings" },
+    { "id": "thb:liability:card:kbank-visa", "name": "KBank Visa Card" },
+    { "id": "thb:income:salary", "name": "Salary" },
+    { "id": "thb:income:freelance", "name": "Freelance Income" },
+    { "id": "thb:expense:rent", "name": "Rent" },
+    { "id": "thb:expense:food:groceries", "name": "Groceries" },
+    { "id": "thb:expense:food:restaurants", "name": "Restaurants" },
+    { "id": "thb:expense:food:coffee", "name": "Coffee" },
+    { "id": "thb:expense:transport", "name": "Transport" },
+    { "id": "thb:expense:utilities:electricity", "name": "Electricity" },
+    { "id": "thb:expense:utilities:water", "name": "Water" },
+    { "id": "thb:expense:utilities:internet", "name": "Internet" },
+    { "id": "thb:expense:mobile", "name": "Mobile" },
+    { "id": "thb:expense:health:pharmacy", "name": "Pharmacy" },
+    { "id": "thb:expense:entertainment:streaming", "name": "Streaming" },
+    { "id": "thb:expense:household", "name": "Household" },
+    { "id": "thb:expense:fees:bank", "name": "Bank Fees" }
+  ],
+  "rows": [
+    {
+      "date": "2026-05-01",
+      "description": "May rent to the landlord",
+      "debit": "thb:expense:rent",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 18000.00
+    },
+    {
+      "date": "2026-05-02",
+      "description": "Big C weekly shop",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 1240.50
+    },
+    {
+      "date": "2026-05-02",
+      "description": "Cafe Amazon iced latte",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 65.00
+    },
+    {
+      "date": "2026-05-03",
+      "description": "MEA electricity bill for April",
+      "debit": "thb:expense:utilities:electricity",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 1485.00
+    },
+    {
+      "date": "2026-05-04",
+      "description": "Grab ride to Asok",
+      "debit": "thb:expense:transport",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 185.00
+    },
+    {
+      "date": "2026-05-05",
+      "description": "Som Tam Nua dinner with Nok",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 480.00
+    },
+    {
+      "date": "2026-05-06",
+      "description": "MWA water bill for April",
+      "debit": "thb:expense:utilities:water",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 210.00
+    },
+    {
+      "date": "2026-05-07",
+      "description": "AIS Fibre home internet",
+      "debit": "thb:expense:utilities:internet",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 799.00
+    },
+    {
+      "date": "2026-05-08",
+      "description": "AIS mobile plan top-up",
+      "debit": "thb:expense:mobile",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 350.00
+    },
+    {
+      "date": "2026-05-09",
+      "description": "7-Eleven snacks and water",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 145.00
+    },
+    {
+      "date": "2026-05-10",
+      "description": "Starbucks flat white",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 130.00
+    },
+    {
+      "date": "2026-05-11",
+      "description": "BTS Rabbit card top-up",
+      "debit": "thb:expense:transport",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 500.00
+    },
+    {
+      "date": "2026-05-12",
+      "description": "Freelance invoice, Ratchada studio",
+      "debit": "thb:asset:bank:kbank",
+      "credit": "thb:income:freelance",
+      "amount": 15000.00
+    },
+    {
+      "date": "2026-05-13",
+      "description": "Watsons cold medicine",
+      "debit": "thb:expense:health:pharmacy",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 245.00
+    },
+    {
+      "date": "2026-05-14",
+      "description": "Netflix monthly plan",
+      "debit": "thb:expense:entertainment:streaming",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 419.00
+    },
+    {
+      "date": "2026-05-15",
+      "description": "Tops market fruit and eggs",
+      "debit": "thb:expense:food:groceries",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 620.75
+    },
+    {
+      "date": "2026-05-16",
+      "description": "HomePro light bulbs and batteries",
+      "debit": "thb:expense:household",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 385.00
+    },
+    {
+      "date": "2026-05-18",
+      "description": "After You cake and tea",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 320.00
+    },
+    {
+      "date": "2026-05-20",
+      "description": "Grab food, pad thai lunch",
+      "debit": "thb:expense:food:restaurants",
+      "credit": "thb:liability:card:kbank-visa",
+      "amount": 175.00
+    },
+    {
+      "date": "2026-05-22",
+      "description": "Bolt ride to Bang Sue",
+      "debit": "thb:expense:transport",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 240.00
+    },
+    {
+      "date": "2026-05-23",
+      "description": "KBank monthly account fee",
+      "debit": "thb:expense:fees:bank",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 50.00
+    },
+    {
+      "date": "2026-05-25",
+      "description": "May salary from Zentry",
+      "debit": "thb:asset:bank:kbank",
+      "credit": "thb:income:salary",
+      "amount": 92000.00
+    },
+    {
+      "date": "2026-05-26",
+      "description": "Transfer into SCB Savings",
+      "debit": "thb:asset:bank:scb-savings",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 20000.00
+    },
+    {
+      "date": "2026-05-28",
+      "description": "Payment to KBank Visa Card",
+      "debit": "thb:liability:card:kbank-visa",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 3000.00
+    },
+    {
+      "date": "2026-05-30",
+      "description": "Cafe Amazon beans for the office",
+      "debit": "thb:expense:food:coffee",
+      "credit": "thb:asset:bank:kbank",
+      "amount": 260.00
+    }
+  ]
+}

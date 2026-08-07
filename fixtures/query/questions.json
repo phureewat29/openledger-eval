@@ -1,0 +1,218 @@
+{
+  "note": "Every case runs in its own sandbox seeded with seed.ndjson (40 rows). A case that declares extraSeed is additionally seeded with paging-rows.ndjson (85 more rows), so only that case's ledger holds 125 transactions; q01 counts the 40 seed rows alone. Every golden below is recomputed from the same rows by src/suites/query/goldens.ts before a run starts, so editing a fixture row without editing its golden fails the load.",
+  "cases": [
+    {
+      "id": "q01",
+      "prompt": "How many transactions are recorded in my ledger in total? Answer with the whole number in `value`.",
+      "golden": {
+        "kind": "count",
+        "value": 40
+      },
+      "derivation": {
+        "op": "count",
+        "where": {}
+      }
+    },
+    {
+      "id": "q02",
+      "prompt": "Counting only my THB accounts, what is my net worth (assets minus liabilities)? Do not convert my other currencies into THB. Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 157683,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "net_worth",
+        "currency": "THB"
+      }
+    },
+    {
+      "id": "q03",
+      "prompt": "How many grocery transactions were recorded in May 2026? Count transactions, not days or shops. Answer with the whole number in `value`.",
+      "golden": {
+        "kind": "count",
+        "value": 5
+      },
+      "derivation": {
+        "op": "count",
+        "where": {
+          "debit": [
+            "thb:expense:food:groceries"
+          ],
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+      }
+    },
+    {
+      "id": "q04",
+      "prompt": "What did I spend at restaurants in May 2026, in THB? Restaurants only: not groceries and not coffee. Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 2600,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "sum",
+        "where": {
+          "debit": [
+            "thb:expense:food:restaurants"
+          ],
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+      }
+    },
+    {
+      "id": "q05",
+      "prompt": "What is the total of all my THB expenses in May 2026, as one number? Expenses only: exclude card payments and transfers between my own accounts. Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 10522,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "sum",
+        "where": {
+          "debitType": "expense",
+          "currency": "THB",
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+      }
+    },
+    {
+      "id": "q06",
+      "prompt": "What is the current balance of my KBank bank account, in THB? Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 159780,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "balance",
+        "account": "thb:asset:bank:kbank"
+      }
+    },
+    {
+      "id": "q07",
+      "prompt": "How much salary income was received in May 2026, in THB? Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 85000,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "sum",
+        "where": {
+          "credit": [
+            "thb:income:salary"
+          ],
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+      }
+    },
+    {
+      "id": "q08",
+      "prompt": "Across the whole ledger, what is the total amount I have spent at the merchant Grab? Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 2000,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "sum",
+        "where": {
+          "merchant": "Grab"
+        }
+      }
+    },
+    {
+      "id": "q09",
+      "prompt": "Which single merchant did I spend the largest total amount at in May 2026? Rank merchants by total amount spent, not by number of transactions. Put the name by itself in `answer`, with no sentence around it.",
+      "golden": {
+        "kind": "string",
+        "value": "Grab"
+      },
+      "derivation": {
+        "op": "top_merchant",
+        "where": {
+          "debitType": "expense",
+          "currency": "THB",
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+      }
+    },
+    {
+      "id": "q10",
+      "prompt": "Taking restaurants, groceries and coffee together as food: how much more did I spend on food in May 2026 than in April 2026? Give the difference itself, not the two totals it came from. Answer with the amount in `value` and its currency code in `unit`.",
+      "golden": {
+        "kind": "money",
+        "value": 3750,
+        "unit": "THB"
+      },
+      "derivation": {
+        "op": "delta",
+        "of": {
+          "debit": [
+            "thb:expense:food:restaurants",
+            "thb:expense:food:groceries",
+            "thb:expense:food:coffee"
+          ],
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        },
+        "minus": {
+          "debit": [
+            "thb:expense:food:restaurants",
+            "thb:expense:food:groceries",
+            "thb:expense:food:coffee"
+          ],
+          "from": "2026-04-01",
+          "to": "2026-04-30"
+        }
+      }
+    },
+    {
+      "id": "q11",
+      "prompt": "In May 2026, how many coffee purchases were for strictly more than 100 THB? A purchase of exactly 100 THB does not count. Answer with the whole number in `value`.",
+      "extraSeed": "paging",
+      "golden": {
+        "kind": "count",
+        "value": 57
+      },
+      "derivation": {
+        "op": "count",
+        "where": {
+          "debit": [
+            "thb:expense:food:coffee"
+          ],
+          "from": "2026-05-01",
+          "to": "2026-05-31",
+          "amountOver": 100
+        }
+      }
+    },
+    {
+      "id": "q12",
+      "prompt": "Give me one single number for everything I spent in May 2026 across all my accounts, counting every expense category. If one number is not meaningful here, say so and give the per-currency totals instead.",
+      "golden": {
+        "kind": "per_currency",
+        "perCurrency": {
+          "THB": 10522,
+          "USD": 50
+        }
+      },
+      "derivation": {
+        "op": "per_currency_sum",
+        "where": {
+          "debitType": "expense",
+          "from": "2026-05-01",
+          "to": "2026-05-31"
+        }
+      }
+    }
+  ]
+}

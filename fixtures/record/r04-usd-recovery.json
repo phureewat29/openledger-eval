@@ -1,0 +1,157 @@
+{
+  "id": "r04-usd-recovery",
+  "input": "r04-usd-recovery.md",
+  "maxCalls": 24,
+  "currency": "USD",
+  "needsLedger": "usd",
+  "accounts": [
+    { "id": "usd:asset:bank:checking", "name": "Business checking" },
+    { "id": "usd:liability:card:visa", "name": "Visa card 4417" },
+    { "id": "usd:income:consulting", "name": "Consulting income" },
+    { "id": "usd:expense:software", "name": "Software and cloud services" },
+    { "id": "usd:expense:software:domains", "name": "Domain names" },
+    { "id": "usd:expense:fees:bank", "name": "Bank fees" }
+  ],
+  "rows": [
+    {
+      "date": "2026-05-01",
+      "description": "GitHub Team, 5 seats, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 84.00
+    },
+    {
+      "date": "2026-05-02",
+      "description": "AWS invoice for April usage",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 412.37
+    },
+    {
+      "date": "2026-05-03",
+      "description": "Vercel Pro, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 20.00
+    },
+    {
+      "date": "2026-05-04",
+      "description": "Namecheap, renewal of 7 domain names",
+      "debit": "usd:expense:software:domains",
+      "credit": "usd:liability:card:visa",
+      "amount": 46.85
+    },
+    {
+      "date": "2026-05-05",
+      "description": "Linear, annual seats billed monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 96.00
+    },
+    {
+      "date": "2026-05-06",
+      "description": "Cloudflare Workers Paid plan",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 5.00
+    },
+    {
+      "date": "2026-05-07",
+      "description": "Consulting invoice 1042, Northwind Labs, paid",
+      "debit": "usd:asset:bank:checking",
+      "credit": "usd:income:consulting",
+      "amount": 6500.00
+    },
+    {
+      "date": "2026-05-08",
+      "description": "Figma Organization, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 135.00
+    },
+    {
+      "date": "2026-05-11",
+      "description": "Fly.io compute for the staging cluster",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 78.42
+    },
+    {
+      "date": "2026-05-12",
+      "description": "Incoming wire fee charged by the bank on 1042",
+      "debit": "usd:expense:fees:bank",
+      "credit": "usd:asset:bank:checking",
+      "amount": 15.00
+    },
+    {
+      "date": "2026-05-13",
+      "description": "Sentry Team, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 29.00
+    },
+    {
+      "date": "2026-05-14",
+      "description": "Supabase Pro, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 25.00
+    },
+    {
+      "date": "2026-05-15",
+      "description": "Partial payment to the Visa card ending 4417",
+      "debit": "usd:liability:card:visa",
+      "credit": "usd:asset:bank:checking",
+      "amount": 1200.00
+    },
+    {
+      "date": "2026-05-18",
+      "description": "1Password Business, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 47.60
+    },
+    {
+      "date": "2026-05-19",
+      "description": "Datadog Pro, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 310.50
+    },
+    {
+      "date": "2026-05-20",
+      "description": "Notion Plus, monthly",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 60.00
+    },
+    {
+      "date": "2026-05-21",
+      "description": "Backblaze B2 storage for backups",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 13.75
+    },
+    {
+      "date": "2026-05-26",
+      "description": "Postmark, transactional email",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 22.50
+    },
+    {
+      "date": "2026-05-27",
+      "description": "Apple Developer Program, annual, paid direct",
+      "debit": "usd:expense:software",
+      "credit": "usd:asset:bank:checking",
+      "amount": 99.00
+    },
+    {
+      "date": "2026-05-29",
+      "description": "AWS invoice for May usage",
+      "debit": "usd:expense:software",
+      "credit": "usd:liability:card:visa",
+      "amount": 388.19
+    }
+  ]
+}
