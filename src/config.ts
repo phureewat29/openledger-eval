@@ -1,0 +1,192 @@
+import { readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { omitBy, uniq } from "es-toolkit";
+import * as z from "zod";
+import { tryExecute, type Result } from "./core/result.js";
+import { MODALITIES, MODALITIES_ENV, type Modality } from "./model/capabilities.js";
+import { ITERATION_SLUG_RE } from "./shared/vocabulary.js";
+
+export type SuiteId = "ingest" | "record" | "query";
+
+export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+
+export interface Config {
+  apiKey: string;
+  oledRepoRoot: string;
+  stream: boolean;
+  timeoutMs: number;
+  /** Declared by hand for an endpoint that publishes no model list; null probes instead. */
+  inputModalities: Modality[] | null;
+  /** Repeatable --suite, in the order given; every id in SUITE_IDS when none was. */
+  suites: SuiteId[];
+  /** Repeatable --model; [] means every id in models.json. */
+  models: string[];
+  /** Repeatable --case; [] means every case of every selected suite. */
+  cases: string[];
+  /**
+   * An existing iteration slug to merge this invocation into, from --into.
+   * null is the ordinary case: a new timestamped directory of its own.
+   */
+  into: string | null;
+  /** null: one lane per validated model, capped at 8; --concurrency overrides. */
+  concurrency: number | null;
+}
+
+/** Every way a config can fail is a usage error, which main exits 2 on. */
+interface ConfigFailure {
+  ok: false;
+  message: string;
+}
+
+type ConfigResult = { ok: true; value: Config } | ConfigFailure;
+
+/** This repo's own root: fixtures, models.json and reports all hang off it. */
+export const EVAL_ROOT = fileURLToPath(new URL("..", import.meta.url));
+const DEFAULT_OLED_REPO_ROOT = resolve(EVAL_ROOT, "../openledger");
+
+/** Where the CLI under test lives, for a reader that needs only that and has no API key to offer. */
+export function oledRepoRoot(env: NodeJS.ProcessEnv): string {
+  return env.OLED_REPO_ROOT?.trim() || DEFAULT_OLED_REPO_ROOT;
+}
+
+export const SUITE_IDS: SuiteId[] = ["ingest", "record", "query"];
+
+/**
+ * One run per case, and no way to ask for more: a second trial doubles a
+ * matrix that already costs real money, and rerunning the whole invocation
+ * says the same thing when a result looks unstable.
+ */
+export const TRIALS = 1;
+
+const MODELS_FILE = join(EVAL_ROOT, "models.json");
+
+const CANDIDATES = z.array(z.string().min(1)).min(1);
+
+/** The candidate list every entry point starts from: the CLI when no --model is passed, the dashboard form always. */
+export function readModelIds(): Result<string[]> {
+  const text = tryExecute(() => readFileSync(MODELS_FILE, "utf8"));
+  if (!text.ok) return { ok: false, error: `cannot read ${MODELS_FILE}: ${text.error}` };
+
+  const json = tryExecute(() => JSON.parse(text.value) as unknown);
+  if (!json.ok) return { ok: false, error: `${MODELS_FILE} is not JSON: ${json.error}` };
+
+  const parsed = CANDIDATES.safeParse(json.value);
+  if (!parsed.success) return { ok: false, error: `${MODELS_FILE}: ${z.prettifyError(parsed.error)}` };
+  return { ok: true, value: parsed.data };
+}
+
+/** A comma list, so one bad value fails at startup instead of mid-run. */
+const MODALITY_LIST = z
+  .string()
+  .transform((value) => value.split(",").map((part) => part.trim()).filter(Boolean))
+  .pipe(z.array(z.enum(MODALITIES)).min(1));
+
+const ENV_SPEC = z.object({
+  OPENROUTER_API_KEY: z.string().min(1).optional(),
+  OLED_REPO_ROOT: z.string().min(1).default(DEFAULT_OLED_REPO_ROOT),
+  LLM_STREAM: z.enum(["true", "false"]).default("true"),
+  LLM_TIMEOUT_MS: z.coerce.number().int().positive().default(600_000),
+  [MODALITIES_ENV]: MODALITY_LIST.optional(),
+});
+
+interface Flags {
+  /** Empty means no --suite was passed, which loadConfig reads as every suite. */
+  suites: SuiteId[];
+  models: string[];
+  cases: string[];
+  into: string | null;
+  concurrency: number | null;
+}
+
+const VALUE_FLAGS = new Set(["--suite", "--model", "--case", "--into", "--concurrency"]);
+
+function usage(message: string): ConfigFailure {
+  return { ok: false, message };
+}
+
+/** One --suite names one suite; "all" names them all, which is what selecting every box means. */
+function parseSuite(value: string): SuiteId[] | null {
+  if (value === "all") return [...SUITE_IDS];
+  return (SUITE_IDS as string[]).includes(value) ? [value as SuiteId] : null;
+}
+
+function parsePositiveInt(value: string): number | null {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+function parseFlags(argv: string[]): { ok: true; value: Flags } | ConfigFailure {
+  const flags: Flags = {
+    suites: [],
+    models: [],
+    cases: [],
+    into: null,
+    concurrency: null,
+  };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i] ?? "";
+    if (!VALUE_FLAGS.has(arg)) return usage(`unknown flag: ${arg}`);
+
+    const value = argv[i + 1];
+    if (value === undefined || value.startsWith("-")) return usage(`${arg} needs a value`);
+    i++;
+
+    if (arg === "--suite") {
+      const suites = parseSuite(value);
+      if (!suites) return usage(`--suite must be ${SUITE_IDS.join(", ")}, or all, got ${value}`);
+      flags.suites = uniq([...flags.suites, ...suites]);
+    }
+    if (arg === "--model") flags.models.push(value);
+    if (arg === "--case") flags.cases.push(value);
+    if (arg === "--into") {
+      // Checked here rather than where it is joined onto a path: a slug is the
+      // one flag that names a directory, and a bad one must never reach one.
+      if (!ITERATION_SLUG_RE.test(value)) {
+        return usage(`--into must be an iteration like 2026-08-09-0051, got ${value}`);
+      }
+      flags.into = value;
+    }
+    if (arg === "--concurrency") {
+      const concurrency = parsePositiveInt(value);
+      if (!concurrency) return usage(`--concurrency must be a positive integer, got ${value}`);
+      flags.concurrency = concurrency;
+    }
+  }
+  return { ok: true, value: flags };
+}
+
+/** Drops blank env values so a `KEY=` line in .env falls back to the default. */
+function presentEnv(env: NodeJS.ProcessEnv): Record<string, string> {
+  return omitBy(env, (value) => !value?.trim()) as Record<string, string>;
+}
+
+export function loadConfig(argv: string[], env: NodeJS.ProcessEnv): ConfigResult {
+  const flags = parseFlags(argv);
+  if (!flags.ok) return flags;
+
+  const parsed = ENV_SPEC.safeParse(presentEnv(env));
+  if (!parsed.success) return usage(z.prettifyError(parsed.error));
+
+  const apiKey = parsed.data.OPENROUTER_API_KEY;
+  if (!apiKey) return usage("no OPENROUTER_API_KEY: set it in .env (see .env.example)");
+
+  return {
+    ok: true,
+    value: {
+      apiKey,
+      oledRepoRoot: parsed.data.OLED_REPO_ROOT,
+      stream: parsed.data.LLM_STREAM === "true",
+      timeoutMs: parsed.data.LLM_TIMEOUT_MS,
+      inputModalities: parsed.data.LLM_INPUT_MODALITIES ?? null,
+      suites: flags.value.suites.length > 0 ? flags.value.suites : [...SUITE_IDS],
+      models: flags.value.models,
+      cases: uniq(flags.value.cases),
+      into: flags.value.into,
+      concurrency: flags.value.concurrency,
+    },
+  };
+}
+
+/** Lives in shared/ so the browser can use it too; re-exported here for every existing caller. */
+export { modelSlug } from "./shared/vocabulary.js";
