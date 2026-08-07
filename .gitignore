@@ -1,0 +1,11 @@
+node_modules/
+.env
+reports/**
+!reports/*/
+!reports/*/benchmark.json
+!reports/*/leaderboard.md
+!reports/archive/**
+reports/*/live.json
+.claude
+CLAUDE.md
+dist/
