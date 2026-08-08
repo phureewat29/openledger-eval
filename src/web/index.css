@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/*
+ * One committed dark palette on the zinc scale — no light fork, because this is
+ * an instrument you watch a run in rather than a document you read.
+ *
+ * Colour is reserved for status and never carries a fact on its own: every cell
+ * that is tinted also prints its own count or glyph. The green/amber pair sits
+ * inside the CVD floor band where that secondary encoding is what makes it legal.
+ */
+@theme {
+  --color-bg: #09090b;
+  --color-surface: #111113;
+  --color-surface-2: #1c1c20;
+  --color-fg: #fafafa;
+  --color-muted: #a1a1aa;
+  /* Below 4.5:1 on the ground: glyphs and already-labelled numbers only, never prose. */
+  --color-subtle: #52525b;
+
+  /*
+   * openledger.sh's own accent. It carries one meaning throughout — this is
+   * ours, and this is alive — so it marks structure, icons and anything in
+   * flight, and never a failure.
+   *
+   * It replaced a second green rather than joining it: measured against
+   * green-400 the pair sits at ΔE 14.1 for normal vision, under the 15 floor,
+   * which is to say nobody could reliably tell them apart.
+   */
+  --color-accent: oklch(91.98% 0.1905 128.5);
+
+  /*
+   * Structure is the accent laid over the ground rather than a neutral grey, so
+   * the frame reads as branded at a hairline weight without the accent itself
+   * ever being loud.
+   *
+   * The two steps are measured, not guessed: a divider at 28% clears 2:1 against
+   * the ground, which is visible without becoming a stripe, and the border a
+   * button or an input draws is at 42% so it clears the 3:1 an interactive
+   * boundary owes a reader. 16% was tried first and disappeared at 1.44:1.
+   */
+  --color-line: color-mix(in oklch, var(--color-accent) 28%, var(--color-bg));
+  --color-line-strong: color-mix(in oklch, var(--color-accent) 42%, var(--color-bg));
+
+  /* Trouble only. Two of them, because a third hue would dilute what they mean. */
+  --color-warn: #fbbf24;
+  --color-bad: #f87171;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * The dashboard often runs in a narrow pane where a scrollbar gutter costs
+ * real width. Everything still scrolls — only the bar itself never paints.
+ */
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Numbers line up in a grid only if every digit is the same width. */
+.tnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* A cell in flight, at a rate that reads as alive without pulling the eye off a failure. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.breathe {
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe {
+    animation: none;
+  }
+}
