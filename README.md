@@ -67,9 +67,9 @@ launch, watch the grid fill. It spawns `npm run eval`, which stands on its own
 for a headless run.
 
 ```sh
-npm run eval -- --suite all                        # every model, every suite
+npm run eval -- --suite all 
 npm run eval -- --suite query --model deepseek/deepseek-v4-flash
-npm run eval -- --into 2026-08-09-2328 --case q09  # one case, into an existing report
+npm run eval -- --into 2026-08-09-2328 --case q09
 ```
 
 | Flag | Meaning |
@@ -114,9 +114,9 @@ the endpoint omitted usage.
 ## Dashboard
 
 ```sh
-npm run dev                  # Vite (page) + the API, with hot reload
-npm start                    # build the page, then serve everything from :4000
-npm run dev:api -- --port 8080   # the API alone, on another port
+npm run dev                  
+npm start                    
+npm run dev:api -- --port 8080
 ```
 
 In development the page is Vite's and the API is a second process, so open the

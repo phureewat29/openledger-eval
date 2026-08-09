@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "startedAt": "2026-08-09T16:32:45.835Z",
+    "oledVersion": "0.22.0",
+    "skillVersion": "0.22.0",
+    "skillSha256": "2cf3269d1708dc7a549f1644d53409912e0da294c5254cd204c74c869c38f93b",
+    "suiteSha256": "707c0cace93785d1c57c51d042378ef35c4d888d7342080241f089932017c2a2",
+    "evalVersion": "0.3.0"
+  },
+  "config": {
+    "suites": [
+      "ingest",
+      "record",
+      "query"
+    ],
+    "trials": 1,
+    "concurrency": 2,
+    "modelsRequested": [
+      "deepseek/deepseek-v4-flash",
+      "anthropic/claude-sonnet-5",
+      "openai/gpt-5.6-luna",
+      "google/gemini-3.6-flash",
+      "x-ai/grok-4.5"
+    ]
+  },
+  "entries": [
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 109870,
+      "avgTokens": {
+        "in": 167442,
+        "out": 12338
+      },
+      "avgToolCalls": 10,
+      "totalCostUsd": 0.024147000000000002,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "google/gemini-3.6-flash",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 184895,
+      "avgTokens": {
+        "in": 346978,
+        "out": 43745
+      },
+      "avgToolCalls": 15,
+      "totalCostUsd": 0.8485545000000001,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 261742,
+      "avgTokens": {
+        "in": 477727,
+        "out": 19254
+      },
+      "avgToolCalls": 42,
+      "totalCostUsd": 1.070978,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "anthropic/claude-sonnet-5",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 312488,
+      "avgTokens": {
+        "in": 707606,
+        "out": 34682
+      },
+      "avgToolCalls": 33,
+      "totalCostUsd": 1.762032,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 444658,
+      "avgTokens": {
+        "in": 2462104,
+        "out": 32901
+      },
+      "avgToolCalls": 54,
+      "totalCostUsd": 0.35390684000000006,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 47400.2,
+      "avgTokens": {
+        "in": 102749.6,
+        "out": 3895
+      },
+      "avgToolCalls": 55.4,
+      "totalCostUsd": 0.0630598,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 58270.4,
+      "avgTokens": {
+        "in": 111907,
+        "out": 2909.8
+      },
+      "avgToolCalls": 44.8,
+      "totalCostUsd": 1.206364,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "anthropic/claude-sonnet-5",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 78339.4,
+      "avgTokens": {
+        "in": 120762.2,
+        "out": 6203.8
+      },
+      "avgToolCalls": 39.8,
+      "totalCostUsd": 1.5178120000000002,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 140148,
+      "avgTokens": {
+        "in": 137057.2,
+        "out": 9320
+      },
+      "avgToolCalls": 55.4,
+      "totalCostUsd": 0.10898804000000001,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "google/gemini-3.6-flash",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 4,
+        "total": 5
+      },
+      "meanPassRate": 0.9529411764705882,
+      "stddevPassRate": 0.1052267283529313,
+      "avgDurationMs": 81874.8,
+      "avgTokens": {
+        "in": 158030.4,
+        "out": 11913.2
+      },
+      "avgToolCalls": 30,
+      "totalCostUsd": null,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 8794.666666666666,
+      "avgTokens": {
+        "in": 16349.583333333334,
+        "out": 324.1666666666667
+      },
+      "avgToolCalls": 5.25,
+      "totalCostUsd": 0.021953499999999997,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 13809.916666666666,
+      "avgTokens": {
+        "in": 19149.333333333332,
+        "out": 591.1666666666666
+      },
+      "avgToolCalls": 5.75,
+      "totalCostUsd": 0.5021479999999999,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 17568.333333333332,
+      "avgTokens": {
+        "in": 18835.5,
+        "out": 1236.8333333333333
+      },
+      "avgToolCalls": 4.333333333333333,
+      "totalCostUsd": 0.0357994,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "anthropic/claude-sonnet-5",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 14677.25,
+      "avgTokens": {
+        "in": 23063.166666666668,
+        "out": 632.1666666666666
+      },
+      "avgToolCalls": 3.75,
+      "totalCostUsd": 0.629376,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "google/gemini-3.6-flash",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 14479.25,
+      "avgTokens": {
+        "in": 40175.166666666664,
+        "out": 2253.1666666666665
+      },
+      "avgToolCalls": 4.5,
+      "totalCostUsd": null,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    }
+  ],
+  "skippedModels": [],
+  "buildDrift": null
+}
