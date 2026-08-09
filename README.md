@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Every eval run drives a ladder of models through OpenRouter against the real CLI in a sandbox, grades the results deterministically, and writes a cross-model perfomance.
+  Every eval run drives a ladder of models through OpenRouter against the real CLI in a sandbox, grades the results deterministically, and writes a cross-model performance.
 </p>
 
 <p align="center">
@@ -160,3 +160,7 @@ A web app over the same `reports/` directory, and nothing else: it reads what
 the harness leaves behind and owns only the launch slot. It listens on loopback,
 and the two things that cost something — starting a run and deleting a sandbox —
 are refused unless the request came from its own page.
+
+## License
+
+[MIT](LICENSE) © Phureewat Aphibansri
