@@ -1,4 +1,4 @@
-# OpenLedger Eval
+# OpenLedger Evaluation
 
 Measures how fit the OpenLedger product, the `oled` CLI and its shipped
 `SKILL.md`, is for LLM agents. Every run drives a ladder of models through
@@ -139,3 +139,4 @@ A web app over the same `reports/` directory, and nothing else: it reads what
 the harness leaves behind and owns only the launch slot. It listens on loopback,
 and the two things that cost something — starting a run and deleting a sandbox —
 are refused unless the request came from its own page.
+# openledger-eval
