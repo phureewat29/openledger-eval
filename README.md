@@ -1,11 +1,11 @@
-<h1 align="center">OpenLedger Eval</h1>
+<h1 align="center">OpenLedger Evaluation</h1>
 
 <p align="center">
-  <strong>Is the OpenLedger CLI fit for the models that will drive it?</strong>
+  <strong>Measures how fit the OpenLedger CLI and SKILL.md are for AI models</strong>
 </p>
 
 <p align="center">
-  Measures how fit the OpenLedger product — the <code>oled</code> CLI and its shipped <code>SKILL.md</code> — is for LLM agents. Every run drives a ladder of models through OpenRouter against the real CLI in a throwaway sandbox, grades the results deterministically, and writes a cross-model leaderboard. Rerun it after changing openledger to see what got better and what broke.
+  Every eval run drives a ladder of models through OpenRouter against the real CLI in a sandbox, grades the results deterministically, and writes a cross-model perfomance.
 </p>
 
 <p align="center">
