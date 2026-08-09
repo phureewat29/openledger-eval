@@ -1,3 +1,4 @@
+import { countBy } from "es-toolkit";
 import { adjustmentsAccount, netWorthMinor, uncategorizedAccount } from "../../core/accounts.js";
 import type { LedgerPosting, LedgerProbe } from "../../oled/ledger.js";
 import { exitTally, rejectedTotal } from "../../report/counters.js";
@@ -61,19 +62,14 @@ function postingKey(posting: LedgerPosting): string {
   return `${posting.date} ${posting.debit} <- ${posting.credit} ${money(posting.amountMinor)}`;
 }
 
-function tally(postings: LedgerPosting[]): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const posting of postings) {
-    const key = postingKey(posting);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  return counts;
+function tally(postings: LedgerPosting[]): Record<string, number> {
+  return countBy(postings, postingKey);
 }
 
 /** Where `have` falls short of `want`, sorted, so the same ledger always reads the same way. */
-function shortOf(want: Map<string, number>, have: Map<string, number>): string[] {
-  return [...want]
-    .map(([key, count]) => ({ key, gap: count - (have.get(key) ?? 0) }))
+function shortOf(want: Record<string, number>, have: Record<string, number>): string[] {
+  return Object.entries(want)
+    .map(([key, count]) => ({ key, gap: count - (have[key] ?? 0) }))
     .filter(({ gap }) => gap > 0)
     .map(({ key, gap }) => (gap === 1 ? key : `${key} ×${gap}`))
     .toSorted();

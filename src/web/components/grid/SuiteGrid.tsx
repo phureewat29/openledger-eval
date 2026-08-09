@@ -1,3 +1,4 @@
+import { groupBy } from "es-toolkit";
 import { RotateCw } from "lucide-react";
 import type { LiveItem } from "../../../report/live.js";
 import { GridCell } from "./GridCell.js";
@@ -53,15 +54,8 @@ function cellKey(model: string, caseId: string): string {
   return `${model}\u0000${caseId}`;
 }
 
-function groupCells(items: LiveItem[]): Map<string, LiveItem[]> {
-  const byCell = new Map<string, LiveItem[]>();
-  for (const item of items) {
-    const key = cellKey(item.model, item.caseId);
-    const held = byCell.get(key);
-    if (held === undefined) byCell.set(key, [item]);
-    else held.push(item);
-  }
-  return byCell;
+function groupCells(items: LiveItem[]): Record<string, LiveItem[]> {
+  return groupBy(items, (item) => cellKey(item.model, item.caseId));
 }
 
 export function SuiteGrid({
@@ -86,7 +80,7 @@ export function SuiteGrid({
   const caseIds = [...new Set(items.map((item) => item.caseId))];
   const byCell = groupCells(items);
 
-  const trials = Math.max(1, ...[...byCell.values()].map((group) => group.length));
+  const trials = Math.max(1, ...Object.values(byCell).map((group) => group.length));
 
   return (
     <section>
@@ -153,7 +147,7 @@ export function SuiteGrid({
                 <td key={caseId} className="p-0 align-middle">
                   {/* Trials sit side by side in the one cell, in trial order, as the plan ran them. */}
                   <div className="flex items-center justify-center gap-1 px-1 py-1.5">
-                    {(byCell.get(cellKey(model, caseId)) ?? [])
+                    {(byCell[cellKey(model, caseId)] ?? [])
                       .toSorted((left, right) => left.trial - right.trial)
                       .map((item) => (
                         <GridCell

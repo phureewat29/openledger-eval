@@ -1,5 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
 import * as z from "zod";
@@ -30,7 +29,6 @@ import { createReportSink } from "./report/sink.js";
 import { resolveReportDir, tallyStates } from "./report/write.js";
 import { expandPlan, printRunLine, runMatrix } from "./runner/matrix.js";
 import { createSandboxRunner, runOne, type RunEnvironment } from "./runner/run-one.js";
-import { installFromTarball, packCli } from "./sandbox/install.js";
 import {
   createWorkspace,
   createWorkspaceGuard,
@@ -41,6 +39,7 @@ import {
 import { ingestSuite } from "./suites/ingest/suite.js";
 import { querySuite } from "./suites/query/suite.js";
 import { recordSuite } from "./suites/record/suite.js";
+import { suiteFingerprint } from "./suites/fingerprint.js";
 import type { AnySuite, EvalCase } from "./suites/types.js";
 
 const FIXTURES_DIR = join(EVAL_ROOT, "fixtures");
@@ -141,22 +140,22 @@ async function readCliVersion(runner: OpenLedgerRunner): Promise<Result<string>>
 }
 
 /**
- * One throwaway sandbox answers what every run is measured against: the CLI
- * that installs and the skill text it ships, captured once for the whole matrix.
+ * One throwaway sandbox answers what every run is measured against: the version
+ * of the installed CLI and the skill text it ships, captured once for the whole
+ * matrix. A missing `oled` fails here, before a single token is spent.
  */
-async function bootstrap(tarball: string, guard: WorkspaceGuard): Promise<Result<Bootstrap>> {
+async function bootstrap(guard: WorkspaceGuard): Promise<Result<Bootstrap>> {
   const created = createWorkspace();
   if (!created.ok) return created;
 
   const workspace = created.value;
   guard.register(workspace);
   try {
-    const installed = await installFromTarball(tarball, workspace.npm);
-    if (!installed.ok) return installed;
-
-    const runner = createSandboxRunner(installed.value.bin, workspace);
+    const runner = createSandboxRunner(workspace);
     const version = await readCliVersion(runner);
-    if (!version.ok) return version;
+    if (!version.ok) {
+      return { ok: false, error: `${version.error}; install it with \`npm install -g oled\`, or \`npm link\` a local build` };
+    }
 
     const skill = await installSkillPack(workspace, runner);
     if (!skill.ok) return skill;
@@ -237,6 +236,8 @@ function reportOutcome(records: RunRecord[]): number {
 interface Merge {
   benchmark: Benchmark;
   records: RunRecord[];
+  /** How this invocation differs from what the report holds, or null when it does not. */
+  drift: string | null;
 }
 
 /**
@@ -250,32 +251,34 @@ interface Merge {
  */
 function openMerge(dir: string, benchmark: Benchmark, identity: RunIdentity): Result<Merge> {
   const drift = identityDrift(benchmark.identity, identity);
-  if (drift !== null) return { ok: false, error: `${drift}; run it as a new iteration instead` };
+  // Said out loud and then merged anyway. A rerun always lands in the report it
+  // came from, so refusing here would leave nowhere for it to go; what the
+  // report cannot do is average across builds without admitting it.
+  if (drift !== null) warn(`this report now ${drift}`);
 
   const { records, unreadable } = readReportRecords(dir);
   // Loud, and then on: an unreadable record is a paid run about to vanish from
   // the leaderboard, and the operator is the only one who can tell whether that
   // matters more than the rerun they asked for.
   for (const reason of unreadable) warn(`${reason}; it will be missing from the merged benchmark`);
-  return { ok: true, value: { benchmark, records } };
+  return { ok: true, value: { benchmark, records, drift } };
 }
 
-async function runInvocation(invocation: Invocation, scratch: string): Promise<number> {
+async function runInvocation(invocation: Invocation): Promise<number> {
   const { config, concurrency } = invocation;
-  const packed = await packCli(config.oledRepoRoot, scratch);
-  if (!packed.ok) return fail(packed.error);
+  const fingerprint = suiteFingerprint(FIXTURES_DIR);
+  if (!fingerprint.ok) return fail(fingerprint.error);
 
   const guard = createWorkspaceGuard();
-  guard.registerPath(scratch);
-  const booted = await bootstrap(packed.value.tarball, guard);
+  const booted = await bootstrap(guard);
   if (!booted.ok) return fail(booted.error);
 
   const identity: RunIdentity = {
     startedAt: invocation.startedAt.toISOString(),
     oledVersion: booted.value.oledVersion,
-    tarballSha256: packed.value.sha256,
     skillVersion: booted.value.skill.version,
     skillSha256: booted.value.skill.sha256,
+    suiteSha256: fingerprint.value,
     evalVersion: readEvalVersion(),
   };
   say(identityLine(identity));
@@ -305,7 +308,7 @@ async function runInvocation(invocation: Invocation, scratch: string): Promise<n
   const priorRecords = merged?.records ?? [];
   const reportIdentity = merged?.benchmark.identity ?? identity;
 
-  const sink = createReportSink(dir, reportIdentity, configEcho, invocation.skipped, priorRecords);
+  const sink = createReportSink(dir, reportIdentity, configEcho, invocation.skipped, priorRecords, merged?.drift ?? null);
   // A signal leaves through process.exit (see the workspace guard), which runs
   // exit handlers but resolves no promise: the benchmark of an interrupted
   // matrix is written synchronously here or not at all.
@@ -335,7 +338,6 @@ async function runInvocation(invocation: Invocation, scratch: string): Promise<n
     stream: config.stream,
     timeoutMs: config.timeoutMs,
     inputModalities: config.inputModalities,
-    tarball: packed.value.tarball,
     skillText: booted.value.skill.text,
     guard,
     onEvent: (planned, event) => {
@@ -409,25 +411,16 @@ async function run(config: Config, startedAt: Date): Promise<number> {
     if (!target.ok) return fail(target.error);
   }
 
-  const scratch = tryExecute(() => mkdtempSync(join(tmpdir(), "oled-eval-pack-")));
-  if (!scratch.ok) return fail(`cannot create a scratch directory: ${scratch.error}`);
-  try {
-    return await runInvocation(
-      {
-        config,
-        startedAt,
-        models: validated,
-        skipped,
-        suites: selected.suites,
-        casesBySuite: casesBySuite.value,
-        modelsRequested: ids.value,
-        concurrency,
-      },
-      scratch.value,
-    );
-  } finally {
-    rmSync(scratch.value, { recursive: true, force: true });
-  }
+  return runInvocation({
+    config,
+    startedAt,
+    models: validated,
+    skipped,
+    suites: selected.suites,
+    casesBySuite: casesBySuite.value,
+    modelsRequested: ids.value,
+    concurrency,
+  });
 }
 
 async function main(): Promise<number> {

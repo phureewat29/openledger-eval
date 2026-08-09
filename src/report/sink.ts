@@ -40,6 +40,8 @@ export function createReportSink(
   config: ConfigEcho,
   skippedModels: SkippedModel[],
   prior: RunRecord[] = [],
+  /** Set when this invocation is merging into a report measured against something else. */
+  buildDrift: string | null = null,
 ): ReportSink {
   const finished: RunRecord[] = [];
   let warned = false;
@@ -58,7 +60,7 @@ export function createReportSink(
     // whoever asked for it, and never retried from the exit handler.
     closed = true;
 
-    const benchmark = buildBenchmark(mergeRecords(prior, finished), identity, config, skippedModels);
+    const benchmark = buildBenchmark(mergeRecords(prior, finished), identity, config, skippedModels, buildDrift);
     const savedBenchmark = writeBenchmark(dir, benchmark);
     if (!savedBenchmark.ok) return savedBenchmark;
 

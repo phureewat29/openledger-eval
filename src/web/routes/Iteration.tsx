@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import type { Benchmark, BenchmarkEntry } from "../../report/benchmark.js";
 import type { FeedLine } from "../../report/feed.js";
-import type { LiveItem } from "../../report/live.js";
+import { liveItemOf, type LiveItem } from "../../report/live-item.js";
 import type { IterationSummary, LoadedRun } from "../../server/reports-fs.js";
 import type { LivePayload } from "../../shared/payloads.js";
 import { Empty } from "../components/Empty.js";
@@ -13,7 +13,6 @@ import { Legend } from "../components/grid/Legend.js";
 import { SuiteGrid } from "../components/grid/SuiteGrid.js";
 import { RerunDialog, type RerunScope } from "../components/RerunDialog.js";
 import { RunSheet } from "../components/run/RunSheet.js";
-import { countChecks } from "../../suites/types.js";
 import { modelSlug } from "../../shared/vocabulary.js";
 import { get } from "../lib/api.js";
 import { liveIsShowing } from "../lib/live-route.js";
@@ -36,34 +35,12 @@ function suitesOf(entries: BenchmarkEntry[]): BenchmarkEntry["suite"][] {
 }
 
 /**
- * A finished run's records, in the shape the live grid draws. The grid speaks
- * `LiveItem`, and a `RunRecord` holds everything one needs — so the same
- * component serves a matrix in flight and a matrix on disk, and the two cannot
- * come to disagree about what a cell means.
- *
- * `record.model` rather than the directory name: the directory is already a
- * slug, and the grid slugs it again to build the link.
+ * A finished run's records, in the shape the live grid draws — through the same
+ * projection the runner uses while a matrix is in flight, so the two grids
+ * cannot come to disagree about what a cell means.
  */
 function itemsOf(runs: LoadedRun[]): LiveItem[] {
-  const items: LiveItem[] = [];
-  for (const run of runs) {
-    const record = run.record;
-    // A record too broken to parse has no state to draw; it is reported by the
-    // run sheet if anyone opens it, and left out of the grid rather than guessed at.
-    if (record === null) continue;
-    const counts = record.grade === null ? null : countChecks(record.grade.assertions);
-    items.push({
-      model: record.model,
-      suite: record.suite,
-      caseId: record.caseId,
-      trial: record.trial,
-      state: record.state,
-      passRate: record.grade?.passRate ?? null,
-      durationMs: record.metrics.durationMs,
-      ...(counts === null ? {} : { checksPassed: counts.passed, checksTotal: counts.total }),
-    });
-  }
-  return items;
+  return runs.flatMap((run) => (run.record === null ? [] : [liveItemOf(run.record)]));
 }
 
 export function Iteration() {

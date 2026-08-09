@@ -386,7 +386,7 @@ const SUBMIT_ARGS = z.object({
   per_currency: z.record(z.string(), z.number()).optional(),
 });
 
-const SUBMIT_DESCRIPTION =
+export const SUBMIT_DESCRIPTION =
   "Finish the task by calling this exactly once. Put the numeric result in `value` (or `per_currency` when the answer spans more than one currency), the currency code in `unit`, and in `answer` the answer itself: when the question asks for a name or a word, that name alone with no sentence around it; otherwise a one-line summary.";
 
 /** Records the answer and ends the phase; a wrong shape is refused like any other bad call. */

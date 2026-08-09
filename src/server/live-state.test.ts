@@ -11,7 +11,7 @@ const NOW = new Date("2026-08-07T05:00:00.000Z");
 const IDENTITY: RunIdentity = {
   startedAt: "2026-08-07T04:44:10.327Z",
   oledVersion: "0.20.1",
-  tarballSha256: "94270f6a3338",
+  suiteSha256: "94270f6a3338",
   skillVersion: "0.20.1",
   skillSha256: "2120973bc677",
   evalVersion: "1.0.0",

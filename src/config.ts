@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { omitBy, uniq } from "es-toolkit";
 import * as z from "zod";
@@ -13,7 +13,6 @@ export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
 export interface Config {
   apiKey: string;
-  oledRepoRoot: string;
   stream: boolean;
   timeoutMs: number;
   /** Declared by hand for an endpoint that publishes no model list; null probes instead. */
@@ -43,13 +42,6 @@ type ConfigResult = { ok: true; value: Config } | ConfigFailure;
 
 /** This repo's own root: fixtures, models.json and reports all hang off it. */
 export const EVAL_ROOT = fileURLToPath(new URL("..", import.meta.url));
-const DEFAULT_OLED_REPO_ROOT = resolve(EVAL_ROOT, "../openledger");
-
-/** Where the CLI under test lives, for a reader that needs only that and has no API key to offer. */
-export function oledRepoRoot(env: NodeJS.ProcessEnv): string {
-  return env.OLED_REPO_ROOT?.trim() || DEFAULT_OLED_REPO_ROOT;
-}
-
 export const SUITE_IDS: SuiteId[] = ["ingest", "record", "query"];
 
 /**
@@ -84,7 +76,6 @@ const MODALITY_LIST = z
 
 const ENV_SPEC = z.object({
   OPENROUTER_API_KEY: z.string().min(1).optional(),
-  OLED_REPO_ROOT: z.string().min(1).default(DEFAULT_OLED_REPO_ROOT),
   LLM_STREAM: z.enum(["true", "false"]).default("true"),
   LLM_TIMEOUT_MS: z.coerce.number().int().positive().default(600_000),
   [MODALITIES_ENV]: MODALITY_LIST.optional(),
@@ -175,7 +166,6 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv): ConfigResult
     ok: true,
     value: {
       apiKey,
-      oledRepoRoot: parsed.data.OLED_REPO_ROOT,
       stream: parsed.data.LLM_STREAM === "true",
       timeoutMs: parsed.data.LLM_TIMEOUT_MS,
       inputModalities: parsed.data.LLM_INPUT_MODALITIES ?? null,

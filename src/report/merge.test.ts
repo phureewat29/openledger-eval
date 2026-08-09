@@ -33,7 +33,7 @@ function identity(patch: Partial<RunIdentity> = {}): RunIdentity {
   return {
     startedAt: "2026-08-06T09:05:00.000Z",
     oledVersion: "1.2.3",
-    tarballSha256: "a".repeat(64),
+    suiteSha256: "a".repeat(64),
     skillVersion: "2.0.0",
     skillSha256: "b".repeat(64),
     evalVersion: "1.0.0",
@@ -95,18 +95,25 @@ test("mergeEcho keeps the prior report's trials and takes concurrency from the n
   assert.equal(merged.concurrency, 8);
 });
 
-test("identityDrift is null when both pinned hashes still match", () => {
+test("identityDrift is null while every pinned field still matches", () => {
   const pinned = identity();
   const current = identity();
   assert.equal(identityDrift(pinned, current), null);
 });
 
-test("identityDrift names oled when only the tarball hash moved", () => {
+test("identityDrift names the questions when only their wording moved", () => {
   const pinned = identity();
-  const current = identity({ tarballSha256: "c".repeat(64) });
+  const current = identity({ suiteSha256: "c".repeat(64) });
+  const message = identityDrift(pinned, current);
+  assert.ok(message?.includes("the questions"));
+  assert.ok(!message?.includes("SKILL.md"));
+});
+
+test("identityDrift names oled when the CLI version moved", () => {
+  const pinned = identity();
+  const current = identity({ oledVersion: "9.9.9" });
   const message = identityDrift(pinned, current);
   assert.ok(message?.includes("oled"));
-  assert.ok(!message?.includes("SKILL.md"));
 });
 
 test("identityDrift names SKILL.md when only the skill hash moved", () => {
@@ -114,13 +121,13 @@ test("identityDrift names SKILL.md when only the skill hash moved", () => {
   const current = identity({ skillSha256: "c".repeat(64) });
   const message = identityDrift(pinned, current);
   assert.ok(message?.includes("SKILL.md"));
-  assert.ok(!message?.includes("oled"));
+  assert.ok(!message?.includes("the questions"));
 });
 
-test("identityDrift names both when both hashes moved", () => {
+test("identityDrift names every field that moved, not just the first", () => {
   const pinned = identity();
-  const current = identity({ tarballSha256: "c".repeat(64), skillSha256: "d".repeat(64) });
+  const current = identity({ suiteSha256: "c".repeat(64), skillSha256: "d".repeat(64) });
   const message = identityDrift(pinned, current);
-  assert.ok(message?.includes("oled"));
+  assert.ok(message?.includes("the questions"));
   assert.ok(message?.includes("SKILL.md"));
 });

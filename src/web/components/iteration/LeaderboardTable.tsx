@@ -1,23 +1,12 @@
 import type { BenchmarkEntry } from "../../../report/benchmark.js";
+import { passRateCell, rankCell } from "../../../report/leaderboard.js";
 import { duration, shortModel, tokens, usd } from "../../lib/format.js";
 import { TableBox, TD, TH } from "../Table.js";
 
 // One suite's ranked rows, exactly as buildBenchmark ordered them — this table
 // never re-sorts, so the medal on row one always matches the entry the caller
-// put there.
-
-const MEDALS = ["🥇", "🥈", "🥉"];
-
-function rankCell(position: number): string {
-  const medal = MEDALS[position - 1];
-  return medal === undefined ? String(position) : `${position} ${medal}`;
-}
-
-/** Fractions in, a percentage out — the benchmark never carries a pre-formatted rate. */
-function passRateCell(entry: BenchmarkEntry): string {
-  const pct = `${(entry.meanPassRate * 100).toFixed(1)}%`;
-  return entry.stddevPassRate === null ? pct : `${pct} ±${(entry.stddevPassRate * 100).toFixed(1)}`;
-}
+// put there. rankCell and passRateCell come from report/leaderboard.ts so this
+// table and the committed markdown never format the same number two ways.
 
 const HEAD = `${TH} text-right`;
 

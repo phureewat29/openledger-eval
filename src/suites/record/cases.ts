@@ -1,3 +1,4 @@
+import { groupBy, sumBy } from "es-toolkit";
 import { readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import * as z from "zod";
@@ -126,7 +127,7 @@ function accountType(accountId: string): AccountType {
 }
 
 function sumMinor(rows: RecordRow[]): number {
-  return rows.reduce((total, row) => total + minorUnits(row.amount), 0);
+  return sumBy(rows, (row) => minorUnits(row.amount));
 }
 
 function balanceMinor(rows: RecordRow[], accountId: string): number {
@@ -167,13 +168,18 @@ function statedTimes(inputText: string, amount: number): number {
   return inputText.match(new RegExp(`(?<![\\d.])${literal}(?!\\d)`, "g"))?.length ?? 0;
 }
 
-/** Which rows use each amount, by row number, so a complaint can name them. */
+/**
+ * Which rows use each amount, by row number, so a complaint can name them.
+ * `groupBy` returns a plain object, and a plain object reorders whole-number
+ * keys ascending regardless of insertion order — so the amounts are read back
+ * in the order the rows themselves first state them, not in whatever order
+ * Object.entries would give a round amount like 480.00.
+ */
 function rowsPerAmount(rows: RecordRow[]): Map<number, number[]> {
-  const grouped = new Map<number, number[]>();
-  rows.forEach((row, index) => {
-    grouped.set(row.amount, [...(grouped.get(row.amount) ?? []), index + 1]);
-  });
-  return grouped;
+  const rowNumbers = rows.map((_row, index) => index + 1);
+  const byAmount = groupBy(rowNumbers, (rowNumber) => rows[rowNumber - 1]!.amount);
+  const amountsInOrder = [...new Set(rows.map((row) => row.amount))];
+  return new Map(amountsInOrder.map((amount) => [amount, byAmount[amount]!]));
 }
 
 /**

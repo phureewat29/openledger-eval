@@ -1,3 +1,4 @@
+import { sumBy } from "es-toolkit";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { SuiteId } from "../../config.js";
@@ -54,7 +55,7 @@ export function LaunchDialog({ open, onClose }: { open: boolean; onClose: () => 
     return next;
   };
 
-  const runs = [...suites].reduce((total, suite) => total + (scale.cases[suite] ?? 0), 0) * models.size;
+  const runs = sumBy([...suites], (suite) => scale.cases[suite] ?? 0) * models.size;
   const ready = suites.size > 0 && models.size > 0 && !sending;
 
   const launch = async (): Promise<void> => {

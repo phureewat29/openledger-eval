@@ -7,12 +7,11 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { WebSocketServer, type WebSocket } from "ws";
 import * as z from "zod";
-import { oledRepoRoot, readModelIds, SUITE_IDS } from "../config.js";
+import { readModelIds, SUITE_IDS } from "../config.js";
 import { finalizeDoc, isRunningFresh, writeLive } from "../report/live.js";
 import { parseClientMessage, type ServerMessage } from "../shared/protocol.js";
 import { createRegistry, type Client } from "./channels.js";
 import { digestOf } from "./digest.js";
-import { driftAgainst } from "./drift.js";
 import { isLocalRequest, isLocalUpgrade, parsePort } from "./http-guard.js";
 import { launcher, parseLaunchRequest, parseRerunRequest } from "./launch.js";
 import { listProcesses, processExists } from "./procs.js";
@@ -161,14 +160,6 @@ app.post("/api/iterations/:slug/rerun", async (c) => {
   const benchmark = readBenchmark(REPORTS_ROOT, slug);
   if (!benchmark.ok) {
     return c.json({ error: `${slug} has no benchmark to merge into: ${benchmark.error}` }, 409);
-  }
-
-  // Before the whitelist, because a report measured against another build cannot
-  // take this run whatever it names.
-  const drift = driftAgainst(benchmark.value.identity, oledRepoRoot(process.env));
-  if (drift !== null) {
-    const message = `${slug} was measured against a different build (${drift.what} ${drift.pinned} → ${drift.current})`;
-    return c.json({ error: `${message}; run it as a new iteration instead`, drift }, 409);
   }
 
   const models = readModelIds();

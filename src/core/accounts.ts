@@ -1,3 +1,5 @@
+import { sumBy } from "es-toolkit";
+
 /**
  * Account ids as oled writes them: `<ccy>:<type>[:<segment>...]`, lowercase,
  * with the ledger's currency at the head and the account type as the second
@@ -54,10 +56,10 @@ export function adjustmentsAccount(currency: string): string {
  * account's own, so a parent contributes nothing its children already did.
  */
 export function netWorthMinor(balances: Record<string, number>): number {
-  return Object.entries(balances).reduce((total, [id, minor]) => {
+  return sumBy(Object.entries(balances), ([id, minor]) => {
     const type = typeOf(id);
-    if (type === "asset") return total + minor;
-    if (type === "liability") return total - minor;
-    return total;
-  }, 0);
+    if (type === "asset") return minor;
+    if (type === "liability") return -minor;
+    return 0;
+  });
 }

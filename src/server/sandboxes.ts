@@ -1,3 +1,4 @@
+import { sumBy } from "es-toolkit";
 import { readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -123,7 +124,7 @@ export async function listSandboxes(
 }
 
 export function reclaimableBytes(entries: SandboxInfo[]): number {
-  return entries.filter(isOrphan).reduce((total, entry) => total + entry.bytes, 0);
+  return sumBy(entries.filter(isOrphan), (entry) => entry.bytes);
 }
 
 /**

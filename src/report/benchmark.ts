@@ -41,6 +41,13 @@ export interface Benchmark {
   config: ConfigEcho;
   entries: BenchmarkEntry[];
   skippedModels: SkippedModel[];
+  /**
+   * How a rerun merged into this report differs from what the rest of it was
+   * measured against, or null while every run agrees. A merge across builds is
+   * allowed — a rerun always lands in the report it came from — so this is what
+   * stops the difference being silent.
+   */
+  buildDrift: string | null;
 }
 
 interface RunGroup {
@@ -132,9 +139,10 @@ export function buildBenchmark(
   identity: RunIdentity,
   config: ConfigEcho,
   skippedModels: SkippedModel[],
+  buildDrift: string | null = null,
 ): Benchmark {
   const entries = groupRuns(records)
     .map((group) => buildEntry(group, config.trials))
     .toSorted(byRank(config.suites));
-  return { schemaVersion: 1, identity, config, entries, skippedModels };
+  return { schemaVersion: 1, identity, config, entries, skippedModels, buildDrift };
 }

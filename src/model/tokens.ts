@@ -1,3 +1,4 @@
+import { sumBy } from "es-toolkit";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 // One estimator for the whole run, so the trimmer and the reported counts
@@ -21,9 +22,9 @@ function partTokens(part: { type: string; text?: string }): number {
 function messageTokens(message: ChatCompletionMessageParam): number {
   const content = message.content;
   if (!Array.isArray(content)) return estimateTextTokens(JSON.stringify(message));
-  return content.reduce((sum, part) => sum + partTokens(part), 0);
+  return sumBy(content, partTokens);
 }
 
 export function estimateTokens(messages: ChatCompletionMessageParam[]): number {
-  return messages.reduce((sum, message) => sum + messageTokens(message), 0);
+  return sumBy(messages, messageTokens);
 }

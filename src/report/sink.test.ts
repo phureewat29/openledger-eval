@@ -16,7 +16,7 @@ import { createReportSink } from "./sink.js";
 const IDENTITY: RunIdentity = {
   startedAt: "2026-08-06T09:05:00.000Z",
   oledVersion: "1.2.3",
-  tarballSha256: "a".repeat(64),
+  suiteSha256: "a".repeat(64),
   skillVersion: "2.0.0",
   skillSha256: "b".repeat(64),
   evalVersion: "1.0.0",

@@ -1,3 +1,4 @@
+import { groupBy, meanBy, sumBy } from "es-toolkit";
 import type { SuiteId } from "../config.js";
 import type { Benchmark } from "../report/benchmark.js";
 import { isRunningFresh, type LiveDoc } from "../report/live.js";
@@ -49,13 +50,9 @@ function statusOf(summary: IterationSummary, doc: LiveDoc | null, now: Date): It
 
 /** Per model rather than per entry: a model runs every suite, and a row is about the model. */
 function scoresByModel(benchmark: Benchmark): ModelScore[] {
-  const totals = new Map<string, { sum: number; count: number }>();
-  for (const entry of benchmark.entries) {
-    const held = totals.get(entry.model) ?? { sum: 0, count: 0 };
-    totals.set(entry.model, { sum: held.sum + entry.meanPassRate, count: held.count + 1 });
-  }
-  return [...totals]
-    .map(([model, { sum, count }]) => ({ model, passRate: sum / count }))
+  const byModel = groupBy(benchmark.entries, (entry) => entry.model);
+  return Object.entries(byModel)
+    .map(([model, entries]) => ({ model, passRate: meanBy(entries, (entry) => entry.meanPassRate) }))
     .toSorted((a, b) => b.passRate - a.passRate);
 }
 
@@ -74,10 +71,9 @@ function fromBenchmark(benchmark: Benchmark): Pick<
   "suites" | "models" | "runs" | "finished" | "meanPassRate" | "best" | "worst" | "costUsd" | "startedAt"
 > {
   const scores = scoresByModel(benchmark);
-  const runs = benchmark.entries.reduce((total, entry) => total + entry.cases.total, 0);
+  const runs = sumBy(benchmark.entries, (entry) => entry.cases.total);
   const rated = benchmark.entries.filter((entry) => entry.cases.total > 0);
-  const mean =
-    rated.length === 0 ? null : rated.reduce((total, entry) => total + entry.meanPassRate, 0) / rated.length;
+  const mean = rated.length === 0 ? null : meanBy(rated, (entry) => entry.meanPassRate);
 
   return {
     startedAt: benchmark.identity.startedAt,
@@ -104,8 +100,7 @@ function fromLive(doc: LiveDoc): Pick<
     models: new Set(doc.items.map((item) => item.model)).size,
     runs: doc.items.length,
     finished: doc.items.filter((item) => TERMINAL_STATES.includes(item.state)).length,
-    meanPassRate:
-      graded.length === 0 ? null : graded.reduce((total, item) => total + (item.passRate ?? 0), 0) / graded.length,
+    meanPassRate: graded.length === 0 ? null : meanBy(graded, (item) => item.passRate ?? 0),
     best: null,
     worst: null,
     // live.json carries no cost; showing zero would read as free.

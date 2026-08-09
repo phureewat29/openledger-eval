@@ -7,7 +7,7 @@ import type { RunIdentity } from "./record.js";
 const IDENTITY: RunIdentity = {
   startedAt: "2026-08-06T09:05:00.000Z",
   oledVersion: "1.2.3",
-  tarballSha256: `a1b2c3d4e5f6${"0".repeat(52)}`,
+  suiteSha256: `a1b2c3d4e5f6${"0".repeat(52)}`,
   skillVersion: "2.0.0",
   skillSha256: `f6e5d4c3b2a1${"0".repeat(52)}`,
   evalVersion: "1.0.0",
@@ -40,6 +40,7 @@ function benchmark(patch: Partial<Benchmark> = {}): Benchmark {
     identity: IDENTITY,
     config: config(),
     entries: [entry()],
+    buildDrift: null,
     skippedModels: [],
     ...patch,
   };
@@ -137,14 +138,14 @@ test("prints the identity block: versions, truncated shas, and the config echo",
   const markdown = renderLeaderboard(benchmark());
   assert.ok(markdown.startsWith("# openledger eval — 2026-08-06T09:05:00.000Z\n"));
   assert.ok(markdown.includes("oled `1.2.3`"));
-  assert.ok(markdown.includes("`a1b2c3d4e5f6`"));
-  assert.ok(!markdown.includes(IDENTITY.tarballSha256), "the full 64-char sha should not appear, only its prefix");
+  assert.ok(markdown.includes("questions `a1b2c3d4e5f6`"));
+  assert.ok(!markdown.includes(IDENTITY.suiteSha256), "the full 64-char sha should not appear, only its prefix");
   assert.ok(markdown.includes("skill `2.0.0` `f6e5d4c3b2a1`"));
   assert.ok(markdown.includes("eval `1.0.0`"));
   assert.ok(markdown.includes("suites: record, query · trials: 1 · concurrency: 2"));
 });
 
-test("suiteRows returns one cell per column, ranked by position, for markdown and HTML alike", () => {
+test("suiteRows returns one cell per column, ranked by position, using the rankCell/passRateCell formatting the HTML table also imports", () => {
   const rows = suiteRows([
     entry({ model: "a/model", meanPassRate: 0.9, stddevPassRate: 0.042 }),
     entry({ model: "b/model", totalCostUsd: null, terminal: { graded: 7, endpoint_error: 1, sandbox_error: 1 } }),
@@ -167,4 +168,18 @@ test("humanDuration steps from seconds to minutes to hours, dropping the smaller
   assert.equal(humanDuration(60_000), "1m00s");
   assert.equal(humanDuration(83_000), "1m23s");
   assert.equal(humanDuration(3_661_000), "1h01m");
+});
+
+/**
+ * A merged report is allowed to span builds — a rerun always lands in the report
+ * it came from — so the only unacceptable outcome is saying nothing about it.
+ */
+test("a report that spans builds says so above its tables", () => {
+  const markdown = renderLeaderboard(benchmark({ buildDrift: "spans more than one build: SKILL.md 2cf3269d1708 → 9a1e77b04c22" }));
+  assert.ok(markdown.includes("spans more than one build"));
+  assert.ok(markdown.includes("SKILL.md 2cf3269d1708 → 9a1e77b04c22"));
+});
+
+test("an ordinary report carries no such line", () => {
+  assert.ok(!renderLeaderboard(benchmark()).includes("spans more than one build"));
 });

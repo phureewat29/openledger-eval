@@ -10,7 +10,6 @@ import { buildCounters } from "../report/counters.js";
 import type { EventSink, RunEvent } from "../report/events.js";
 import { computeCostUsd, type RunRecord, type TerminalState } from "../report/record.js";
 import { createRecorder, type Recorder } from "../report/recorder.js";
-import { installFromTarball } from "../sandbox/install.js";
 import { createWorkspace, type Workspace, type WorkspaceGuard } from "../sandbox/workspace.js";
 import type { AnswerSink, CaseGrade, SuiteContext } from "../suites/types.js";
 import type { PlannedRun } from "./matrix.js";
@@ -18,10 +17,18 @@ import type { PlannedRun } from "./matrix.js";
 // Long enough for a statement extraction, short enough that a hung CLI cannot own the matrix.
 const CLI_TIMEOUT_MS = 120_000;
 
-/** Every sandbox runs the CLI the same way: the packed binary, the workspace's own env and cwd. */
-export function createSandboxRunner(bin: string, workspace: Workspace): OpenLedgerRunner {
+/**
+ * The CLI under test, as a user would have it: `oled` resolved from PATH, from
+ * whatever `npm install -g` or `npm link` put there. The harness used to pack a
+ * sibling checkout and install that tarball into every sandbox, which tied a run
+ * to a source tree it had no business knowing about.
+ */
+const OLED_BIN = "oled";
+
+/** Every sandbox runs the CLI the same way: one binary, the workspace's own env and cwd. */
+export function createSandboxRunner(workspace: Workspace): OpenLedgerRunner {
   return createOpenLedgerRunner({
-    bin,
+    bin: OLED_BIN,
     env: workspace.env,
     cwd: workspace.cwd,
     timeoutMs: CLI_TIMEOUT_MS,
@@ -35,7 +42,6 @@ export interface RunEnvironment {
   stream: boolean;
   timeoutMs: number;
   inputModalities: Modality[] | null;
-  tarball: string;
   /** Captured once at startup, so every run is measured against the same text. */
   skillText: string;
   guard: WorkspaceGuard;
@@ -116,10 +122,7 @@ async function play(
   recorder: Recorder,
   workspace: Workspace,
 ): Promise<Outcome> {
-  const installed = await installFromTarball(env.tarball, workspace.npm);
-  if (!installed.ok) return failure("sandbox_error", installed.error);
-
-  const runner = createSandboxRunner(installed.value.bin, workspace);
+  const runner = createSandboxRunner(workspace);
   const configured = await initConfig(runner, workspace);
   if (!configured.ok) return failure("sandbox_error", configured.error);
 

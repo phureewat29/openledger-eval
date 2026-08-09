@@ -1,3 +1,4 @@
+import { sumBy } from "es-toolkit";
 import { Cpu, HardDrive, HeartCrack, Trash2, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import type { LivePayload, ProcessesPayload, SandboxesPayload } from "../../shared/payloads.js";
@@ -115,7 +116,7 @@ function Sandboxes({ sandboxes }: { sandboxes: SandboxesPayload | null }) {
   const entries = sandboxes?.entries ?? [];
   const orphans = entries.filter((entry) => entry.owner === "none");
   const selected = orphans.filter((entry) => chosen.has(entry.name));
-  const selectedBytes = selected.reduce((total, entry) => total + entry.bytes, 0);
+  const selectedBytes = sumBy(selected, (entry) => entry.bytes);
 
   const remove = async (): Promise<void> => {
     setConfirming(false);

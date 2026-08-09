@@ -1,4 +1,4 @@
-import { sum } from "es-toolkit";
+import { countBy, sum } from "es-toolkit";
 import { EXIT, exitName } from "../oled/contract.js";
 import type { RejectionType, RunEvent } from "./events.js";
 
@@ -64,13 +64,10 @@ function countRejections(calls: ToolCallEvent[]): Record<RejectionType, number> 
 }
 
 function countNonzeroExits(calls: ToolCallEvent[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const call of calls) {
-    if (call.exitCode === null || call.exitCode === EXIT.OK) continue;
-    const name = exitName(call.exitCode);
-    counts[name] = (counts[name] ?? 0) + 1;
-  }
-  return counts;
+  const nonzero = calls.filter(
+    (call): call is ToolCallEvent & { exitCode: number } => call.exitCode !== null && call.exitCode !== EXIT.OK,
+  );
+  return countBy(nonzero, (call) => exitName(call.exitCode));
 }
 
 /** Refusals across every kind, so a run page and a scorecard cannot report different totals. */

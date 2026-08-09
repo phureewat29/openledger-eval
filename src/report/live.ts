@@ -1,33 +1,23 @@
 import { renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SuiteId } from "../config.js";
 import { tryExecute, type Result } from "../core/result.js";
 import type { PlannedRun } from "../runner/matrix.js";
-import { countChecks, type CaseGrade } from "../suites/types.js";
 import type { ConfigEcho } from "./benchmark.js";
-import type { RunIdentity, RunRecord, TerminalState } from "./record.js";
+import {
+  isSameItem,
+  keyOfRecord,
+  liveItemOf,
+  pendingItem,
+  type ItemKey,
+  type LiveItem,
+} from "./live-item.js";
+import type { RunIdentity, RunRecord } from "./record.js";
+
+export { type LiveItem, type LiveItemState } from "./live-item.js";
 
 // The runner's mid-flight status, written to reports/<ts>/live.json while a
 // matrix runs so a separate reader (the dashboard) can watch it progress
 // without touching anything the CLI itself reads or writes.
-
-export type LiveItemState = "pending" | "running" | TerminalState;
-
-/** One plan cell's current status, addressed by (model, suite, caseId, trial). */
-export interface LiveItem {
-  model: string;
-  suite: SuiteId;
-  caseId: string;
-  trial: number;
-  state: LiveItemState;
-  /** Set once state reaches "graded"; null before that and for the other terminal states. */
-  passRate: number | null;
-  /** Set once the item leaves "running"; null before that. */
-  durationMs: number | null;
-  /** Counted as countChecks counts, so a passed check means the same here as in a grade. */
-  checksPassed?: number;
-  checksTotal?: number;
-}
 
 /** `updatedAt` is a heartbeat, not just a transition marker: it advances on every write, idle beats included. */
 export interface LiveDoc {
@@ -71,32 +61,13 @@ export function isRunningFresh(doc: LiveDoc, now: Date): boolean {
   return doc.status === "running" && silentMs(doc, now) <= STALE_MS;
 }
 
-type ItemKey = Pick<LiveItem, "model" | "suite" | "caseId" | "trial">;
-
 function keyOfPlanned(planned: PlannedRun): ItemKey {
   return { model: planned.model.id, suite: planned.suite.id, caseId: planned.kase.id, trial: planned.trial };
-}
-
-function keyOfRecord(record: RunRecord): ItemKey {
-  return { model: record.model, suite: record.suite, caseId: record.caseId, trial: record.trial };
-}
-
-function isSameItem(item: ItemKey, key: ItemKey): boolean {
-  return (
-    item.model === key.model &&
-    item.suite === key.suite &&
-    item.caseId === key.caseId &&
-    item.trial === key.trial
-  );
 }
 
 /** Rebuilds `items` with one entry replaced; every other item is returned as-is. */
 function withItem(doc: LiveDoc, key: ItemKey, update: (item: LiveItem) => LiveItem): LiveDoc {
   return { ...doc, items: doc.items.map((item) => (isSameItem(item, key) ? update(item) : item)) };
-}
-
-function pendingItem(key: ItemKey): LiveItem {
-  return { ...key, state: "pending", passRate: null, durationMs: null };
 }
 
 /** Every planned cell starts pending, in plan order; the matrix has not run anything yet. */
@@ -119,21 +90,8 @@ export function markRunning(doc: LiveDoc, planned: PlannedRun): LiveDoc {
   return withItem(doc, keyOfPlanned(planned), (item) => ({ ...item, state: "running" }));
 }
 
-/** Absent rather than zero when a run carried no grade: nothing was checked, and 0/0 reads as a score. */
-function checkFields(grade: CaseGrade | null): Pick<LiveItem, "checksPassed" | "checksTotal"> {
-  if (!grade) return {};
-  const { passed, total } = countChecks(grade.assertions);
-  return { checksPassed: passed, checksTotal: total };
-}
-
 export function markFinished(doc: LiveDoc, record: RunRecord): LiveDoc {
-  return withItem(doc, keyOfRecord(record), (item) => ({
-    ...item,
-    state: record.state,
-    passRate: record.grade?.passRate ?? null,
-    durationMs: record.metrics.durationMs,
-    ...checkFields(record.grade),
-  }));
+  return withItem(doc, keyOfRecord(record), () => liveItemOf(record));
 }
 
 /**

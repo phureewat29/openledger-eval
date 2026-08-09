@@ -9,9 +9,10 @@ import type { RunMetrics } from "./recorder.js";
 export interface RunIdentity {
   startedAt: string;
   oledVersion: string;
-  tarballSha256: string;
   skillVersion: string;
   skillSha256: string;
+  /** The questions and the answer contract, so a reworded prompt is visible as a different build. */
+  suiteSha256: string;
   evalVersion: string;
 }
 

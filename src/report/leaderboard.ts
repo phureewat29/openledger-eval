@@ -5,7 +5,7 @@ import type { Benchmark, BenchmarkEntry } from "./benchmark.js";
 // Renders a Benchmark straight to the markdown an operator reads. The ranking
 // already happened in benchmark.ts; this file only formats what it produced.
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+export const MEDALS = ["🥇", "🥈", "🥉"];
 
 function trimZero(text: string): string {
   return text.replace(/\.0$/, "");
@@ -33,7 +33,7 @@ export function humanDuration(ms: number): string {
   return `${hours}h${pad2(minutes)}m`;
 }
 
-function passRateCell(entry: BenchmarkEntry): string {
+export function passRateCell(entry: BenchmarkEntry): string {
   const pct = `${(entry.meanPassRate * 100).toFixed(1)}%`;
   return entry.stddevPassRate === null ? pct : `${pct} ±${(entry.stddevPassRate * 100).toFixed(1)}`;
 }
@@ -49,7 +49,7 @@ function notesCell(entry: BenchmarkEntry): string {
 }
 
 /** Medals go to the first three rows in table order. */
-function rankCell(position: number): string {
+export function rankCell(position: number): string {
   const medal = MEDALS[position - 1] ?? null;
   return medal ? `${position} ${medal}` : `${position}`;
 }
@@ -68,8 +68,10 @@ export const LEADERBOARD_COLUMNS: readonly string[] = [
 
 /**
  * One cell array per entry, aligned to LEADERBOARD_COLUMNS and ranked by
- * position in `entries`, which must already be one suite's ranked rows. The
- * markdown table and the dashboard's HTML table both render from this alone.
+ * position in `entries`, which must already be one suite's ranked rows. Only
+ * the markdown table renders from this directly — the dashboard's HTML table
+ * builds its own JSX rows, but imports MEDALS, rankCell and passRateCell from
+ * this file so the two never format the same number two different ways.
  */
 export function suiteRows(entries: BenchmarkEntry[]): string[][] {
   return entries.map((entry, index) => [
@@ -103,9 +105,11 @@ function suiteSection(suite: SuiteId, entries: BenchmarkEntry[]): string {
 function identityBlock(benchmark: Benchmark): string {
   const { identity, config } = benchmark;
   return [
-    `oled \`${identity.oledVersion}\` · tarball \`${identity.tarballSha256.slice(0, 12)}\` · ` +
-      `skill \`${identity.skillVersion}\` \`${identity.skillSha256.slice(0, 12)}\` · eval \`${identity.evalVersion}\``,
+    `oled \`${identity.oledVersion}\` · skill \`${identity.skillVersion}\` \`${identity.skillSha256.slice(0, 12)}\` · ` +
+      `questions \`${identity.suiteSha256.slice(0, 12)}\` · eval \`${identity.evalVersion}\``,
     `suites: ${config.suites.join(", ")} · trials: ${config.trials} · concurrency: ${config.concurrency}`,
+    // Only when there is something to say: an ordinary report carries no such line.
+    ...(benchmark.buildDrift === null ? [] : [`\n> **This report ${benchmark.buildDrift}.** A rerun landed here measured against something else.`]),
   ].join("\n");
 }
 

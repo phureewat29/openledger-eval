@@ -8,7 +8,8 @@ changing openledger to see what got better and what broke.
 
 ## The Three Suites
 
-**Ingest** — the model gets a password-locked card statement (126 rows). It
+### Ingest
+The model gets a password-locked card statement (126 rows). It
 must find the file, run `oled ingest prepare`, read the extracted text, and
 post every row with `oled ingest commit`, then resolve what the ledger
 flagged. Scoring reads the ledger back and compares it with the statement's
@@ -20,7 +21,8 @@ parsing.
 Eval versions before 2.0.0 called this suite **record**, so their reports label
 these results `record`; nothing rewrites them.
 
-**Record** — the model gets transactions as text: a markdown table, a scribbled
+### Record
+The model gets transactions as text: a markdown table, a scribbled
 note, a CSV export. No file, no extraction. It must turn that text into correct
 `oled` calls, working from the chart of accounts it was handed and nothing else.
 Five cases, 20 to 50 rows each, and the prompt never says how many. Each case
@@ -44,7 +46,8 @@ the case's own rows, so a wrong fixture fails at startup rather than failing a
 model. The journey — turns used against both caps, nonzero exits by name,
 refusals, repeated commands — is reported beside the checks and never graded.
 
-**Query** — the sandbox is seeded with 40 known transactions. The model gets
+### Query 
+The sandbox is seeded with 40 known transactions. The model gets
 `SKILL.md` and one question, answers it with the CLI, and must finish by
 calling `submit_answer`. Twelve cases, from "how many transactions" to a
 paging case a single page cannot answer and a currency trap that fails any
@@ -53,12 +56,15 @@ re-derived from the seed rows at startup; a mismatch refuses to run.
 
 ## Setup
 
-1. Build the CLI under test: `cd ../openledger && npm run build`. Another
-   checkout works too; point `OLED_REPO_ROOT` at it.
+1. Install the CLI under test so that `oled` is on your PATH:
+   `npm install -g oled`. To measure a local build instead, run
+   `npm run build && npm link` in the openledger checkout — the eval takes
+   whichever `oled` it finds, exactly as a user would.
 2. `cp .env.example .env` and set `OPENROUTER_API_KEY`.
 3. `npm install`.
 
-Node 18+, macOS or Linux.
+Node 18+, macOS or Linux. `oled --version` should answer before you run
+anything; the harness checks it once at startup and refuses before spending.
 
 ## Run
 
@@ -139,4 +145,3 @@ A web app over the same `reports/` directory, and nothing else: it reads what
 the harness leaves behind and owns only the launch slot. It listens on loopback,
 and the two things that cost something — starting a run and deleting a sandbox —
 are refused unless the request came from its own page.
-# openledger-eval
