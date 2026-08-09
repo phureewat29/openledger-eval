@@ -114,7 +114,8 @@ the endpoint omitted usage.
 ## Dashboard
 
 ```sh
-npm run dev                  
+npm run dev
+# or 
 npm start                    
 npm run dev:api -- --port 8080
 ```
