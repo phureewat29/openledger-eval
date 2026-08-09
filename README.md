@@ -16,50 +16,37 @@
 
 ## The Three Suites
 
-### Ingest
-The model gets a password-locked card statement (126 rows). It
-must find the file, run `oled ingest prepare`, read the extracted text, and
-post every row with `oled ingest commit`, then resolve what the ledger
-flagged. Scoring reads the ledger back and compares it with the statement's
-fact file: row counts, group totals, uncategorized ratio, open questions,
-file lifecycle, net worth. Twelve scored assertions plus one reported line for
-rows the statement's own groups can't see (the opening balance), no prose
-parsing.
+Every suite is scored by reading the ledger back, never by parsing prose.
 
-Eval versions before 2.0.0 called this suite **record**, so their reports label
-these results `record`; nothing rewrites them.
+### Ingest
+
+A password-locked card statement, 126 rows. The model finds the file, runs
+`oled ingest prepare`, reads the extracted text, posts every row with
+`oled ingest commit`, then resolves what the ledger flagged. Twelve assertions
+check the ledger against the statement's own fact file: row counts, group
+totals, uncategorized ratio, open questions, file lifecycle, net worth.
 
 ### Record
-The model gets transactions as text: a markdown table, a scribbled
-note, a CSV export. No file, no extraction. It must turn that text into correct
-`oled` calls, working from the chart of accounts it was handed and nothing else.
-Five cases, 20 to 50 rows each, and the prompt never says how many. Each case
-runs in two phases: record the rows, then resolve whatever the ledger flagged.
-Creating an account costs a turn, so the cap is tight; in two cases it sits below
-the row count, which forces the rows into batches. One case is in a currency the
-sandbox has no ledger for, so its first commit is refused and the model has to
-open the ledger and retry.
 
-Scoring reads the ledger back: the row count, which doubles as the double-post
-check since a re-committed batch posts everything twice; every date and amount,
-counted, so a row moved to another day, two rows merged into their sum or one row
-split in two fails even where the balances still tie; one balance per account in
-minor units; nothing under `<ccy>:expense:uncategorized`; nothing under
-`<ccy>:equity:adjustments`, the account `accounts adjust` posts the other side of
-a forced balance to, which is what stops a run setting all 18 balances by hand
-and recording nothing; and no question left open or deferred, since deferring one
-is not answering it. Descriptions are not scored: a model may reword them, and
-the date and the amount already pin a row. The expected ledger is derived from
-the case's own rows, so a wrong fixture fails at startup rather than failing a
-model. The journey — turns used against both caps, nonzero exits by name,
-refusals, repeated commands — is reported beside the checks and never graded.
+The same job with nothing to extract — transactions arrive as a random markdown
+table, a scribbled note, an unknown financial CSV export. Five cases of 20 to 50
+rows, and the prompt never says how many. Turn caps sit below the row count in
+two of them, forcing batches, and one case is in a currency the sandbox has no
+ledger for, so its first commit is refused and the model has to open one and
+retry.
 
-### Query 
-The sandbox is seeded with 40 known transactions. The model gets
-`SKILL.md` and one question, answers it with the CLI, and must finish by
-calling `submit_answer`. Twelve cases, from "how many transactions" to a
-paging case a single page cannot answer and a currency trap that fails any
-model that sums THB and USD. Golden answers live in the fixture and are
+Scoring counts every date and amount and checks every balance, so merged, split
+or misdated rows fail even where the totals still tie. Nothing may be left
+uncategorized, forced into an adjustments account, or asked and unanswered.
+Descriptions are not scored. The journey — turns, nonzero exits, refusals,
+repeated commands — is reported beside the checks and never graded.
+
+### Query
+
+A sandbox seeded with 40 known transactions, one question, and `SKILL.md`. The
+model answers with the CLI and must finish by calling `submit_answer`. Twelve
+cases, from "how many transactions" to a paging case one page cannot answer and
+a currency trap that fails any model that sums THB and USD. Goldens are
 re-derived from the seed rows at startup; a mismatch refuses to run.
 
 ## Setup
