@@ -1,10 +1,18 @@
-# OpenLedger Evaluation
+<h1 align="center">OpenLedger Eval</h1>
 
-Measures how fit the OpenLedger product, the `oled` CLI and its shipped
-`SKILL.md`, is for LLM agents. Every run drives a ladder of models through
-OpenRouter against the real CLI in a throwaway sandbox, grades the results
-deterministically, and writes a cross-model leaderboard. Rerun it after
-changing openledger to see what got better and what broke.
+<p align="center">
+  <strong>Is the OpenLedger CLI fit for the models that will drive it?</strong>
+</p>
+
+<p align="center">
+  Measures how fit the OpenLedger product — the <code>oled</code> CLI and its shipped <code>SKILL.md</code> — is for LLM agents. Every run drives a ladder of models through OpenRouter against the real CLI in a throwaway sandbox, grades the results deterministically, and writes a cross-model leaderboard. Rerun it after changing openledger to see what got better and what broke.
+</p>
+
+<p align="center">
+  <img src=".github/dashboard.png" width="900" alt="The dashboard mid-run: one grid per suite, models down the side and cases across the top, each cell showing checks passed." />
+</p>
+
+<br />
 
 ## The Three Suites
 
@@ -68,22 +76,25 @@ anything; the harness checks it once at startup and refuses before spending.
 
 ## Run
 
-`npm run dashboard` is the way in: pick a suite, tick the models, press
-launch, and watch the grid fill. See [Dashboard](#dashboard).
+The dashboard is the way in: pick a suite, tick the models, press launch, and
+watch the grid fill. See [Dashboard](#dashboard).
 
-The dashboard starts runs by spawning `npm start`, which also stands on its
-own for a headless run:
+It starts runs by spawning `npm run eval`, which also stands on its own for a
+headless run:
 
 ```sh
-npm start -- --suite all                 # every model in models.json, every suite
-npm start -- --suite ingest --suite query
-npm start -- --model deepseek/deepseek-v4-flash
+npm run eval -- --suite all                 # every model in models.json, every suite
+npm run eval -- --suite ingest --suite query
+npm run eval -- --model deepseek/deepseek-v4-flash
+npm run eval -- --into 2026-08-09-2328 --case q09   # rerun one case into an existing report
 ```
 
 | Flag | Meaning |
 | --- | --- |
 | `--suite ingest\|record\|query\|all` | repeatable; which suites to run (default all) |
 | `--model <id>` | repeatable; overrides `models.json` |
+| `--case <id>` | repeatable; run only these cases of the selected suites |
+| `--into <slug>` | merge into an existing report instead of writing a new one |
 | `--concurrency <n>` | parallel runs (default: one lane per model, capped at 8) |
 
 Every case runs once. There is no way to ask for repeats: a second trial
@@ -98,8 +109,8 @@ of it, a 28k-token floor when the window isn't published) — there is no
 global knob. Exit 0 means every run was graded (failing grades are data);
 1 means some run hit an endpoint or sandbox error; 2 means bad usage.
 
-Each run is hermetic: a fresh temp directory with its own home, and its own
-`oled` install from a tarball packed once per invocation. The CLI reads no
+Each run is hermetic: a fresh temp directory with its own home. The CLI itself
+is whichever `oled` is on your PATH — the one a user would have — and reads no
 environment configuration, so every default it has — the config file, the
 database, the data and cache directories — resolves under that home, and the
 run then pins the three paths again on the `oled config --init` command line so
@@ -117,24 +128,28 @@ One invocation writes one iteration under `reports/<timestamp>/`:
   time, tokens in/out, cost, tool calls. Committed to git as the
   regression trail.
 - `benchmark.json` — the same data machine-readable, plus the identity
-  block: oled version, tarball sha, skill version and sha, eval version.
-  Also committed.
-- `runs/<model>/<suite>/<case>[-t<n>].{json,md}` — per-run
-  detail: every assertion with want/got evidence, metrics, counters, and
-  the full event stream, including what each `oled` call was piped and what
-  it replied. Written as each run is graded. Ignored by git.
+  block: oled version, skill version and sha, a fingerprint of the questions
+  and the answer contract, and the eval version. Also committed.
+- `runs/<model>/<suite>/<case>[-t<n>].json` — per-run detail: every
+  assertion with want/got evidence, metrics, counters, and the full event
+  stream, including what each `oled` call was piped and what it replied.
+  Written as each run is graded. Ignored by git.
+
+A rerun merges back into the report it came from rather than starting a new
+one. If it was measured against a different build — a newer `oled`, an edited
+`SKILL.md`, a reworded question — it still lands, and the leaderboard says the
+report spans more than one build rather than averaging across them in silence.
 
 Cost comes from OpenRouter's published pricing times reported usage and
 shows `—` when the endpoint omitted usage. Query tool-call counts include
-the one `submit_answer` call. `reports/archive/` holds two runs from the
-pre-rebuild harness; their schema is older and nothing loads them.
+the one `submit_answer` call.
 
 ## Dashboard
 
 ```sh
 npm run dev                  # Vite (page) + the API, with hot reload
 npm start                    # build the page, then serve everything from :4000
-npm run dev -- --port 8080   # the API on another port
+npm run dev:api -- --port 8080   # the API alone, on another port
 ```
 
 In development the page is Vite's and the API is a second process; open the URL
