@@ -12,6 +12,7 @@ import {
   parseRerunRequest,
   pauseTarget,
   rerunArgs,
+  runPid,
   spawnArgs,
   stopTarget,
   type ChildHandle,
@@ -208,6 +209,28 @@ test("a rerun's own live.json is its launcher's, though the iteration it merges 
   assert.equal(ownsRun(slot, withOpenedAt), true);
 });
 
+/**
+ * A matrix killed outright leaves `status: "running"` on disk for ever. Probing
+ * that pid is a `ps` fork, and the live payload is rebuilt more than once a
+ * second — so without the existence check an idle dashboard nobody is looking at
+ * forks indefinitely. Existence and not freshness, because a paused run stops
+ * heartbeating on purpose and must still be found.
+ */
+test("does not probe a run whose process is gone, however much its report still says running", () => {
+  const dead = snapshot("running", beat(600));
+  assert.equal(runPid(IDLE_SLOT, dead, () => false), null);
+});
+
+test("still probes a run that has stopped beating but whose process is there, which is what paused looks like", () => {
+  const frozen = snapshot("running", beat(600));
+  assert.equal(runPid(IDLE_SLOT, frozen, () => true), RUN_PID);
+});
+
+test("asks nothing of a finished report", () => {
+  assert.equal(runPid(IDLE_SLOT, snapshot("done", beat(1)), () => true), null);
+  assert.equal(runPid(IDLE_SLOT, null, () => true), null);
+});
+
 test("counts any end but zero as a failed launch, a signal included", () => {
   const at = beat(1);
   assert.equal(launchFailed(IDLE_SLOT), false);
@@ -342,7 +365,7 @@ test("interrupts a run it never spawned by the pid that run wrote down", () => {
   const { launcher, children, interrupted } = harness();
   const fresh = snapshot("running", beat(2));
 
-  assert.deepEqual(launcher.target(fresh, NOW), { kind: "foreign", pid: RUN_PID });
+  assert.deepEqual(launcher.target(fresh, NOW, false), { kind: "foreign", pid: RUN_PID });
   assert.deepEqual(launcher.stop(fresh, NOW), { ok: true });
   assert.deepEqual(interrupted, [RUN_PID], "one SIGINT, since there is no handle to escalate against");
   assert.equal(children.length, 0);
@@ -518,5 +541,5 @@ test("hold offers nothing on a child that is still packing, which has no live.js
   const { launcher } = frozenHarness();
   launcher.launch(REQUEST, null, NOW);
 
-  assert.deepEqual(launcher.holdTarget(null, NOW), { kind: "none" });
+  assert.deepEqual(launcher.holdTarget(null, NOW, false), { kind: "none" });
 });

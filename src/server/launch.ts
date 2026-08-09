@@ -15,6 +15,7 @@ import {
   selfProc,
   signalGroup,
 } from "./procs.js";
+import { LAUNCH_LOG } from "../shared/paths.js";
 import type { LiveSnapshot } from "./reports-fs.js";
 
 // The dashboard's only mutable state: one slot holding the eval process this
@@ -25,8 +26,7 @@ import type { LiveSnapshot } from "./reports-fs.js";
 /** Suites are ticked, like models: "all" is what picking every one means, not another thing to pick. */
 export const SUITE_SELECTIONS: SuiteId[] = [...SUITE_IDS];
 
-/** Relative on purpose: it is both the path to write and the name the failure panel shows. */
-export const LAUNCH_LOG = "reports/dashboard-launch.log";
+export { LAUNCH_LOG };
 
 const LAUNCH_LOG_PATH = join(EVAL_ROOT, LAUNCH_LOG);
 
@@ -191,14 +191,27 @@ function isReachable(live: LiveSnapshot, now: Date, paused: boolean): boolean {
 }
 
 /**
- * The run a signal could reach, named before anything is asked of the OS about
- * it. Returning null for a finished report is what keeps an idle dashboard from
- * spending a `ps` a second to ask whether nothing is frozen.
+ * The run worth asking the OS about, or null when there is nothing there.
+ *
+ * The existence check is what makes this cheap enough to ask every second.
+ * `status: "running"` alone is not evidence a run is alive — a matrix killed
+ * outright leaves that word on disk for ever, and probing it would fork a `ps`
+ * a second, indefinitely, on a dashboard nobody is looking at.
+ *
+ * Existence rather than freshness, because a paused run is deliberately not
+ * fresh: its heartbeat stops the moment it is frozen, so a freshness gate would
+ * hide the very state the probe exists to find. `exists` is a signal-0 syscall,
+ * next to nothing beside the fork it saves.
  */
-export function runPid(slot: SlotView, live: LiveSnapshot | null): number | null {
+export function runPid(
+  slot: SlotView,
+  live: LiveSnapshot | null,
+  exists: (pid: number) => boolean,
+): number | null {
   if (slot.alive) return slot.pgid;
   if (live === null || live.doc.status !== "running") return null;
-  return live.doc.pid ?? null;
+  const pid = live.doc.pid;
+  return pid !== undefined && exists(pid) ? pid : null;
 }
 
 /** null when a launch may go ahead; otherwise the reason to show, since these POSTs spend money. */
@@ -323,10 +336,15 @@ export interface Launcher {
   launch(request: LaunchRequest, live: LiveSnapshot | null, now: Date): LaunchOutcome;
   /** A rerun is a launch with a narrower argv; the busy guard and the slot are the same. */
   rerun(request: RerunRequest, live: LiveSnapshot | null, now: Date): LaunchOutcome;
-  /** What a stop would reach right now; the page renders its button from this and nothing else. */
-  target(live: LiveSnapshot | null, now: Date): StopTarget;
+  /**
+   * What a stop would reach right now; the page renders its button from this and
+   * nothing else. `paused` is passed in rather than probed, so a caller building
+   * a whole payload asks the OS once instead of once per question it happens to
+   * ask — the same shape `liveState` already takes.
+   */
+  target(live: LiveSnapshot | null, now: Date, paused: boolean): StopTarget;
   /** The same, for the hold buttons; `kind` is the verb on offer. */
-  holdTarget(live: LiveSnapshot | null, now: Date): PauseTarget;
+  holdTarget(live: LiveSnapshot | null, now: Date, paused: boolean): PauseTarget;
   stop(live: LiveSnapshot | null, now: Date): StopOutcome;
   hold(action: PauseAction, live: LiveSnapshot | null, now: Date): StopOutcome;
   /** Whether the reachable run is frozen; the busy guard and every state read need it. */
@@ -367,9 +385,13 @@ export function createLauncher(deps: LauncherDeps): Launcher {
     if (claimed.escalation !== null) clearTimeout(claimed.escalation);
   }
 
-  /** Asked of the OS, and only where there is a run to ask about, so an idle dashboard spends no ps. */
+  /**
+   * The one place that asks the OS whether a run is frozen, and the only fork in
+   * the whole read. Callers that ask several questions of one moment — the live
+   * payload asks three — call this once and pass the answer down.
+   */
   function frozen(live: LiveSnapshot | null): boolean {
-    const pid = runPid(view(), live);
+    const pid = runPid(view(), live, deps.exists);
     return pid !== null && deps.stopped(pid);
   }
 
@@ -395,15 +417,15 @@ export function createLauncher(deps: LauncherDeps): Launcher {
     return { ok: true };
   }
 
-  function target(live: LiveSnapshot | null, now: Date): StopTarget {
-    return stopTarget(view(), live, now, deps.exists, frozen(live));
+  function target(live: LiveSnapshot | null, now: Date, paused: boolean): StopTarget {
+    return stopTarget(view(), live, now, deps.exists, paused);
   }
 
-  function holdTarget(live: LiveSnapshot | null, now: Date): PauseTarget {
+  function holdTarget(live: LiveSnapshot | null, now: Date, paused: boolean): PauseTarget {
     // A foreign run was found by its own live.json, so it has opened one by
     // definition; an owned child has only once that document is its.
     const opened = !view().alive || ownsRun(view(), live);
-    return pauseTarget(target(live, now), view(), frozen(live), opened);
+    return pauseTarget(target(live, now, paused), view(), paused, opened);
   }
 
   /** One SIGINT and no more: there is no handle to watch, so nothing to escalate to and nothing to record. */
@@ -415,12 +437,12 @@ export function createLauncher(deps: LauncherDeps): Launcher {
 
   function stop(live: LiveSnapshot | null, now: Date): StopOutcome {
     const claimed = slot;
-    const reached = target(live, now);
     // A stopped process queues a SIGINT rather than acting on it, so a frozen run
     // would be killed by the escalation with its sandboxes still on disk. The
     // continue comes first, and the interrupt lands on something able to run its
     // cleanup handler.
     const held = frozen(live);
+    const reached = target(live, now, held);
 
     if (reached.kind === "foreign") {
       if (held) deps.hold(reached.pid, "SIGCONT");
@@ -444,7 +466,7 @@ export function createLauncher(deps: LauncherDeps): Launcher {
   const HOLD_SIGNAL: Record<PauseAction, NodeJS.Signals> = { pause: "SIGSTOP", resume: "SIGCONT" };
 
   function hold(action: PauseAction, live: LiveSnapshot | null, now: Date): StopOutcome {
-    const reached = holdTarget(live, now);
+    const reached = holdTarget(live, now, frozen(live));
     if (reached.kind === "none") return IDLE_HOLD[action];
     // Asking to pause an already-frozen run, or to resume one that is running,
     // is a page acting on a state it has since left rather than a failure.

@@ -5,7 +5,7 @@ import type { Benchmark } from "../report/benchmark.js";
 import { FEED_FILE, FEED_KINDS, type FeedKind, type FeedLine } from "../report/feed.js";
 import type { LiveDoc } from "../report/live.js";
 import { readRecordFile } from "../report/read.js";
-import type { RunRecord } from "../report/record.js";
+import { summarise, type RunRecord, type RunSummary } from "../report/record.js";
 import { ITERATION_SLUG_RE } from "../shared/vocabulary.js";
 
 // Every read the dashboard makes, fresh per request: no cache, no watcher. A
@@ -296,14 +296,19 @@ export function readRunRecord(
 /** One run file, with the record behind it when it could be read. */
 export interface LoadedRun extends Omit<RunGroup, "stems"> {
   stem: string;
-  /** null when the .json is missing or unreadable; the .md beside it may still render. */
-  record: RunRecord | null;
+  /** null when the .json is missing or unreadable. */
+  record: RunSummary | null;
 }
 
 /**
- * Every run file of one iteration, records included. An unreadable record is
- * carried as null rather than dropped: the run happened, and its cell must
- * still lead to whatever the run left behind.
+ * Every run file of one iteration, transcripts left behind. An iteration's runs
+ * are read to draw a grid, a leaderboard and a failure tally, none of which look
+ * at an event — and carrying them made this the heaviest response the server
+ * sends, megabytes of transcript parsed and re-serialised to be discarded. The
+ * sheet for a single open run reads its events through `readRunRecord`.
+ *
+ * An unreadable record is carried as null rather than dropped: the run happened,
+ * and its cell must still lead to whatever the run left behind.
  */
 export function listRunRecords(reportsRoot: string, slug: string): Result<LoadedRun[]> {
   const groups = listRunFiles(reportsRoot, slug);
@@ -312,7 +317,12 @@ export function listRunRecords(reportsRoot: string, slug: string): Result<Loaded
   const runs = groups.value.flatMap((group) =>
     group.stems.map((stem) => {
       const record = readRunRecord(reportsRoot, slug, group.model, group.suite, stem);
-      return { model: group.model, suite: group.suite, stem, record: record.ok ? record.value : null };
+      return {
+        model: group.model,
+        suite: group.suite,
+        stem,
+        record: record.ok ? summarise(record.value) : null,
+      };
     }),
   );
   return { ok: true, value: runs };

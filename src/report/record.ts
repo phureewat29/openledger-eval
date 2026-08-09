@@ -39,6 +39,19 @@ export interface RunRecord {
 }
 
 /**
+ * A run without its transcript. The events are the bulk of a record — a single
+ * one reaches 130KB — and a whole iteration's worth is read, parsed and sent
+ * only for a grid that reads the grade and the duration. Anything listing many
+ * runs speaks this; only the sheet for one open run asks for the events.
+ */
+export type RunSummary = Omit<RunRecord, "events">;
+
+export function summarise(record: RunRecord): RunSummary {
+  const { events: _events, ...summary } = record;
+  return summary;
+}
+
+/**
  * The name a run's files are written under, minus the extension. `-t<n>` only
  * once more than one trial ran, so a single-trial file keeps the case's own
  * name. The one authority on it: a dashboard link to a run has to name the same

@@ -52,6 +52,8 @@ function readLivePayload(deps: WatchDeps, notice: string | null): LivePayload {
   const live: LiveSnapshot | null = snapshot.ok ? snapshot.value : null;
   const slot = deps.launcher.view();
   const found = live === null ? null : findIteration(deps.reportsRoot, live.slug);
+  // Asked once and answered three times. Each of these used to probe for itself,
+  // which is a `ps` fork apiece, several times a second, for one fact.
   const paused = deps.launcher.frozen(live);
   return {
     kind: liveState(slot, live, now, paused).kind,
@@ -59,8 +61,8 @@ function readLivePayload(deps: WatchDeps, notice: string | null): LivePayload {
     doc: live?.doc ?? null,
     hasBenchmark: found?.ok === true && found.value !== null ? found.value.hasBenchmark : false,
     slot,
-    stop: deps.launcher.target(live, now),
-    hold: deps.launcher.holdTarget(live, now),
+    stop: deps.launcher.target(live, now, paused),
+    hold: deps.launcher.holdTarget(live, now, paused),
     notice,
   };
 }

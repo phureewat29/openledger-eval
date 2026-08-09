@@ -7,6 +7,7 @@ import { Empty } from "../components/Empty.js";
 import { ActivityDrawer } from "../components/feed/ActivityDrawer.js";
 import { Legend } from "../components/grid/Legend.js";
 import { SuiteGrid } from "../components/grid/SuiteGrid.js";
+import { LAUNCH_LOG } from "../../shared/paths.js";
 import { RerunDialog, type RerunScope } from "../components/RerunDialog.js";
 import { RunSheet } from "../components/run/RunSheet.js";
 import { modelSlug } from "../../shared/vocabulary.js";
@@ -15,10 +16,6 @@ import { duration } from "../lib/format.js";
 // The screen a run is watched on. The bar above it carries the vitals, so this
 // owns the matrix itself, what the state means when it is not simply running,
 // and the feed underneath.
-
-/** Where a failed launch left its reasons, named here so the panel points somewhere. */
-const LAUNCH_LOG = "reports/dashboard-launch.log";
-
 
 /**
  * How long a run has been silent. The live payload stops arriving once it goes
