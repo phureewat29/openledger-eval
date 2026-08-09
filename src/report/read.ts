@@ -10,9 +10,7 @@ import type { RunRecord } from "./record.js";
 
 /**
  * A run's .json is a RunRecord and carries no schemaVersion to trust, so the
- * guard is structural: the fields every reader takes without asking first. A
- * record written by an older build simply lacks the newer fields, which readers
- * treat as unrecorded rather than as absent facts.
+ * guard is structural: the fields every reader takes without asking first.
  */
 export function isRunRecord(value: unknown): value is RunRecord {
   if (typeof value !== "object" || value === null) return false;

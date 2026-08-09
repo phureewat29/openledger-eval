@@ -12,9 +12,7 @@ import {
   readBenchmark,
   readFeedTail,
   readLive,
-  readRunMd,
   readRunRecord,
-  resolveRunMd,
 } from "./reports-fs.js";
 
 function scratch(): string {
@@ -261,24 +259,6 @@ test("groups run files by model and suite, from the records", () => {
   }
 });
 
-test("resolves a run file only through names readdir actually returned", () => {
-  const root = scratch();
-  try {
-    put(root, "2026-08-06-1000/runs/a-model/query/q01.md", "# a run");
-    put(root, "secret.md", "not yours");
-
-    const resolved = resolveRunMd(root, "2026-08-06-1000", "a-model", "query", "q01");
-    assert.ok(resolved.ok);
-    assert.equal(resolved.value, join(root, "2026-08-06-1000", "runs", "a-model", "query", "q01.md"));
-
-    const text = readRunMd(root, "2026-08-06-1000", "a-model", "query", "q01");
-    assert.ok(text.ok);
-    assert.equal(text.value, "# a run");
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
-});
-
 function runJson(patch: Record<string, unknown> = {}): string {
   return JSON.stringify({
     model: "a/model",
@@ -364,22 +344,22 @@ test("loads every run file of an iteration, carrying an unreadable record as nul
 test("refuses every smuggled name, decoded or not, before anything is joined", () => {
   const root = scratch();
   try {
-    put(root, "2026-08-06-1000/runs/a-model/query/q01.md", "# a run");
-    put(root, "secret.md", "not yours");
+    put(root, "2026-08-06-1000/runs/a-model/query/q01.json", runJson());
+    put(root, "secret.json", "not yours");
 
     const hostile: [string, string, string, string][] = [
       ["2026-08-06-1000", "..", "query", "q01"],
       ["2026-08-06-1000", "../..", "query", "q01"],
       ["2026-08-06-1000", "a-model", "..", "q01"],
       ["2026-08-06-1000", "a-model", "query", "../../../../secret"],
-      ["2026-08-06-1000", "a-model", "query", "q01.md"],
+      ["2026-08-06-1000", "a-model", "query", "q01.json"],
       ["2026-08-06-1000", "a-model", "query", "q0"],
       ["2026-08-06-1000", "A-Model", "query", "q01"],
       ["..", "a-model", "query", "q01"],
       ["archive", "a-model", "query", "q01"],
     ];
     for (const [slug, model, suite, stem] of hostile) {
-      const resolved = resolveRunMd(root, slug, model, suite, stem);
+      const resolved = readRunRecord(root, slug, model, suite, stem);
       assert.equal(resolved.ok, false, [slug, model, suite, stem].join("/"));
     }
   } finally {

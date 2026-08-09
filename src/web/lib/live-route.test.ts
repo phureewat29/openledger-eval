@@ -16,7 +16,6 @@ function payload(over: Partial<LivePayload>): LivePayload {
     slot: {} as LivePayload["slot"],
     stop: { kind: "none" },
     hold: { kind: "none" },
-    notice: null,
     ...over,
   };
 }

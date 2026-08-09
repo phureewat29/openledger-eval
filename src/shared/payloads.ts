@@ -22,8 +22,6 @@ export interface LivePayload {
   stop: StopTarget;
   /** Which way this run can be held, if either; the page renders its button from this alone. */
   hold: PauseTarget;
-  /** Why a launch was refused, when one just was. */
-  notice: string | null;
 }
 
 export interface FeedPayload {

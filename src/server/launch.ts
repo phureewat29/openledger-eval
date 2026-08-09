@@ -168,8 +168,7 @@ export const IDLE_SLOT: SlotView = {
  */
 export function ownsRun(slot: SlotView, live: LiveSnapshot | null): boolean {
   if (slot.launchedAt === null || live === null) return false;
-  const opened = live.doc.openedAt ?? live.doc.startedAt;
-  return Date.parse(opened) >= Date.parse(slot.launchedAt);
+  return Date.parse(live.doc.openedAt) >= Date.parse(slot.launchedAt);
 }
 
 /** A nonzero exit says the run ended badly; whether it ever started is `ownsRun`'s question. */

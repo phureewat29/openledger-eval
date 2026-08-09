@@ -18,8 +18,7 @@ import { Badge, Panel, type Tone } from "../Badge.js";
 // that route param (the live grid) already knows it another way.
 
 interface RunResponse {
-  record: RunRecord | null;
-  markdown: string | null;
+  record: RunRecord;
 }
 
 type LoadState =
@@ -162,13 +161,7 @@ export function RunSheet({
       <div className="min-h-0 flex-1 overflow-auto">
         {state.kind === "loading" && <Empty title="loading run" />}
         {state.kind === "error" && <Empty title="couldn't load this run" hint={state.error} />}
-        {state.kind === "loaded" && state.response.record !== null && <RunDetail record={state.response.record} />}
-        {state.kind === "loaded" && state.response.record === null && state.response.markdown !== null && (
-          <div className="p-5">
-            <p className="mb-2 text-subtle">this run's .json could not be read — showing its markdown report instead.</p>
-            <pre className="tnum whitespace-pre-wrap break-all">{state.response.markdown}</pre>
-          </div>
-        )}
+        {state.kind === "loaded" && <RunDetail record={state.response.record} />}
       </div>
     </div>
   );

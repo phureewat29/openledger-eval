@@ -7,14 +7,13 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { WebSocketServer, type WebSocket } from "ws";
 import * as z from "zod";
-import { EVAL_ROOT, oledRepoRoot, readModelIds, SUITE_IDS } from "../config.js";
+import { oledRepoRoot, readModelIds, SUITE_IDS } from "../config.js";
 import { finalizeDoc, isRunningFresh, writeLive } from "../report/live.js";
-import { parseClientMessage, parseChannelParams, type ServerMessage } from "../shared/protocol.js";
-import { PROTOCOL_VERSION } from "../shared/protocol.js";
+import { parseClientMessage, type ServerMessage } from "../shared/protocol.js";
 import { createRegistry, type Client } from "./channels.js";
 import { digestOf } from "./digest.js";
 import { driftAgainst } from "./drift.js";
-import { DEFAULT_PORT, isLocalRequest, isLocalUpgrade, parsePort } from "./http-guard.js";
+import { isLocalRequest, isLocalUpgrade, parsePort } from "./http-guard.js";
 import { launcher, parseLaunchRequest, parseRerunRequest } from "./launch.js";
 import { listProcesses, processExists } from "./procs.js";
 import {
@@ -25,7 +24,6 @@ import {
   readBenchmark,
   readLive,
   readFeedTail,
-  readRunMd,
   readRunRecord,
 } from "./reports-fs.js";
 import { isOrphan, listSandboxes, removeSandbox, sandboxRoot } from "./sandboxes.js";
@@ -84,7 +82,6 @@ app.get("/api/bootstrap", (c) => {
   const iterations = listIterations(REPORTS_ROOT);
   const models = readModelIds();
   return c.json({
-    protocol: PROTOCOL_VERSION,
     serverId: SERVER_ID,
     port,
     suites: SUITE_IDS,
@@ -123,26 +120,8 @@ app.get("/api/iterations/:slug", (c) => {
 app.get("/api/iterations/:slug/runs/:model/:suite/:stem", (c) => {
   const { slug, model, suite, stem } = c.req.param();
   const record = readRunRecord(REPORTS_ROOT, slug, model, suite, stem);
-  if (record.ok) return c.json({ record: record.value, markdown: null });
-
-  // The .json is the richer source and the only one new runs will write; the
-  // markdown beside it rescues every report directory already on disk.
-  const markdown = readRunMd(REPORTS_ROOT, slug, model, suite, stem);
-  if (markdown.ok) return c.json({ record: null, markdown: markdown.value });
-  return c.json({ error: record.error }, 404);
-});
-
-app.get("/api/processes", async (c) => {
-  const procs = await listProcesses();
-  if (!procs.ok) return c.json({ error: procs.error }, 500);
-  return c.json({ procs: procs.value });
-});
-
-app.get("/api/sandboxes", async (c) => {
-  const procs = await listProcesses();
-  const listed = await listSandboxes(sandboxRoot(), procs.ok ? procs.value : [], new Date());
-  if (!listed.ok) return c.json({ error: listed.error }, 500);
-  return c.json({ entries: listed.value });
+  if (!record.ok) return c.json({ error: record.error }, 404);
+  return c.json({ record: record.value });
 });
 
 app.post("/api/launch", async (c) => {
@@ -325,8 +304,7 @@ function send(socket: WebSocket, message: ServerMessage): void {
 
 wss.on("connection", (socket) => {
   const client: Client = { id: randomUUID(), send: (message) => send(socket, message) };
-  registry.add(client);
-  send(socket, { type: "welcome", protocol: PROTOCOL_VERSION, serverId: SERVER_ID });
+  send(socket, { type: "welcome", serverId: SERVER_ID });
 
   socket.on("message", (raw) => {
     const message = parseClientMessage(raw.toString());
@@ -334,12 +312,8 @@ wss.on("connection", (socket) => {
       send(socket, { type: "error", channel: null, error: "unreadable message" });
       return;
     }
-    if (message.cmd === "ping") return send(socket, { type: "pong" });
     if (message.cmd === "unsubscribe") return registry.unsubscribe(client, message.channel);
-
-    const params = parseChannelParams(message.channel, message.params);
-    if (!params.ok) return send(socket, { type: "error", channel: message.channel, error: params.error });
-    registry.subscribe(client, message.channel, params.value);
+    registry.subscribe(client, message.channel);
   });
 
   socket.on("close", () => registry.remove(client));
@@ -361,4 +335,3 @@ server.on("upgrade", (req, socket, head) => {
 
 process.on("exit", () => registry.stopAll());
 
-export { app, EVAL_ROOT, DEFAULT_PORT };

@@ -9,14 +9,6 @@ import type { LiveItemState } from "../report/live.js";
 // graph is a white screen — and `vite build` exits 0 on it, so nothing catches
 // that but running the page. `import type` is erased and is always safe.
 
-export const LIVE_STATES: LiveItemState[] = [
-  "pending",
-  "running",
-  "graded",
-  "endpoint_error",
-  "sandbox_error",
-];
-
 export const TERMINAL_STATES: LiveItemState[] = ["graded", "endpoint_error", "sandbox_error"];
 
 /** What a reader is told a state means. The raw names live on as data, never as prose. */
@@ -36,28 +28,6 @@ export function gradeShade(passRate: number | null): GradeShade {
   if (passRate !== null && passRate < 1) return "partial";
   return "full";
 }
-
-export const GRADE_GLYPH: Record<GradeShade, string> = { full: "█", partial: "▓", empty: "░" };
-
-/** The grade lives in the shade, so the shades need saying out loud as much as the states do. */
-export const GRADE_LEGEND: [GradeShade, string][] = [
-  ["full", "Every check passed"],
-  ["partial", "Some checks passed"],
-  ["empty", "No check passed"],
-];
-
-/**
- * One token per live state; a graded token is shaded further by its own pass
- * rate. Used where a cell has no room for its counts — a tally, a legend — and
- * as the fallback for a record too old to carry them.
- */
-export const STATE_GLYPH: Record<LiveItemState, (passRate: number | null) => string> = {
-  pending: () => "·",
-  running: () => "▸",
-  graded: (passRate) => GRADE_GLYPH[gradeShade(passRate)],
-  endpoint_error: () => "!",
-  sandbox_error: () => "✕",
-};
 
 /**
  * `YYYY-MM-DD-HHmm`, the shape `timestampSlug` writes and the only directory

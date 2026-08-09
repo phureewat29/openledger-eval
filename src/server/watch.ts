@@ -46,7 +46,7 @@ export interface WatchDeps {
 }
 
 /** Everything the live payload is built from, gathered in one place per rescan. */
-function readLivePayload(deps: WatchDeps, notice: string | null): LivePayload {
+function readLivePayload(deps: WatchDeps): LivePayload {
   const now = deps.now();
   const snapshot = newestLive(deps.reportsRoot);
   const live: LiveSnapshot | null = snapshot.ok ? snapshot.value : null;
@@ -63,7 +63,6 @@ function readLivePayload(deps: WatchDeps, notice: string | null): LivePayload {
     slot,
     stop: deps.launcher.target(live, now, paused),
     hold: deps.launcher.holdTarget(live, now, paused),
-    notice,
   };
 }
 
@@ -74,7 +73,7 @@ function readLivePayload(deps: WatchDeps, notice: string | null): LivePayload {
  */
 function livePrint(payload: LivePayload): string {
   const doc = payload.doc === null ? null : { ...payload.doc, updatedAt: "" };
-  return JSON.stringify({ ...payload, doc, notice: null });
+  return JSON.stringify({ ...payload, doc });
 }
 
 /** Flattens the tree into rows the client indents by `depth` without walking anything. */
@@ -141,11 +140,11 @@ function liveSource(deps: WatchDeps): Source {
   return (publish) => {
     let print = "";
     let last: LivePayload | null = null;
-    const emit = (notice: string | null = null): void => {
-      const payload = readLivePayload(deps, notice);
+    const emit = (): void => {
+      const payload = readLivePayload(deps);
       last = payload;
       const next = livePrint(payload);
-      if (next === print && notice === null) return;
+      if (next === print) return;
       print = next;
       publish(payload);
     };

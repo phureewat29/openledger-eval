@@ -33,7 +33,7 @@ test("a subscriber receives what its source publishes the instant it starts", ()
   const registry = createRegistry(sources({ live: greeting("hello") }));
   const client = fakeClient("a");
 
-  registry.subscribe(client, "live", {});
+  registry.subscribe(client, "live");
   assert.deepEqual(client.received, [{ type: "message", channel: "live", payload: "hello" }]);
 });
 
@@ -49,8 +49,8 @@ test("a second subscriber does not restart a source that is already running", ()
     }),
   );
 
-  registry.subscribe(fakeClient("a"), "live", {});
-  registry.subscribe(fakeClient("b"), "live", {});
+  registry.subscribe(fakeClient("a"), "live");
+  registry.subscribe(fakeClient("b"), "live");
   assert.equal(starts, 1);
 });
 
@@ -59,29 +59,29 @@ test("a subscriber joining a running source is caught up rather than left blank"
   // second reader of a finished run would wait forever for a change that will
   // never come — which is what a reload with another tab open looks like.
   const registry = createRegistry(sources({ live: greeting("hello") }));
-  registry.subscribe(fakeClient("first"), "live", {});
+  registry.subscribe(fakeClient("first"), "live");
 
   const late = fakeClient("late");
-  registry.subscribe(late, "live", {});
+  registry.subscribe(late, "live");
   assert.deepEqual(late.received, [{ type: "message", channel: "live", payload: "hello" }]);
 });
 
 test("the catch-up goes only to the subscriber that asked for it", () => {
   const registry = createRegistry(sources({ live: greeting("hello") }));
   const first = fakeClient("first");
-  registry.subscribe(first, "live", {});
+  registry.subscribe(first, "live");
   assert.equal(first.received.length, 1);
 
-  registry.subscribe(fakeClient("late"), "live", {});
+  registry.subscribe(fakeClient("late"), "live");
   assert.equal(first.received.length, 1, "a reader already current is told nothing again");
 });
 
 test("a source with nothing to say yet catches nobody up", () => {
   const registry = createRegistry(sources());
-  registry.subscribe(fakeClient("first"), "live", {});
+  registry.subscribe(fakeClient("first"), "live");
 
   const late = fakeClient("late");
-  registry.subscribe(late, "live", {});
+  registry.subscribe(late, "live");
   assert.deepEqual(late.received, []);
 });
 
@@ -97,9 +97,9 @@ test("a publish reaches every subscriber of that channel and nobody else", () =>
   );
 
   const [a, b, c] = [fakeClient("a"), fakeClient("b"), fakeClient("c")];
-  registry.subscribe(a, "live", {});
-  registry.subscribe(b, "live", {});
-  registry.subscribe(c, "feed", {});
+  registry.subscribe(a, "live");
+  registry.subscribe(b, "live");
+  registry.subscribe(c, "feed");
 
   push("news");
   assert.equal(a.received.length, 1);
@@ -112,8 +112,8 @@ test("the source stops when its last subscriber leaves, and not before", () => {
   const registry = createRegistry(sources({ live: () => ({ stop: () => void (stopped += 1), current: () => null }) }));
   const [a, b] = [fakeClient("a"), fakeClient("b")];
 
-  registry.subscribe(a, "live", {});
-  registry.subscribe(b, "live", {});
+  registry.subscribe(a, "live");
+  registry.subscribe(b, "live");
   registry.unsubscribe(a, "live");
   assert.equal(stopped, 0, "one reader left is still a reader");
 
@@ -131,8 +131,8 @@ test("a disconnect takes every channel that client was watching with it", () => 
   );
   const client = fakeClient("a");
 
-  registry.subscribe(client, "live", {});
-  registry.subscribe(client, "feed", {});
+  registry.subscribe(client, "live");
+  registry.subscribe(client, "feed");
   registry.remove(client);
   assert.deepEqual(stops.toSorted(), ["feed", "live"]);
 });
@@ -149,27 +149,18 @@ test("subscribing twice replaces the params rather than doubling the messages", 
   );
   const client = fakeClient("a");
 
-  registry.subscribe(client, "feed", { slug: "2026-08-08-0230" });
-  registry.subscribe(client, "feed", { slug: "2026-08-08-0245" });
-  assert.equal(registry.size("feed"), 1);
-  assert.deepEqual(registry.paramsOf("feed"), [{ slug: "2026-08-08-0245" }]);
+  registry.subscribe(client, "feed");
+  registry.subscribe(client, "feed");
 
   push("one");
-  assert.equal(client.received.length, 1);
-});
-
-test("publishing to a channel nobody watches reaches nobody and throws nothing", () => {
-  const registry = createRegistry(sources());
-  registry.publish("live", "into the void");
-  assert.equal(registry.size("live"), 0);
+  assert.equal(client.received.length, 1, "a second subscribe must not double what one client receives");
 });
 
 test("stopping the registry stops every running source", () => {
   let stopped = 0;
   const registry = createRegistry(sources({ live: () => ({ stop: () => void (stopped += 1), current: () => null }) }));
-  registry.subscribe(fakeClient("a"), "live", {});
+  registry.subscribe(fakeClient("a"), "live");
 
   registry.stopAll();
   assert.equal(stopped, 1);
-  assert.equal(registry.size("live"), 0);
 });

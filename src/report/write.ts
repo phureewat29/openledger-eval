@@ -79,7 +79,7 @@ function writeText(path: string, text: string): Result<string> {
   return { ok: true, value: path };
 }
 
-/** Writes the record's .json beside a rendered .md of the same stem. */
+/** One file per run: the record itself, under the stem its cell is addressed by. */
 export function writeRunFiles(
   reportDir: string,
   record: RunRecord,

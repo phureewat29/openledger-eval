@@ -255,32 +255,7 @@ function resolveRunFile(
   return childOf(suiteDir.value, file);
 }
 
-export function resolveRunMd(
-  reportsRoot: string,
-  slug: string,
-  model: string,
-  suite: string,
-  stem: string,
-): Result<string> {
-  return resolveRunFile(reportsRoot, slug, model, suite, `${stem}.md`);
-}
-
-export function readRunMd(
-  reportsRoot: string,
-  slug: string,
-  model: string,
-  suite: string,
-  stem: string,
-): Result<string> {
-  const path = resolveRunMd(reportsRoot, slug, model, suite, stem);
-  if (!path.ok) return path;
-
-  const text = tryExecute(() => readFileSync(path.value, "utf8"));
-  if (!text.ok) return { ok: false, error: `cannot read ${path.value}: ${text.error}` };
-  return text;
-}
-
-/** The record behind one run file. A failure here is a page that falls back to the .md, never a 500. */
+/** The record behind one run file, transcript included; the sheet for one open run is its only reader. */
 export function readRunRecord(
   reportsRoot: string,
   slug: string,

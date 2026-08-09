@@ -59,6 +59,7 @@ function snapshot(
       schemaVersion: 1,
       status,
       startedAt,
+      openedAt: startedAt,
       updatedAt,
       pid,
       identity: IDENTITY,
@@ -344,13 +345,9 @@ test("resolves a stop against the run, its own child first and the newest live.j
 });
 
 test("offers nothing to stop for a run that is finished, quiet, nameless or gone", () => {
-  const beating = snapshot("running", beat(2));
-  // A report written before the pid field: parsing one leaves the key missing.
-  const before: LiveSnapshot = { ...beating, doc: { ...beating.doc, pid: undefined } };
   assert.deepEqual(stopTarget(IDLE_SLOT, null, NOW, runExists), NOTHING, "no live.json at all");
   assert.deepEqual(stopTarget(IDLE_SLOT, snapshot("done", beat(1)), NOW, runExists), NOTHING, "a finished run");
   assert.deepEqual(stopTarget(IDLE_SLOT, snapshot("running", beat(40)), NOW, runExists), NOTHING, "a stale heartbeat");
-  assert.deepEqual(stopTarget(IDLE_SLOT, before, NOW, runExists), NOTHING, "a live.json from before the pid existed");
   assert.deepEqual(stopTarget(IDLE_SLOT, snapshot("running", beat(2)), NOW, () => false), NOTHING, "a pid gone quiet");
 });
 

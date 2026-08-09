@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Channel, ServerMessage } from "../../shared/protocol.js";
 
 // One socket for the whole page, shared by every channel any component asks for.
@@ -13,12 +13,11 @@ const BACKOFF_MS = [250, 500, 1_000, 2_000, 5_000];
 
 interface Subscription {
   channel: Channel;
-  params: unknown;
   listener: Listener;
 }
 
 interface ChannelClient {
-  subscribe(channel: Channel, params: unknown, listener: Listener): () => void;
+  subscribe(channel: Channel, listener: Listener): () => void;
   onStatus(listener: (status: ConnectionStatus) => void): () => void;
   /** Changes when the dashboard process restarts, which invalidates anything cached. */
   onServer(listener: (serverId: string) => void): () => void;
@@ -56,7 +55,7 @@ function createClient(): ChannelClient {
       setStatus("open");
       // Everything the page was watching is re-asked for: the server keeps no
       // memory of a socket that dropped.
-      for (const sub of subs) send({ cmd: "subscribe", channel: sub.channel, params: sub.params });
+      for (const sub of subs) send({ cmd: "subscribe", channel: sub.channel });
     });
 
     next.addEventListener("message", (event) => {
@@ -87,10 +86,10 @@ function createClient(): ChannelClient {
   connect();
 
   return {
-    subscribe(channel, params, listener) {
-      const sub: Subscription = { channel, params, listener };
+    subscribe(channel, listener) {
+      const sub: Subscription = { channel, listener };
       subs.add(sub);
-      send({ cmd: "subscribe", channel, params });
+      send({ cmd: "subscribe", channel });
       return () => {
         subs.delete(sub);
         // Only the last reader of a channel tells the server to stop.
@@ -116,17 +115,12 @@ function client(): ChannelClient {
 }
 
 /** The last payload a channel pushed, or null until the first one arrives. */
-export function useChannel<T>(channel: Channel, params: unknown = {}): T | null {
+export function useChannel<T>(channel: Channel): T | null {
   const [data, setData] = useState<T | null>(null);
-  // Params are compared by value: an inline object literal must not resubscribe
-  // on every render.
-  const key = JSON.stringify(params);
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
 
   useEffect(() => {
-    return client().subscribe(channel, JSON.parse(key) as unknown, (payload) => setData(payload as T));
-  }, [channel, key]);
+    return client().subscribe(channel, (payload) => setData(payload as T));
+  }, [channel]);
 
   return data;
 }

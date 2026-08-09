@@ -1,12 +1,12 @@
 import type { LiveDoc, LiveItem } from "../../report/live.js";
+import { TERMINAL_STATES } from "../../shared/vocabulary.js";
 
 // Every number the chrome prints. Kept apart from the components so the same
 // figure reads the same way wherever it appears.
 
-const TERMINAL = new Set(["graded", "endpoint_error", "sandbox_error"]);
-
-export function isTerminal(item: LiveItem): boolean {
-  return TERMINAL.has(item.state);
+/** The shared list, not a copy of it: a fourth state added to the union must reach here too. */
+function isTerminal(item: LiveItem): boolean {
+  return TERMINAL_STATES.includes(item.state);
 }
 
 export function duration(ms: number): string {
@@ -37,7 +37,7 @@ export function bytes(count: number): string {
 
 /** The vendor prefix is the same for every model in a row; the name after it is not. */
 export function shortModel(id: string): string {
-  return id.slice(id.indexOf("/") + 1);
+  return id.slice(id.lastIndexOf("/") + 1);
 }
 
 export function progressOf(doc: LiveDoc | null): { done: number; total: number; percent: number } {

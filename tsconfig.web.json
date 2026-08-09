@@ -14,8 +14,7 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "types": ["node", "vite/client"],
-    "paths": { "@/*": ["./src/web/*"] }
+    "types": ["node", "vite/client"]
   },
   "include": ["src/web", "src/shared", "vite.config.ts"]
 }

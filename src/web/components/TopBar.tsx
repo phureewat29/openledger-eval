@@ -4,7 +4,7 @@ import type { LivePayload } from "../../shared/payloads.js";
 import { post } from "../lib/api.js";
 import { Badge, type Tone } from "./Badge.js";
 import { HoldButton } from "./HoldButton.js";
-import { duration, elapsedOf, progressOf, tokens, usd } from "../lib/format.js";
+import { duration, elapsedOf, progressOf } from "../lib/format.js";
 
 // The run's vitals, and the one control that stops it. Progress is the bar's own
 // bottom edge rather than a component of its own: it is always there, it costs
@@ -44,22 +44,18 @@ function useNow(active: boolean): number {
   return now;
 }
 
-function costOf(doc: LivePayload["doc"]): number | null {
-  // live.json carries no cost; it is a benchmark figure. Shown as unknown rather
-  // than as zero, which would read as free.
-  return doc === null ? null : null;
-}
-
 export function TopBar({ live }: { live: LivePayload | null }) {
   const kind = live?.kind ?? "none";
   const moving = kind === "running-fresh" || kind === "starting";
   const now = useNow(moving);
 
+  // Neither cost nor tokens are here: live.json carries neither, they are figures
+  // a benchmark computes once a run is scored. The bar showed a placeholder
+  // em-dash for one and hid the other behind a constant zero, which is a promise
+  // of two numbers and the delivery of none. The iteration page has both.
   const { done, total, percent } = progressOf(live?.doc ?? null);
   const spent = live?.doc?.items.length ? elapsedOf(live.doc, now) : 0;
   const stoppable = live?.stop.kind !== undefined && live.stop.kind !== "none";
-
-  const totalTokens = 0;
 
   return (
     <header className="relative flex h-12 shrink-0 items-center gap-4 border-b border-line px-4">
@@ -78,8 +74,6 @@ export function TopBar({ live }: { live: LivePayload | null }) {
             <span className="text-subtle">/{total}</span>
           </span>
           <span title="elapsed">{duration(spent)}</span>
-          {totalTokens > 0 && <span title="tokens">{tokens(totalTokens)}</span>}
-          <span title="cost">{usd(costOf(live?.doc ?? null))}</span>
         </div>
       )}
 

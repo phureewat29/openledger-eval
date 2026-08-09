@@ -1,5 +1,5 @@
 import type { LiveItem, LiveItemState } from "../../../report/live.js";
-import { STATE_LEGEND, TERMINAL_STATES } from "../../../shared/vocabulary.js";
+import { gradeShade, STATE_LEGEND, TERMINAL_STATES, type GradeShade } from "../../../shared/vocabulary.js";
 import { duration } from "../../lib/format.js";
 import { Tip } from "../Tip.js";
 import {
@@ -29,8 +29,6 @@ export interface CellFace {
   Icon?: LucideIcon;
 }
 
-type GradeShade = "full" | "partial" | "empty";
-
 /**
  * Green for a clean pass, amber where some checks failed, red where none passed
  * — drawn as an outline over a wash of its own hue rather than a solid block. A
@@ -45,12 +43,6 @@ const SHADE_TONE: Record<GradeShade, string> = {
   partial: "border-warn/40 bg-warn/15 text-warn",
   empty: "border-bad/40 bg-bad/15 text-bad",
 };
-
-/** A rate of null has nothing better to say yet, so it reads as a pass rather than a failure. */
-function shadeOf(rate: number | null): GradeShade {
-  if (rate === null || rate >= 1) return "full";
-  return rate === 0 ? "empty" : "partial";
-}
 
 /** One entry per state that carries no score of its own; graded reads its own counts instead. */
 const STATE_FACE: Record<Exclude<LiveItemState, "graded">, CellFace> = {
@@ -78,10 +70,10 @@ function gradedFace(item: LiveItem): CellFace {
   if (checksPassed !== undefined && checksTotal !== undefined) {
     // 0 of 0 is a case with nothing to check, not a case that failed everything.
     const rate = checksTotal === 0 ? 1 : checksPassed / checksTotal;
-    return { text: `${checksPassed}/${checksTotal}`, tone: SHADE_TONE[shadeOf(rate)] };
+    return { text: `${checksPassed}/${checksTotal}`, tone: SHADE_TONE[gradeShade(rate)] };
   }
   if (item.passRate !== null) {
-    return { text: `${Math.round(item.passRate * 100)}%`, tone: SHADE_TONE[shadeOf(item.passRate)] };
+    return { text: `${Math.round(item.passRate * 100)}%`, tone: SHADE_TONE[gradeShade(item.passRate)] };
   }
   // Graded carrying neither counts nor a rate is nothing this harness writes.
   return { text: "—", tone: SHADE_TONE.full };

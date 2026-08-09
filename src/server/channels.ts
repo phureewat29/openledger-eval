@@ -28,26 +28,15 @@ export interface SourceHandle {
 export type Source = (publish: (payload: unknown) => void) => SourceHandle;
 
 export interface Registry {
-  add(client: Client): void;
+  /** Forgets a client entirely, which is what a closed socket amounts to. */
   remove(client: Client): void;
-  subscribe(client: Client, channel: Channel, params: unknown): void;
+  subscribe(client: Client, channel: Channel): void;
   unsubscribe(client: Client, channel: Channel): void;
-  /** Pushes to every subscriber of one channel, whatever asked for it. */
-  publish(channel: Channel, payload: unknown): void;
-  /** Subscriber count, so a source can be told whether anyone is still there. */
-  size(channel: Channel): number;
-  /** Every param object currently subscribed to a channel, newest last. */
-  paramsOf(channel: Channel): unknown[];
   stopAll(): void;
 }
 
-interface Subscription {
-  client: Client;
-  params: unknown;
-}
-
 interface Live {
-  subs: Subscription[];
+  subs: Client[];
   /** null until the first subscriber starts the source. */
   handle: SourceHandle | null;
 }
@@ -58,7 +47,7 @@ export function createRegistry(sources: Record<Channel, Source>): Registry {
   function publish(channel: Channel, payload: unknown): void {
     const entry = live.get(channel);
     if (entry === undefined) return;
-    for (const sub of entry.subs) sub.client.send({ type: "message", channel, payload });
+    for (const client of entry.subs) client.send({ type: "message", channel, payload });
   }
 
   function entryFor(channel: Channel): Live {
@@ -91,30 +80,26 @@ export function createRegistry(sources: Record<Channel, Source>): Registry {
   }
 
   return {
-    add: () => {},
     remove(client) {
       for (const [channel, entry] of [...live]) {
-        entry.subs = entry.subs.filter((sub) => sub.client !== client);
+        entry.subs = entry.subs.filter((sub) => sub !== client);
         drop(channel, entry);
       }
     },
-    subscribe(client, channel, params) {
+    subscribe(client, channel) {
       const entry = entryFor(channel);
-      // One subscription per client per channel: a resubscribe replaces its
-      // params rather than doubling the messages that client receives.
-      entry.subs = entry.subs.filter((sub) => sub.client !== client);
-      entry.subs.push({ client, params });
+      // One subscription per client per channel: a resubscribe is a no-op rather
+      // than a second copy of every message that client receives.
+      entry.subs = entry.subs.filter((sub) => sub !== client);
+      entry.subs.push(client);
       join(channel, entry, client);
     },
     unsubscribe(client, channel) {
       const entry = live.get(channel);
       if (entry === undefined) return;
-      entry.subs = entry.subs.filter((sub) => sub.client !== client);
+      entry.subs = entry.subs.filter((sub) => sub !== client);
       drop(channel, entry);
     },
-    publish,
-    size: (channel) => live.get(channel)?.subs.length ?? 0,
-    paramsOf: (channel) => (live.get(channel)?.subs ?? []).map((sub) => sub.params),
     stopAll() {
       for (const [channel, entry] of [...live]) {
         entry.subs = [];

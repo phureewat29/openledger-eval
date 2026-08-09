@@ -14,11 +14,6 @@ const target = `http://127.0.0.1:${API_PORT}`;
 export default defineConfig({
   root: fileURLToPath(new URL("src/web", import.meta.url)),
   plugins: [react(), tailwindcss()],
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("src/web", import.meta.url)),
-    },
-  },
   server: {
     port: 4001,
     strictPort: true,

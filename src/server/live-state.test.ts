@@ -28,6 +28,7 @@ function snapshot(status: LiveDoc["status"], updatedAt: string): LiveSnapshot {
       schemaVersion: 1,
       status,
       startedAt: IDENTITY.startedAt,
+      openedAt: IDENTITY.startedAt,
       updatedAt,
       pid: 4242,
       identity: IDENTITY,

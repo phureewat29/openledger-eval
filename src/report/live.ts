@@ -42,18 +42,16 @@ export interface LiveDoc {
    * The two are separate because a dashboard decides whether a live.json belongs
    * to the child it just spawned by comparing timestamps: read against
    * `startedAt`, a rerun's document looks older than the launch that made it and
-   * the run reads as forever "starting". Optional, because a document written
-   * before this field existed simply lacks it.
+   * the run reads as forever "starting".
    */
-  openedAt?: string;
+  openedAt: string;
   updatedAt: string;
   /**
    * The runner's own process id, which is what lets anyone who can read this
    * directory stop the run — the dashboard that spawned it, another one, or a
-   * hand at a terminal. Optional because a report written before this field
-   * existed simply lacks it, exactly as `checksPassed` was added.
+   * hand at a terminal.
    */
-  pid?: number;
+  pid: number;
   identity: RunIdentity;
   config: ConfigEcho;
   /** One per PlannedRun, in plan order; the array's length and order never change after this. */

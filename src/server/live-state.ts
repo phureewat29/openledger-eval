@@ -6,22 +6,6 @@ import type { LiveSnapshot } from "./reports-fs.js";
 // newest live.json and the clock. Nothing here renders: the same answer drives
 // a rendered panel, a websocket push and the decision to stop pushing at all.
 
-/**
- * The vocabulary itself lives in shared/ because the browser needs it too, and
- * this module cannot be imported from there — it value-imports launch.ts, which
- * reaches `node:child_process`. Re-exported so no server caller has to care.
- */
-export {
-  gradeShade,
-  GRADE_GLYPH,
-  GRADE_LEGEND,
-  LIVE_STATES,
-  STATE_GLYPH,
-  STATE_LEGEND,
-  TERMINAL_STATES,
-  type GradeShade,
-} from "../shared/vocabulary.js";
-
 export type LiveState =
   | { kind: "none" }
   | { kind: "starting" }
