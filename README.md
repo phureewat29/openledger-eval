@@ -51,7 +51,7 @@ re-derived from the seed rows at startup; a mismatch refuses to run.
 
 ## Setup
 
-1. `npm install -g oled`, so the CLI under test is on your PATH. For a local
+1. `npm install -g @aquartier/openledger`, so the CLI under test is on your PATH. For a local
    build, run `npm run build && npm link` in the openledger checkout instead.
    The eval takes whichever `oled` it finds, exactly as a user would.
 2. `cp .env.example .env` and set `OPENROUTER_API_KEY`.
