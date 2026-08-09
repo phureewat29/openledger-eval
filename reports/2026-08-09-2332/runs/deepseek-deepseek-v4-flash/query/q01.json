@@ -1,0 +1,142 @@
+{
+  "model": "deepseek/deepseek-v4-flash",
+  "suite": "query",
+  "caseId": "q01",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "q01",
+    "assertions": [
+      {
+        "id": "submit_called",
+        "label": "answer submitted",
+        "passed": true,
+        "evidence": {
+          "want": "one submit_answer call",
+          "got": "an answer was submitted"
+        }
+      },
+      {
+        "id": "answer_correct",
+        "label": "answer",
+        "passed": true,
+        "evidence": {
+          "want": "40",
+          "got": "40"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 2,
+    "toolCalls": 2,
+    "tokensIn": 3683,
+    "tokensOut": 170,
+    "tokensEstimated": false,
+    "llmMs": 5290,
+    "toolMs": 146,
+    "durationMs": 5436,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 0,
+    "repeatedCommands": 0,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": 0.00056322,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "answer",
+      "title": "How many transactions are recorded in my ledger in total? Answer with the whole number in `value`."
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1672,
+        "completionTokens": 62,
+        "estimated": false
+      },
+      "durationMs": 2030
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 145,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status --json",
+      "command": "oled status --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-hitt1E/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-hitt1E/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":25,\"transactions\":40,\"merchants\":22,\"notes\":0},\"files\":{\"new\":0,\"ingested\":0,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{\"THB\":159780,\"USD\":-65},\"liabilities\":{\"THB\":2097},\"net_worth\":{\"THB\":157683,\"USD\":-65}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-hitt1E/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-hitt1E/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":25,\\\"transactions\\\":40,\\\"merchants\\\":22,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":0,\\\"ingested\\\":0,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{\\\"THB\\\":159780,\\\"USD\\\":-65},\\\"liabilities\\\":{\\\"THB\\\":2097},\\\"net_worth\\\":{\\\"THB\\\":157683,\\\"USD\\\":-65}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2011,
+        "completionTokens": 108,
+        "estimated": false
+      },
+      "durationMs": 3260
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 2,
+      "durationMs": 1,
+      "tool": "submit_answer",
+      "subcommand": "submit_answer",
+      "args": "{\"answer\": \"40 transactions are recorded in the ledger.\", \"value\": 40, \"unit\": \"transactions\"}",
+      "command": "submit_answer",
+      "ok": true,
+      "exitCode": null,
+      "rejected": null,
+      "message": "40 transactions are recorded in the ledger.",
+      "hint": null,
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "commit": null,
+      "result": "answer recorded"
+    },
+    {
+      "type": "phase_end",
+      "phase": "answer",
+      "reply": "",
+      "exit": "answered"
+    }
+  ]
+}

@@ -1,0 +1,1443 @@
+{
+  "model": "google/gemini-3.6-flash",
+  "suite": "record",
+  "caseId": "r05-messy",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "r05-messy",
+    "assertions": [
+      {
+        "id": "rows_posted",
+        "label": "posted rows",
+        "passed": false,
+        "evidence": {
+          "want": "30 rows",
+          "got": "29 rows"
+        }
+      },
+      {
+        "id": "rows_match",
+        "label": "each row's date, accounts and amount",
+        "passed": false,
+        "evidence": {
+          "want": "30 rows as the text states them",
+          "got": "missing 2026-06-22 thb:expense:utilities <- thb:asset:bank:kbank 800.00"
+        }
+      },
+      {
+        "id": "balance:thb:asset:bank:kbank",
+        "label": "balance thb:asset:bank:kbank",
+        "passed": false,
+        "evidence": {
+          "want": "2497.00",
+          "got": "3297.00"
+        }
+      },
+      {
+        "id": "balance:thb:asset:bank:scb",
+        "label": "balance thb:asset:bank:scb",
+        "passed": true,
+        "evidence": {
+          "want": "5000.00",
+          "got": "5000.00"
+        }
+      },
+      {
+        "id": "balance:thb:liability:card:visa",
+        "label": "balance thb:liability:card:visa",
+        "passed": true,
+        "evidence": {
+          "want": "627.00",
+          "got": "627.00"
+        }
+      },
+      {
+        "id": "balance:thb:income:freelance",
+        "label": "balance thb:income:freelance",
+        "passed": true,
+        "evidence": {
+          "want": "18000.00",
+          "got": "18000.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:food:groceries",
+        "label": "balance thb:expense:food:groceries",
+        "passed": true,
+        "evidence": {
+          "want": "2383.00",
+          "got": "2383.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:food:restaurants",
+        "label": "balance thb:expense:food:restaurants",
+        "passed": true,
+        "evidence": {
+          "want": "1250.00",
+          "got": "1250.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:food:coffee",
+        "label": "balance thb:expense:food:coffee",
+        "passed": true,
+        "evidence": {
+          "want": "340.00",
+          "got": "340.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:transport",
+        "label": "balance thb:expense:transport",
+        "passed": true,
+        "evidence": {
+          "want": "1190.00",
+          "got": "1190.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:utilities",
+        "label": "balance thb:expense:utilities",
+        "passed": false,
+        "evidence": {
+          "want": "2360.00",
+          "got": "1560.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:subscriptions",
+        "label": "balance thb:expense:subscriptions",
+        "passed": true,
+        "evidence": {
+          "want": "548.00",
+          "got": "548.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:health",
+        "label": "balance thb:expense:health",
+        "passed": true,
+        "evidence": {
+          "want": "2160.00",
+          "got": "2160.00"
+        }
+      },
+      {
+        "id": "balance:thb:expense:household",
+        "label": "balance thb:expense:household",
+        "passed": true,
+        "evidence": {
+          "want": "899.00",
+          "got": "899.00"
+        }
+      },
+      {
+        "id": "nothing_uncategorized",
+        "label": "nothing in thb:expense:uncategorized",
+        "passed": true,
+        "evidence": {
+          "want": "0.00",
+          "got": "0.00"
+        }
+      },
+      {
+        "id": "nothing_adjusted",
+        "label": "nothing posted through thb:equity:adjustments",
+        "passed": true,
+        "evidence": {
+          "want": "0.00",
+          "got": "0.00"
+        }
+      },
+      {
+        "id": "questions_closed",
+        "label": "questions closed",
+        "passed": true,
+        "evidence": {
+          "want": "0 open, 0 deferred",
+          "got": "0 open, 0 deferred"
+        }
+      },
+      {
+        "id": "turns_used",
+        "label": "turns used",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "up to 34 (26 recording, 8 resolving)",
+          "got": "34 turns, 33 oled calls"
+        }
+      },
+      {
+        "id": "nonzero_exits",
+        "label": "nonzero exits",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "reported, not scored",
+          "got": "none"
+        }
+      },
+      {
+        "id": "refused_calls",
+        "label": "refused calls",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "reported, not scored",
+          "got": "0"
+        }
+      },
+      {
+        "id": "repeated_commands",
+        "label": "repeated commands",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "reported, not scored",
+          "got": "0"
+        }
+      },
+      {
+        "id": "net_worth",
+        "label": "net worth in THB",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "6870.00",
+          "got": "7670.00"
+        }
+      }
+    ],
+    "passRate": 0.7647058823529411,
+    "passed": false
+  },
+  "metrics": {
+    "llmCalls": 34,
+    "toolCalls": 33,
+    "tokensIn": 169860,
+    "tokensOut": 20387,
+    "tokensEstimated": true,
+    "llmMs": 119890,
+    "toolMs": 4966,
+    "durationMs": 124856,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 2,
+    "repeatedCommands": 0,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": null,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "record",
+      "title": "Record the transactions"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2193,
+        "completionTokens": 48,
+        "estimated": false
+      },
+      "durationMs": 1899
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 1,
+      "durationMs": 144,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status",
+      "command": "oled status --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-4WjkeJ/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-4WjkeJ/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":5,\"transactions\":0,\"merchants\":0,\"notes\":0},\"files\":{\"new\":0,\"ingested\":0,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{},\"liabilities\":{},\"net_worth\":{}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-4WjkeJ/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-4WjkeJ/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":5,\\\"transactions\\\":0,\\\"merchants\\\":0,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":0,\\\"ingested\\\":0,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{},\\\"liabilities\\\":{},\\\"net_worth\\\":{}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2423,
+        "completionTokens": 34,
+        "estimated": false
+      },
+      "durationMs": 1279
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 2,
+      "durationMs": 138,
+      "tool": "oled",
+      "subcommand": "accounts tree",
+      "args": "accounts tree",
+      "command": "oled accounts tree --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"thb:equity\",\"name\":\"Equity (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[{\"id\":\"thb:equity:adjustments\",\"name\":\"Adjustments (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]},{\"id\":\"thb:equity:opening\",\"name\":\"Opening Balance (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]}]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"thb:equity\\\",\\\"name\\\":\\\"Equity (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[{\\\"id\\\":\\\"thb:equity:adjustments\\\",\\\"name\\\":\\\"Adjustments (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:equity:opening\\\",\\\"name\\\":\\\"Opening Balance (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:expense\\\",\\\"name\\\":\\\"Expenses (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[{\\\"id\\\":\\\"thb:expense:uncategorized\\\",\\\"name\\\":\\\"Uncategorized (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"type\\\":\\\"summary\\\",\\\"roots\\\":2}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 3,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2660,
+        "completionTokens": 60,
+        "estimated": false
+      },
+      "durationMs": 1956
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 3,
+      "durationMs": 123,
+      "tool": "oled",
+      "subcommand": "oled",
+      "args": "--help",
+      "command": "oled --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "OpenLedger  ·  A reliable, deterministic ledger for your AI",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"\\nOpenLedger  ·  A reliable, deterministic ledger for your AI\\n\\nAbout\\n  Place financial statements in a folder; your AI posts each row to a local ledger.\\n  Ask for net worth, spending, subscriptions, or debt payoff. Answers always come from the ledger.\\n  Every entry is double-entry and data stays safely on your machine.\\n\\nUsage\\n  oled               <command> [OPTIONS]\\n\\nCommands\\n  status             Status: config, database, ledger counts, net worth (default)\\n  doctor             Diagnose the harness environment\\n  setup              Install the skill for an agent CLI (--dir <path>)\\n  config             OpenLedger configuration\\n  ingest             Ingest pipeline: list / prepare / commit / done / fail\\n  files              Browse ingested files (list / show / drop)\\n  transactions       Transactions: list / show / add / update / delete / recategorize / dedupe / merge\\n  accounts           Manage the chart of accounts\\n  merchants          Manage merchants and their default accounts\\n  questions          List, answer, and defer open questions\\n  report             Income, expenses, and networth\\n  notes              Manage freeform notes\\n  datasets           Reference datasets\\n  open               Open the data folder in file explorer\\n\\nOptions\\n  --json             Emit NDJSON (machine-readable) instead of human output\\n  --no-color         Disable ANSI color output\\n  --config <path>    Config file to use (default ~/.oled/config.json)\\n  --version          Show the version and exit\\n  --help             Show this help screen\\n\\nContract\\n  Exit codes: 0 ok · 1 error · 2 usage · 3 not ready · 4 input required · 5 not found · 6 invalid · 7 partial.\\n  Under --json every stdout line is one JSON object, and list reads end with a {\\\"type\\\":\\\"summary\\\"} row.\\n  Errors are one stderr JSON object with a hint; read output masks PII as [USER]/[CARD], masks are not data.\\n\\nOpenLedger is a tool, it only summarizes financial statements: \n…[truncated 78 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 4,
+      "content": "",
+      "finishReason": "stop",
+      "toolCalls": 0,
+      "usage": {
+        "promptTokens": 3007,
+        "completionTokens": 1,
+        "estimated": true
+      },
+      "durationMs": 1693
+    },
+    {
+      "type": "operational",
+      "phase": "record",
+      "operation": "stall_prod",
+      "detail": "prod 1: empty reply with no tool call"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 5,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 3144,
+        "completionTokens": 56,
+        "estimated": false
+      },
+      "durationMs": 1466
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 5,
+      "durationMs": 119,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --help",
+      "command": "oled transactions add --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled transactions add [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled transactions add [options]\\n\\nAdd a manual transaction; statement rows belong in `ingest commit`\\n\\nOptions:\\n  --resolve               create missing account paths and raise questions\\n                          instead of failing\\n  --debit-account <id>    debit account id, currency-prefixed (e.g.\\n                          thb:expense:food)\\n  --credit-account <id>   credit account id, currency-prefixed (e.g.\\n                          thb:asset:bank:kbank)\\n  --amount <n>            transaction amount (decimal)\\n  --date <date>           transaction date (defaults to today)\\n  --description <text>    transaction description\\n  --merchant-name <name>  merchant name to upsert and link\\n  --json                  Emit NDJSON (machine-readable) instead of human output\\n  --no-color              Disable ANSI color output\\n  --config <path>         Config file to use (default ~/.oled/config.json)\\n  -h, --help              display help for command\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 6,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 3395,
+        "completionTokens": 3627,
+        "estimated": false
+      },
+      "durationMs": 13982
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 6,
+      "durationMs": 151,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-01 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 640.00 --merchant-name \"Big C\" --description \"Big C run\"",
+      "command": "oled transactions add --resolve --date 2026-06-01 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 640.00 --merchant-name Big C --description Big C run --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:be48867f-402a-4a9f-b03e-456f07338744\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:be48867f-402a-4a9f-b03e-456f07338744\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 7,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 3541,
+        "completionTokens": 3400,
+        "estimated": false
+      },
+      "durationMs": 12322
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 7,
+      "durationMs": 148,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-02 --debit-account thb:expense:food:coffee --credit-account thb:asset:bank:kbank --amount 65.00 --merchant-name \"Cafe Amazon\" --description \"latte\"",
+      "command": "oled transactions add --resolve --date 2026-06-02 --debit-account thb:expense:food:coffee --credit-account thb:asset:bank:kbank --amount 65.00 --merchant-name Cafe Amazon --description latte --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:d33111e7-e6e6-4361-a2b4-2d0d761d4b97\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:d33111e7-e6e6-4361-a2b4-2d0d761d4b97\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 8,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 3685,
+        "completionTokens": 2658,
+        "estimated": false
+      },
+      "durationMs": 11019
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 8,
+      "durationMs": 142,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-02 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 120.00 --merchant-name \"Grab\" --description \"ride over to Asok\"",
+      "command": "oled transactions add --resolve --date 2026-06-02 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 120.00 --merchant-name Grab --description ride over to Asok --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:ad048723-7e3b-4e1b-ab39-526985f2f00e\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:ad048723-7e3b-4e1b-ab39-526985f2f00e\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 9,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 3827,
+        "completionTokens": 1774,
+        "estimated": false
+      },
+      "durationMs": 7076
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 9,
+      "durationMs": 141,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-03 --debit-account thb:expense:food:restaurants --credit-account thb:liability:card:visa --amount 385.00 --merchant-name \"Som Tam Nua\" --description \"dinner at Som Tam Nua with Nok\"",
+      "command": "oled transactions add --resolve --date 2026-06-03 --debit-account thb:expense:food:restaurants --credit-account thb:liability:card:visa --amount 385.00 --merchant-name Som Tam Nua --description dinner at Som Tam Nua with Nok --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:edcd9f1c-a12b-4803-83dd-15394ffd9a20\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:edcd9f1c-a12b-4803-83dd-15394ffd9a20\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 10,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 3974,
+        "completionTokens": 1662,
+        "estimated": false
+      },
+      "durationMs": 6911
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 10,
+      "durationMs": 155,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-03 --debit-account thb:expense:utilities --credit-account thb:asset:bank:kbank --amount 1250.00 --merchant-name \"MEA\" --description \"MEA electricity bill\"",
+      "command": "oled transactions add --resolve --date 2026-06-03 --debit-account thb:expense:utilities --credit-account thb:asset:bank:kbank --amount 1250.00 --merchant-name MEA --description MEA electricity bill --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:76a1b3d0-db73-4367-826c-d278ddb6ed62\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:76a1b3d0-db73-4367-826c-d278ddb6ed62\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 11,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4115,
+        "completionTokens": 1673,
+        "estimated": false
+      },
+      "durationMs": 7796
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 11,
+      "durationMs": 229,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-04 --debit-account thb:expense:health --credit-account thb:asset:bank:kbank --amount 480.00 --merchant-name \"Boots\" --description \"allergy tablets\"",
+      "command": "oled transactions add --resolve --date 2026-06-04 --debit-account thb:expense:health --credit-account thb:asset:bank:kbank --amount 480.00 --merchant-name Boots --description allergy tablets --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:b3aedfae-ba2c-4165-872a-e32bb8e393e1\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:b3aedfae-ba2c-4165-872a-e32bb8e393e1\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 12,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4255,
+        "completionTokens": 342,
+        "estimated": false
+      },
+      "durationMs": 5117
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 12,
+      "durationMs": 141,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-05 --debit-account thb:asset:bank:kbank --credit-account thb:income:freelance --amount 18000.00 --description \"freelance invoice\"",
+      "command": "oled transactions add --resolve --date 2026-06-05 --debit-account thb:asset:bank:kbank --credit-account thb:income:freelance --amount 18000.00 --description freelance invoice --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:fff64b01-aca5-4649-9860-94392a1c9915\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:fff64b01-aca5-4649-9860-94392a1c9915\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 13,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4392,
+        "completionTokens": 1884,
+        "estimated": false
+      },
+      "durationMs": 8450
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 13,
+      "durationMs": 150,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-05 --debit-account thb:asset:bank:scb --credit-account thb:asset:bank:kbank --amount 5000.00 --description \"transfer to SCB savings\"",
+      "command": "oled transactions add --resolve --date 2026-06-05 --debit-account thb:asset:bank:scb --credit-account thb:asset:bank:kbank --amount 5000.00 --description transfer to SCB savings --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:474c08ec-e5da-4cb3-8ac2-10011813eb25\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:474c08ec-e5da-4cb3-8ac2-10011813eb25\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 14,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4529,
+        "completionTokens": 77,
+        "estimated": false
+      },
+      "durationMs": 1412
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 14,
+      "durationMs": 149,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-06 --debit-account thb:expense:household --credit-account thb:liability:card:visa --amount 899.00 --merchant-name \"HomePro\" --description \"curtain rail\"",
+      "command": "oled transactions add --resolve --date 2026-06-06 --debit-account thb:expense:household --credit-account thb:liability:card:visa --amount 899.00 --merchant-name HomePro --description curtain rail --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:af26be2d-6203-466c-a014-8c0deff06e79\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:af26be2d-6203-466c-a014-8c0deff06e79\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 15,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4668,
+        "completionTokens": 81,
+        "estimated": false
+      },
+      "durationMs": 1906
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 15,
+      "durationMs": 140,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-07 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 88.00 --merchant-name \"7-Eleven\" --description \"snack run\"",
+      "command": "oled transactions add --resolve --date 2026-06-07 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 88.00 --merchant-name 7-Eleven --description snack run --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:a4fe0918-55f3-42ee-9473-a5a320f815f4\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:a4fe0918-55f3-42ee-9473-a5a320f815f4\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 16,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4813,
+        "completionTokens": 578,
+        "estimated": false
+      },
+      "durationMs": 2924
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 16,
+      "durationMs": 165,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-08 --debit-account thb:expense:food:coffee --credit-account thb:asset:bank:kbank --amount 65.00 --merchant-name \"Cafe Amazon\" --description \"latte\"",
+      "command": "oled transactions add --resolve --date 2026-06-08 --debit-account thb:expense:food:coffee --credit-account thb:asset:bank:kbank --amount 65.00 --merchant-name Cafe Amazon --description latte --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:87734ba1-4b7d-4301-9dbc-31e66c7468f2\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:87734ba1-4b7d-4301-9dbc-31e66c7468f2\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 17,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4954,
+        "completionTokens": 77,
+        "estimated": false
+      },
+      "durationMs": 1554
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 17,
+      "durationMs": 151,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-08 --debit-account thb:expense:utilities --credit-account thb:asset:bank:kbank --amount 310.00 --merchant-name \"MWA\" --description \"water bill\"",
+      "command": "oled transactions add --resolve --date 2026-06-08 --debit-account thb:expense:utilities --credit-account thb:asset:bank:kbank --amount 310.00 --merchant-name MWA --description water bill --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:b5e78f19-5500-4966-bd01-13061ca27c3e\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:b5e78f19-5500-4966-bd01-13061ca27c3e\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 18,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5095,
+        "completionTokens": 77,
+        "estimated": false
+      },
+      "durationMs": 1738
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 18,
+      "durationMs": 159,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-09 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 145.00 --merchant-name \"Grab\" --description \"ride to Silom\"",
+      "command": "oled transactions add --resolve --date 2026-06-09 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 145.00 --merchant-name Grab --description ride to Silom --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:c09b4680-dfc0-4ed0-b969-d8b483ec8ae9\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:c09b4680-dfc0-4ed0-b969-d8b483ec8ae9\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 19,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5234,
+        "completionTokens": 80,
+        "estimated": false
+      },
+      "durationMs": 1621
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 19,
+      "durationMs": 199,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-10 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 520.00 --merchant-name \"Tops\" --description \"groceries\"",
+      "command": "oled transactions add --resolve --date 2026-06-10 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 520.00 --merchant-name Tops --description groceries --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:ad89f625-c759-41df-9e29-0ea169b1f8f8\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:ad89f625-c759-41df-9e29-0ea169b1f8f8\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 20,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5377,
+        "completionTokens": 78,
+        "estimated": false
+      },
+      "durationMs": 1866
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 20,
+      "durationMs": 138,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-10 --debit-account thb:expense:health --credit-account thb:asset:bank:kbank --amount 480.00 --merchant-name \"Boots\" --description \"allergy tablets\"",
+      "command": "oled transactions add --resolve --date 2026-06-10 --debit-account thb:expense:health --credit-account thb:asset:bank:kbank --amount 480.00 --merchant-name Boots --description allergy tablets --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:27c18426-a932-4f29-8044-f3181fa6e51e\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:27c18426-a932-4f29-8044-f3181fa6e51e\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 21,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5520,
+        "completionTokens": 80,
+        "estimated": false
+      },
+      "durationMs": 2079
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 21,
+      "durationMs": 138,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-11 --debit-account thb:expense:food:coffee --credit-account thb:liability:card:visa --amount 135.00 --merchant-name \"Starbucks\" --description \"flat white, large\"",
+      "command": "oled transactions add --resolve --date 2026-06-11 --debit-account thb:expense:food:coffee --credit-account thb:liability:card:visa --amount 135.00 --merchant-name Starbucks --description flat white, large --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:c4901c4d-9e42-46a4-b011-16126733efcd\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:c4901c4d-9e42-46a4-b011-16126733efcd\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 22,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5664,
+        "completionTokens": 79,
+        "estimated": false
+      },
+      "durationMs": 1571
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 22,
+      "durationMs": 137,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-11 --debit-account thb:expense:food:restaurants --credit-account thb:liability:card:visa --amount 210.00 --merchant-name \"Grab\" --description \"khao soi delivery\"",
+      "command": "oled transactions add --resolve --date 2026-06-11 --debit-account thb:expense:food:restaurants --credit-account thb:liability:card:visa --amount 210.00 --merchant-name Grab --description khao soi delivery --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:a3ae0c1b-9087-4a88-a810-ec4a35f79dcf\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:a3ae0c1b-9087-4a88-a810-ec4a35f79dcf\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 23,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5806,
+        "completionTokens": 79,
+        "estimated": false
+      },
+      "durationMs": 1392
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 23,
+      "durationMs": 140,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-12 --debit-account thb:expense:transport --credit-account thb:asset:bank:kbank --amount 300.00 --merchant-name \"BTS\" --description \"Rabbit card top-up\"",
+      "command": "oled transactions add --resolve --date 2026-06-12 --debit-account thb:expense:transport --credit-account thb:asset:bank:kbank --amount 300.00 --merchant-name BTS --description Rabbit card top-up --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:301dc25b-fad4-489c-bb2c-3c384701598d\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:301dc25b-fad4-489c-bb2c-3c384701598d\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 24,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5947,
+        "completionTokens": 74,
+        "estimated": false
+      },
+      "durationMs": 1391
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 24,
+      "durationMs": 196,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-12 --debit-account thb:expense:subscriptions --credit-account thb:liability:card:visa --amount 419.00 --merchant-name \"Netflix\" --description \"monthly\"",
+      "command": "oled transactions add --resolve --date 2026-06-12 --debit-account thb:expense:subscriptions --credit-account thb:liability:card:visa --amount 419.00 --merchant-name Netflix --description monthly --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:5ffcf32f-3584-41a6-88b1-590c89c6b9ce\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:5ffcf32f-3584-41a6-88b1-590c89c6b9ce\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 25,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6084,
+        "completionTokens": 80,
+        "estimated": false
+      },
+      "durationMs": 1357
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 25,
+      "durationMs": 145,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-13 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 705.00 --merchant-name \"Big C\" --description \"groceries\"",
+      "command": "oled transactions add --resolve --date 2026-06-13 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 705.00 --merchant-name Big C --description groceries --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:be88e102-4959-45d4-b8fe-d94de5a1e98a\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:be88e102-4959-45d4-b8fe-d94de5a1e98a\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 26,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6227,
+        "completionTokens": 80,
+        "estimated": false
+      },
+      "durationMs": 2087
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 26,
+      "durationMs": 153,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-14 --debit-account thb:expense:food:restaurants --credit-account thb:asset:bank:kbank --amount 95.00 --merchant-name \"Yindee\" --description \"noodles, lunch\"",
+      "command": "oled transactions add --resolve --date 2026-06-14 --debit-account thb:expense:food:restaurants --credit-account thb:asset:bank:kbank --amount 95.00 --merchant-name Yindee --description noodles, lunch --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:4fe8b278-d3b0-4e08-967d-28db8df2e400\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:4fe8b278-d3b0-4e08-967d-28db8df2e400\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "phase_end",
+      "phase": "record",
+      "reply": "",
+      "exit": "call_cap"
+    },
+    {
+      "type": "phase_start",
+      "phase": "resolve",
+      "title": "Resolve what the ledger flagged"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 27,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6423,
+        "completionTokens": 1103,
+        "estimated": false
+      },
+      "durationMs": 4742
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 27,
+      "durationMs": 144,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-14 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 160.00 --merchant-name \"Grab\" --description \"ride home\"",
+      "command": "oled transactions add --resolve --date 2026-06-14 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 160.00 --merchant-name Grab --description ride home --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:db7b6eb2-3618-4c14-8803-a3cd6952d143\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:db7b6eb2-3618-4c14-8803-a3cd6952d143\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 28,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6561,
+        "completionTokens": 75,
+        "estimated": false
+      },
+      "durationMs": 1488
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 28,
+      "durationMs": 142,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-15 --debit-account thb:liability:card:visa --credit-account thb:asset:bank:kbank --amount 3000.00 --description \"Visa payment from KBank\"",
+      "command": "oled transactions add --resolve --date 2026-06-15 --debit-account thb:liability:card:visa --credit-account thb:asset:bank:kbank --amount 3000.00 --description Visa payment from KBank --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:c6422b08-8a10-4f39-a66e-59b0794021ee\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:c6422b08-8a10-4f39-a66e-59b0794021ee\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 29,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6701,
+        "completionTokens": 83,
+        "estimated": false
+      },
+      "durationMs": 1430
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 29,
+      "durationMs": 143,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-16 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 430.00 --merchant-name \"Lotus's\" --description \"Lotus's shop\"",
+      "command": "oled transactions add --resolve --date 2026-06-16 --debit-account thb:expense:food:groceries --credit-account thb:asset:bank:kbank --amount 430.00 --merchant-name Lotus's --description Lotus's shop --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:aa550027-d742-48d3-886f-0053b4ef27f1\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:aa550027-d742-48d3-886f-0053b4ef27f1\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 30,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6848,
+        "completionTokens": 78,
+        "estimated": false
+      },
+      "durationMs": 1894
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 30,
+      "durationMs": 143,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-17 --debit-account thb:expense:subscriptions --credit-account thb:liability:card:visa --amount 129.00 --merchant-name \"iCloud\" --description \"iCloud storage renewed\"",
+      "command": "oled transactions add --resolve --date 2026-06-17 --debit-account thb:expense:subscriptions --credit-account thb:liability:card:visa --amount 129.00 --merchant-name iCloud --description iCloud storage renewed --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:2996b690-7713-4a37-b791-e07aadb06e5a\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:2996b690-7713-4a37-b791-e07aadb06e5a\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 31,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6990,
+        "completionTokens": 79,
+        "estimated": false
+      },
+      "durationMs": 1700
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 31,
+      "durationMs": 143,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-18 --debit-account thb:expense:food:coffee --credit-account thb:asset:bank:kbank --amount 75.00 --merchant-name \"Cafe Amazon\" --description \"Cafe Amazon coffee\"",
+      "command": "oled transactions add --resolve --date 2026-06-18 --debit-account thb:expense:food:coffee --credit-account thb:asset:bank:kbank --amount 75.00 --merchant-name Cafe Amazon --description Cafe Amazon coffee --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:63927c22-4d5f-4e0e-931b-193a1c7caae5\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:63927c22-4d5f-4e0e-931b-193a1c7caae5\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 32,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 7133,
+        "completionTokens": 71,
+        "estimated": false
+      },
+      "durationMs": 1661
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 32,
+      "durationMs": 143,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-19 --debit-account thb:expense:health --credit-account thb:asset:bank:kbank --amount 1200.00 --description \"dentist cleaning\"",
+      "command": "oled transactions add --resolve --date 2026-06-19 --debit-account thb:expense:health --credit-account thb:asset:bank:kbank --amount 1200.00 --description dentist cleaning --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:97e743b6-b45a-4ff3-8238-77ab39dd595c\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:97e743b6-b45a-4ff3-8238-77ab39dd595c\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 33,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 7267,
+        "completionTokens": 77,
+        "estimated": false
+      },
+      "durationMs": 1571
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 33,
+      "durationMs": 169,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-20 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 465.00 --merchant-name \"Grab\" --description \"ride out to airport\"",
+      "command": "oled transactions add --resolve --date 2026-06-20 --debit-account thb:expense:transport --credit-account thb:liability:card:visa --amount 465.00 --merchant-name Grab --description ride out to airport --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:e87ad49e-6e6c-4403-b230-ae3925816921\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:e87ad49e-6e6c-4403-b230-ae3925816921\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 34,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 7408,
+        "completionTokens": 82,
+        "estimated": false
+      },
+      "durationMs": 1540
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 34,
+      "durationMs": 148,
+      "tool": "oled",
+      "subcommand": "transactions add",
+      "args": "transactions add --resolve --date 2026-06-21 --debit-account thb:expense:food:restaurants --credit-account thb:liability:card:visa --amount 560.00 --merchant-name \"Peppina\" --description \"dinner at Peppina\"",
+      "command": "oled transactions add --resolve --date 2026-06-21 --debit-account thb:expense:food:restaurants --credit-account thb:liability:card:visa --amount 560.00 --merchant-name Peppina --description dinner at Peppina --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"transaction_id\":\"tx:2396f6fb-1663-4378-a582-aed802146e92\",\"duplicate\":false,\"raised_questions\":0,\"currency_overridden\":false}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"transaction_id\\\":\\\"tx:2396f6fb-1663-4378-a582-aed802146e92\\\",\\\"duplicate\\\":false,\\\"raised_questions\\\":0,\\\"currency_overridden\\\":false}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "phase_end",
+      "phase": "resolve",
+      "reply": "",
+      "exit": "call_cap"
+    }
+  ]
+}

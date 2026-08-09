@@ -1,11 +1,9 @@
 node_modules/
 .env
 logs/
-reports/**
-!reports/*/
-!reports/*/benchmark.json
-!reports/*/leaderboard.md
-!reports/archive/**
+# Reports are the regression trail and go in whole, transcripts included.
+# live.json is the exception: the runner rewrites it every few seconds while a
+# matrix is going, so committing it would leave the tree dirty mid-run.
 reports/*/live.json
 .claude
 CLAUDE.md

@@ -1,0 +1,990 @@
+{
+  "model": "google/gemini-3.6-flash",
+  "suite": "record",
+  "caseId": "r04-usd-recovery",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "r04-usd-recovery",
+    "assertions": [
+      {
+        "id": "rows_posted",
+        "label": "posted rows",
+        "passed": true,
+        "evidence": {
+          "want": "20 rows",
+          "got": "20 rows"
+        }
+      },
+      {
+        "id": "rows_match",
+        "label": "each row's date, accounts and amount",
+        "passed": true,
+        "evidence": {
+          "want": "20 rows as the text states them",
+          "got": "all 20 match"
+        }
+      },
+      {
+        "id": "balance:usd:asset:bank:checking",
+        "label": "balance usd:asset:bank:checking",
+        "passed": true,
+        "evidence": {
+          "want": "5186.00",
+          "got": "5186.00"
+        }
+      },
+      {
+        "id": "balance:usd:liability:card:visa",
+        "label": "balance usd:liability:card:visa",
+        "passed": true,
+        "evidence": {
+          "want": "574.18",
+          "got": "574.18"
+        }
+      },
+      {
+        "id": "balance:usd:income:consulting",
+        "label": "balance usd:income:consulting",
+        "passed": true,
+        "evidence": {
+          "want": "6500.00",
+          "got": "6500.00"
+        }
+      },
+      {
+        "id": "balance:usd:expense:software",
+        "label": "balance usd:expense:software",
+        "passed": true,
+        "evidence": {
+          "want": "1826.33",
+          "got": "1826.33"
+        }
+      },
+      {
+        "id": "balance:usd:expense:software:domains",
+        "label": "balance usd:expense:software:domains",
+        "passed": true,
+        "evidence": {
+          "want": "46.85",
+          "got": "46.85"
+        }
+      },
+      {
+        "id": "balance:usd:expense:fees:bank",
+        "label": "balance usd:expense:fees:bank",
+        "passed": true,
+        "evidence": {
+          "want": "15.00",
+          "got": "15.00"
+        }
+      },
+      {
+        "id": "nothing_uncategorized",
+        "label": "nothing in usd:expense:uncategorized",
+        "passed": true,
+        "evidence": {
+          "want": "0.00",
+          "got": "0.00"
+        }
+      },
+      {
+        "id": "nothing_adjusted",
+        "label": "nothing posted through usd:equity:adjustments",
+        "passed": true,
+        "evidence": {
+          "want": "0.00",
+          "got": "0.00"
+        }
+      },
+      {
+        "id": "questions_closed",
+        "label": "questions closed",
+        "passed": true,
+        "evidence": {
+          "want": "0 open, 0 deferred",
+          "got": "0 open, 0 deferred"
+        }
+      },
+      {
+        "id": "turns_used",
+        "label": "turns used",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "up to 32 (24 recording, 8 resolving)",
+          "got": "23 turns, 21 oled calls"
+        }
+      },
+      {
+        "id": "nonzero_exits",
+        "label": "nonzero exits",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "reported, not scored",
+          "got": "PARTIAL×1, USAGE×2"
+        }
+      },
+      {
+        "id": "refused_calls",
+        "label": "refused calls",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "reported, not scored",
+          "got": "0"
+        }
+      },
+      {
+        "id": "repeated_commands",
+        "label": "repeated commands",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "reported, not scored",
+          "got": "3"
+        }
+      },
+      {
+        "id": "net_worth",
+        "label": "net worth in USD",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "4611.82",
+          "got": "4611.82"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 23,
+    "toolCalls": 21,
+    "tokensIn": 253554,
+    "tokensOut": 6090,
+    "tokensEstimated": false,
+    "llmMs": 60526,
+    "toolMs": 2803,
+    "durationMs": 63329,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {
+      "PARTIAL": 1,
+      "USAGE": 2
+    },
+    "helpCalls": 4,
+    "repeatedCommands": 3,
+    "contextTrims": 0
+  },
+  "questionsRaised": 20,
+  "costUsd": 0.42600600000000005,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "record",
+      "title": "Record the transactions"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2062,
+        "completionTokens": 32,
+        "estimated": false
+      },
+      "durationMs": 2198
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 1,
+      "durationMs": 152,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status --json",
+      "command": "oled status --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-3dvfb9/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-3dvfb9/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":5,\"transactions\":0,\"merchants\":0,\"notes\":0},\"files\":{\"new\":0,\"ingested\":0,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{},\"liabilities\":{},\"net_worth\":{}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-3dvfb9/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-3dvfb9/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":5,\\\"transactions\\\":0,\\\"merchants\\\":0,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":0,\\\"ingested\\\":0,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{},\\\"liabilities\\\":{},\\\"net_worth\\\":{}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2292,
+        "completionTokens": 106,
+        "estimated": false
+      },
+      "durationMs": 2230
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 2,
+      "durationMs": 122,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --help --json",
+      "command": "oled ingest commit --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled ingest commit [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled ingest commit [options]\\n\\nCommit extracted transactions (NDJSON/JSON array via --input file or stdin) into\\nthe ledger\\n\\nOptions:\\n  --file <id>      default source file id for committed rows\\n  --input <path>   read the batch from an NDJSON/JSON file instead of stdin\\n  --json           Emit NDJSON (machine-readable) instead of human output\\n  --no-color       Disable ANSI color output\\n  --config <path>  Config file to use (default ~/.oled/config.json)\\n  -h, --help       display help for command\\n\\nBehavior: posts one batch of statement rows; each item resolves account hints, links merchants, and raises questions instead of failing.\\nItem: {\\\"date\\\":\\\"YYYY-MM-DD\\\",\\\"description\\\":\\\"...\\\",\\\"debit_account\\\":\\\"thb:expense:food\\\",\\\"credit_account\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":135.00,\\\"source_page\\\":2,\\\"row_index\\\":0,\\\"raw_descriptor\\\":\\\"<verbatim bank text>\\\",\\\"merchant\\\":{\\\"canonical_name\\\":\\\"...\\\"}}\\nRules: amount > 0, direction comes from the two accounts, never a sign; account ids are currency-prefixed (<currency>:<type>:<path>) and both sides must share the prefix; ids are taken literally (an exact match posts there, a well-formed path inside an existing ledger is created, a lookalike only raises a question); commit never opens a new ledger — an id whose currency prefix names no existing ledger is refused, naming the ledger and the accounts create command that opens it, and only ids with no usable prefix fall back to the other side's <currency>:expense:uncategorized with a question; set row_index + source_page and pass --file <sf-id> so a re-run is an idempotent duplicate:true no-op.\\nDirection, not sign: debit the account that grows, amount always positive. Card purchase: debit thb:expense:<cat>, credit thb:liability:credit_card:<x>. Bank spend: debit thb:expense:<cat>, credit thb:asset:bank:<x>. Salary: debit thb:asset:bank:<x>, credit thb:income:salary. A refund reverses the purchase's accounts; a card payment de\n…[truncated 702 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 3,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2969,
+        "completionTokens": 3160,
+        "estimated": false
+      },
+      "durationMs": 11887
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 3,
+      "durationMs": 135,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --json",
+      "command": "oled ingest commit --json",
+      "stdin": true,
+      "stdinPreview": "[\n  {\"date\":\"2026-05-01\",\"description\":\"GitHub Team, 5 seats, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":84.00},\n  {\"date\":\"2026-05-02\",\"description\":\"AWS invoice for April usage\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":412.37},\n  {\"date\":\"2026-05-03\",\"description\":\"Vercel Pro, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":20.00},\n  {\"date\":\"2026-05-04\",\"description\":\"Namecheap, renewal of 7 domain names\",\"debit_account\":\"usd:expense:software:domains\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":46.85},\n  {\"date\":\"2026-05-05\",\"description\":\"Linear, annual seats billed monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":96.00},\n  {\"date\":\"2026-05-06\",\"description\":\"Cloudflare Workers Paid plan\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":5.00},\n  {\"date\":\"2026-05-07\",\"description\":\"Consulting invoice 1042, Northwind Labs, paid\",\"debit_account\":\"usd:asset:bank:checking\",\"credit_account\":\"usd:income:consulting\",\"amount\":6500.00},\n  {\"date\":\"2026-05-08\",\"description\":\"Figma Organization, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":135.00},\n  {\"date\":\"2026-05-11\",\"description\":\"Fly.io compute for the staging cluster\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":78.42},\n  {\"date\":\"2026-05-12\",\"description\":\"Incoming wire fee charged by the bank on 1042\",\"debit_account\":\"usd:expense:fees:bank\",\"credit_account\":\"usd:asset:bank:checking\",\"amount\":15.00},\n  {\"date\":\"2026-05-13\",\"description\":\"Sentry Team, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":29.00},\n  {\"date\":\"2026-05-14\",\"description\":\"Supabase Pro, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":25.00},\n  {\"date\":\"2026-05-15\",\"description\":\"Partial payment to the Visa card ending 4417\",\"debit_account\":\"usd:liability:card:visa\",\"credit_account\":\"usd:asset:bank:checking\",\"amount\":1200.00},\n  {\"date\":\"2026-05-18\",\"description\":\"1Password Business, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":47.60},\n  {\"date\":\"2026-05-19\",\"description\":\"Datadog Pro, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":310.50},\n  {\"date\":\"2026-05-20\",\"description\":\"Notion Plus, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":60.00},\n  {\"date\":\"2026-05-21\",\"description\":\"Backblaze B2 storage for backups\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":13.75},\n  {\"date\":\"2026-05-26\",\"description\":\"Postmark, transactional email\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":22.50},\n  {\"date\":\"2026-05-27\",\"description\":\"Apple Developer Program, annual, paid direct\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:asset:bank:checking\",\"amount\":99.00},\n  {\"date\":\"2026-05-29\",\"description\":\"AWS invoice for May usage\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":388.19}\n]",
+      "stdinDigest": "9373e89866f7b2e1",
+      "rows": 22,
+      "ok": false,
+      "exitCode": 7,
+      "rejected": null,
+      "message": "{\"type\":\"summary\",\"batch_id\":\"ib:b24ead02-59a3-4fbf-8fc5-a5e2d6e58b6b\",\"posted\":0,\"duplicates\":0,\"failed\":20,\"raised_questions\":20}",
+      "hint": null,
+      "commit": {
+        "posted": 0,
+        "duplicates": 0,
+        "failed": 20,
+        "questionsRaised": 20
+      },
+      "result": "{\"exit_code\":7,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:expense:software names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or fix the currency prefix\\\",\\\"raised_questions\\\":1,\\\"unopened_ledger\\\":\\\"usd\\\"}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:expense:software names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or fix the currency prefix\\\",\\\"raised_questions\\\":1,\\\"unopened_ledger\\\":\\\"usd\\\"}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:expense:software names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or fix the currency prefix\\\",\\\"raised_questions\\\":1,\\\"unopened_ledger\\\":\\\"usd\\\"}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:expense:software:domains names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or fix the currency prefix\\\",\\\"raised_questions\\\":1,\\\"unopened_ledger\\\":\\\"usd\\\"}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:expense:software names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or fix the currency prefix\\\",\\\"raised_questions\\\":1,\\\"unopened_ledger\\\":\\\"usd\\\"}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":5,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:expense:software names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or fix the currency prefix\\\",\\\"raised_questions\\\":1,\\\"unopened_ledger\\\":\\\"usd\\\"}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":6,\\\"ok\\\":false,\\\"reason\\\":\\\"currency_mismatch\\\",\\\"message\\\":\\\"debit usd:asset:bank:checking names ledger \\\\\\\"usd\\\\\\\", which does not exist here; open it with `oled accounts create`, or\n…[truncated 4053 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 4,
+      "content": "...\nThe ledger doesn't have the `usd` ledger open yet. Let's create an account with `usd` prefix.",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5595,
+        "completionTokens": 69,
+        "estimated": false
+      },
+      "durationMs": 2833
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 4,
+      "durationMs": 123,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create usd:asset:bank:checking --json",
+      "command": "oled accounts create usd:asset:bank:checking --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": false,
+      "exitCode": 2,
+      "rejected": null,
+      "message": "{\"error\":{\"code\":\"E_USAGE\",\"message\":\"too many arguments for 'create'. Expected 0 arguments but got 1.\",\"hint\":\"run `oled accounts create --help` for its flags and usage\"}}",
+      "hint": "run `oled accounts create --help` for its flags and usage",
+      "commit": null,
+      "result": "{\"exit_code\":2,\"stdout\":\"\",\"stderr\":\"{\\\"error\\\":{\\\"code\\\":\\\"E_USAGE\\\",\\\"message\\\":\\\"too many arguments for 'create'. Expected 0 arguments but got 1.\\\",\\\"hint\\\":\\\"run `oled accounts create --help` for its flags and usage\\\"}}\\n\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 5,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5696,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 1545
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 5,
+      "durationMs": 125,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --help",
+      "command": "oled accounts create --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled accounts create [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled accounts create [options]\\n\\nCreate a new account (single via flags, or batch via --input)\\n\\nOptions:\\n  --id <id>            account id, currency-prefixed (e.g. thb:asset:bank:kbank)\\n  --name <name>        account name\\n  --type <type>        account type\\n  --parent <id>        parent account id\\n  --subtype <s>        account subtype\\n  --bank <name>        bank name\\n  --masked <number>    masked account number\\n  --due-day <n>        payment due day\\n  --statement-day <n>  statement closing day\\n  --metadata <json>    additional metadata as JSON\\n  --input <path>       batch-create accounts from an NDJSON/JSON file instead of\\n                       individual flags\\n  --json               Emit NDJSON (machine-readable) instead of human output\\n  --no-color           Disable ANSI color output\\n  --config <path>      Config file to use (default ~/.oled/config.json)\\n  -h, --help           display help for command\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 6,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5961,
+        "completionTokens": 33,
+        "estimated": false
+      },
+      "durationMs": 1676
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 6,
+      "durationMs": 152,
+      "tool": "oled",
+      "subcommand": "accounts tree",
+      "args": "accounts tree --json",
+      "command": "oled accounts tree --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"thb:equity\",\"name\":\"Equity (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[{\"id\":\"thb:equity:adjustments\",\"name\":\"Adjustments (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]},{\"id\":\"thb:equity:opening\",\"name\":\"Opening Balance (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]}]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"thb:equity\\\",\\\"name\\\":\\\"Equity (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[{\\\"id\\\":\\\"thb:equity:adjustments\\\",\\\"name\\\":\\\"Adjustments (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:equity:opening\\\",\\\"name\\\":\\\"Opening Balance (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:expense\\\",\\\"name\\\":\\\"Expenses (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[{\\\"id\\\":\\\"thb:expense:uncategorized\\\",\\\"name\\\":\\\"Uncategorized (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"type\\\":\\\"summary\\\",\\\"roots\\\":2}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 7,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6200,
+        "completionTokens": 187,
+        "estimated": false
+      },
+      "durationMs": 2018
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 7,
+      "durationMs": 130,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:asset:bank:checking --name \"Business checking\" --json",
+      "command": "oled accounts create --id usd:asset:bank:checking --name Business checking --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": false,
+      "exitCode": 2,
+      "rejected": null,
+      "message": "{\"error\":{\"code\":\"E_USAGE\",\"message\":\"--type required\",\"hint\":\"append --help to the command for its flags and usage\"}}",
+      "hint": "append --help to the command for its flags and usage",
+      "commit": null,
+      "result": "{\"exit_code\":2,\"stdout\":\"\",\"stderr\":\"{\\\"error\\\":{\\\"code\\\":\\\"E_USAGE\\\",\\\"message\\\":\\\"--type required\\\",\\\"hint\\\":\\\"append --help to the command for its flags and usage\\\"}}\\n\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 8,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6266,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 1858
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 8,
+      "durationMs": 133,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:asset:bank:checking --name \"Business checking\" --type asset --json",
+      "command": "oled accounts create --id usd:asset:bank:checking --name Business checking --type asset --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"usd:asset:bank:checking\",\"created\":true,\"created_parents\":[\"usd:asset\",\"usd:asset:bank\"]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"usd:asset:bank:checking\\\",\\\"created\\\":true,\\\"created_parents\\\":[\\\"usd:asset\\\",\\\"usd:asset:bank\\\"]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 9,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6335,
+        "completionTokens": 124,
+        "estimated": false
+      },
+      "durationMs": 2521
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 9,
+      "durationMs": 145,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:liability:card:visa --name \"Visa card 4417\" --type liability --json",
+      "command": "oled accounts create --id usd:liability:card:visa --name Visa card 4417 --type liability --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"usd:liability:card:visa\",\"created\":true,\"created_parents\":[\"usd:liability\",\"usd:liability:card\"]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"usd:liability:card:visa\\\",\\\"created\\\":true,\\\"created_parents\\\":[\\\"usd:liability\\\",\\\"usd:liability:card\\\"]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 10,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6409,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 2089
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 10,
+      "durationMs": 131,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:income:consulting --name \"Consulting income\" --type income --json",
+      "command": "oled accounts create --id usd:income:consulting --name Consulting income --type income --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"usd:income:consulting\",\"created\":true,\"created_parents\":[\"usd:income\"]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"usd:income:consulting\\\",\\\"created\\\":true,\\\"created_parents\\\":[\\\"usd:income\\\"]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 11,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6471,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 1785
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 11,
+      "durationMs": 134,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:expense:software --name \"Software and cloud services\" --type expense --json",
+      "command": "oled accounts create --id usd:expense:software --name Software and cloud services --type expense --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"usd:expense:software\",\"created\":true,\"created_parents\":[\"usd:expense\"]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"usd:expense:software\\\",\\\"created\\\":true,\\\"created_parents\\\":[\\\"usd:expense\\\"]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 12,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6532,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 1728
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 12,
+      "durationMs": 130,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:expense:software:domains --name \"Domain names\" --type expense --json",
+      "command": "oled accounts create --id usd:expense:software:domains --name Domain names --type expense --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"usd:expense:software:domains\",\"created\":true,\"created_parents\":[]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"usd:expense:software:domains\\\",\\\"created\\\":true,\\\"created_parents\\\":[]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 13,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6592,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 2038
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 13,
+      "durationMs": 131,
+      "tool": "oled",
+      "subcommand": "accounts create",
+      "args": "accounts create --id usd:expense:fees:bank --name \"Bank fees\" --type expense --json",
+      "command": "oled accounts create --id usd:expense:fees:bank --name Bank fees --type expense --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"usd:expense:fees:bank\",\"created\":true,\"created_parents\":[\"usd:expense:fees\"]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"usd:expense:fees:bank\\\",\\\"created\\\":true,\\\"created_parents\\\":[\\\"usd:expense:fees\\\"]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 14,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 6657,
+        "completionTokens": 17,
+        "estimated": false
+      },
+      "durationMs": 1610
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 14,
+      "durationMs": 128,
+      "tool": "oled",
+      "subcommand": "questions list",
+      "args": "questions list --json",
+      "command": "oled questions list --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"cn:1ffcf463-4c33-4353-ade7-c18914d79c36\",\"kind\":\"currency_mismatch\",\"prompt\":\"Transaction \\\"GitHub Team, 5 seats, monthly\\\" on 2026-05-01 books its debit side to \\\"usd:expense:software\\\", whose ledger \\\"usd\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the currency prefix and re-ingest. Nothing was posted.\",\"transaction_id\":null,\"account_id\":null,\"context\":{\"side\":\"debit\",\"account_id\":\"usd:expense:software\",\"ledger\":\"usd\",\"date\":\"2026-05-01\",\"description\":\"GitHub Team, 5 seats, monthly\"},\"file_id\":null,\"created_at\":\"2026-08-09T17:05:33.480Z\"}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"cn:1ffcf463-4c33-4353-ade7-c18914d79c36\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"prompt\\\":\\\"Transaction \\\\\\\"GitHub Team, 5 seats, monthly\\\\\\\" on 2026-05-01 books its debit side to \\\\\\\"usd:expense:software\\\\\\\", whose ledger \\\\\\\"usd\\\\\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the currency prefix and re-ingest. Nothing was posted.\\\",\\\"transaction_id\\\":null,\\\"account_id\\\":null,\\\"context\\\":{\\\"side\\\":\\\"debit\\\",\\\"account_id\\\":\\\"usd:expense:software\\\",\\\"ledger\\\":\\\"usd\\\",\\\"date\\\":\\\"2026-05-01\\\",\\\"description\\\":\\\"GitHub Team, 5 seats, monthly\\\"},\\\"file_id\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:05:33.480Z\\\"}\\n{\\\"id\\\":\\\"cn:a472caa6-f213-4c70-9e59-bf8b80249759\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"prompt\\\":\\\"Transaction \\\\\\\"AWS invoice for April usage\\\\\\\" on 2026-05-02 books its debit side to \\\\\\\"usd:expense:software\\\\\\\", whose ledger \\\\\\\"usd\\\\\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the currency prefix and re-ingest. Nothing was posted.\\\",\\\"transaction_id\\\":null,\\\"account_id\\\":null,\\\"context\\\":{\\\"side\\\":\\\"debit\\\",\\\"account_id\\\":\\\"usd:expense:software\\\",\\\"ledger\\\":\\\"usd\\\",\\\"date\\\":\\\"2026-05-02\\\",\\\"description\\\":\\\"AWS invoice for April usage\\\"},\\\"file_id\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:05:33.481Z\\\"}\\n{\\\"id\\\":\\\"cn:06a22562-9314-4dd2-b46b-aa104c19aec2\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"prompt\\\":\\\"Transaction \\\\\\\"Vercel Pro, monthly\\\\\\\" on 2026-05-03 books its debit side to \\\\\\\"usd:expense:software\\\\\\\", whose ledger \\\\\\\"usd\\\\\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the curre\n…[truncated 13645 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 15,
+      "content": "Now that the USD accounts exist, let's re-run `ingest commit`.",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 11521,
+        "completionTokens": 1201,
+        "estimated": false
+      },
+      "durationMs": 5404
+    },
+    {
+      "type": "tool_call",
+      "phase": "record",
+      "turn": 15,
+      "durationMs": 152,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --json",
+      "command": "oled ingest commit --json",
+      "stdin": true,
+      "stdinPreview": "[\n  {\"date\":\"2026-05-01\",\"description\":\"GitHub Team, 5 seats, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":84.00},\n  {\"date\":\"2026-05-02\",\"description\":\"AWS invoice for April usage\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":412.37},\n  {\"date\":\"2026-05-03\",\"description\":\"Vercel Pro, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":20.00},\n  {\"date\":\"2026-05-04\",\"description\":\"Namecheap, renewal of 7 domain names\",\"debit_account\":\"usd:expense:software:domains\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":46.85},\n  {\"date\":\"2026-05-05\",\"description\":\"Linear, annual seats billed monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":96.00},\n  {\"date\":\"2026-05-06\",\"description\":\"Cloudflare Workers Paid plan\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":5.00},\n  {\"date\":\"2026-05-07\",\"description\":\"Consulting invoice 1042, Northwind Labs, paid\",\"debit_account\":\"usd:asset:bank:checking\",\"credit_account\":\"usd:income:consulting\",\"amount\":6500.00},\n  {\"date\":\"2026-05-08\",\"description\":\"Figma Organization, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":135.00},\n  {\"date\":\"2026-05-11\",\"description\":\"Fly.io compute for the staging cluster\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":78.42},\n  {\"date\":\"2026-05-12\",\"description\":\"Incoming wire fee charged by the bank on 1042\",\"debit_account\":\"usd:expense:fees:bank\",\"credit_account\":\"usd:asset:bank:checking\",\"amount\":15.00},\n  {\"date\":\"2026-05-13\",\"description\":\"Sentry Team, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":29.00},\n  {\"date\":\"2026-05-14\",\"description\":\"Supabase Pro, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":25.00},\n  {\"date\":\"2026-05-15\",\"description\":\"Partial payment to the Visa card ending 4417\",\"debit_account\":\"usd:liability:card:visa\",\"credit_account\":\"usd:asset:bank:checking\",\"amount\":1200.00},\n  {\"date\":\"2026-05-18\",\"description\":\"1Password Business, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":47.60},\n  {\"date\":\"2026-05-19\",\"description\":\"Datadog Pro, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":310.50},\n  {\"date\":\"2026-05-20\",\"description\":\"Notion Plus, monthly\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":60.00},\n  {\"date\":\"2026-05-21\",\"description\":\"Backblaze B2 storage for backups\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":13.75},\n  {\"date\":\"2026-05-26\",\"description\":\"Postmark, transactional email\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":22.50},\n  {\"date\":\"2026-05-27\",\"description\":\"Apple Developer Program, annual, paid direct\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:asset:bank:checking\",\"amount\":99.00},\n  {\"date\":\"2026-05-29\",\"description\":\"AWS invoice for May usage\",\"debit_account\":\"usd:expense:software\",\"credit_account\":\"usd:liability:card:visa\",\"amount\":388.19}\n]",
+      "stdinDigest": "9373e89866f7b2e1",
+      "rows": 22,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"result\",\"index\":0,\"ok\":true,\"transaction_id\":\"tx:ce3e2a92-7a13-4309-85c4-b1a3a0231169\",\"duplicate\":false,\"currency_overridden\":false,\"raised_questions\":0,\"merchant\":{\"how\":\"none\"},\"sides\":[{\"side\":\"debit\",\"requested\":\"usd:expense:software\",\"resolved\":\"usd:expense:software\",\"how\":\"exact\"},{\"side\":\"credit\",\"requested\":\"usd:liability:card:visa\",\"resolved\":\"usd:liability:card:visa\",\"how\":\"exact\"}]}",
+      "hint": null,
+      "commit": {
+        "posted": 20,
+        "duplicates": 0,
+        "failed": 0,
+        "questionsRaised": 0
+      },
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:ce3e2a92-7a13-4309-85c4-b1a3a0231169\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"usd:expense:software\\\",\\\"resolved\\\":\\\"usd:expense:software\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"usd:liability:card:visa\\\",\\\"resolved\\\":\\\"usd:liability:card:visa\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:0c50a684-b99b-49b4-818f-e4ed693e1917\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"usd:expense:software\\\",\\\"resolved\\\":\\\"usd:expense:software\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"usd:liability:card:visa\\\",\\\"resolved\\\":\\\"usd:liability:card:visa\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:e1bef6ba-2021-450d-86a6-3d7df9e454db\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"usd:expense:software\\\",\\\"resolved\\\":\\\"usd:expense:software\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"usd:liability:card:visa\\\",\\\"resolved\\\":\\\"usd:liability:card:visa\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:8c07a6c3-3d69-4034-b74f-68b500df619d\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"usd:expense:software:domains\\\",\\\"resolved\\\":\\\"usd:expense:software:domains\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"usd:liability:card:visa\\\",\\\"resolved\\\":\\\"usd:liability:card:visa\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:849497a6-e284-43d1-8be2-a6\n…[truncated 7543 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "record",
+      "turn": 16,
+      "content": "All 20 transactions have been recorded in your ledger.",
+      "finishReason": "stop",
+      "toolCalls": 0,
+      "usage": {
+        "promptTokens": 15486,
+        "completionTokens": 12,
+        "estimated": false
+      },
+      "durationMs": 2296
+    },
+    {
+      "type": "phase_end",
+      "phase": "record",
+      "reply": "All 20 transactions have been recorded in your ledger.",
+      "exit": "answered"
+    },
+    {
+      "type": "phase_start",
+      "phase": "resolve",
+      "title": "Resolve what the ledger flagged"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 17,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 15551,
+        "completionTokens": 87,
+        "estimated": false
+      },
+      "durationMs": 1775
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 17,
+      "durationMs": 141,
+      "tool": "oled",
+      "subcommand": "questions list",
+      "args": "questions list --json",
+      "command": "oled questions list --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"cn:1ffcf463-4c33-4353-ade7-c18914d79c36\",\"kind\":\"currency_mismatch\",\"prompt\":\"Transaction \\\"GitHub Team, 5 seats, monthly\\\" on 2026-05-01 books its debit side to \\\"usd:expense:software\\\", whose ledger \\\"usd\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the currency prefix and re-ingest. Nothing was posted.\",\"transaction_id\":null,\"account_id\":null,\"context\":{\"side\":\"debit\",\"account_id\":\"usd:expense:software\",\"ledger\":\"usd\",\"date\":\"2026-05-01\",\"description\":\"GitHub Team, 5 seats, monthly\"},\"file_id\":null,\"created_at\":\"2026-08-09T17:05:33.480Z\"}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"cn:1ffcf463-4c33-4353-ade7-c18914d79c36\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"prompt\\\":\\\"Transaction \\\\\\\"GitHub Team, 5 seats, monthly\\\\\\\" on 2026-05-01 books its debit side to \\\\\\\"usd:expense:software\\\\\\\", whose ledger \\\\\\\"usd\\\\\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the currency prefix and re-ingest. Nothing was posted.\\\",\\\"transaction_id\\\":null,\\\"account_id\\\":null,\\\"context\\\":{\\\"side\\\":\\\"debit\\\",\\\"account_id\\\":\\\"usd:expense:software\\\",\\\"ledger\\\":\\\"usd\\\",\\\"date\\\":\\\"2026-05-01\\\",\\\"description\\\":\\\"GitHub Team, 5 seats, monthly\\\"},\\\"file_id\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:05:33.480Z\\\"}\\n{\\\"id\\\":\\\"cn:a472caa6-f213-4c70-9e59-bf8b80249759\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"prompt\\\":\\\"Transaction \\\\\\\"AWS invoice for April usage\\\\\\\" on 2026-05-02 books its debit side to \\\\\\\"usd:expense:software\\\\\\\", whose ledger \\\\\\\"usd\\\\\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the currency prefix and re-ingest. Nothing was posted.\\\",\\\"transaction_id\\\":null,\\\"account_id\\\":null,\\\"context\\\":{\\\"side\\\":\\\"debit\\\",\\\"account_id\\\":\\\"usd:expense:software\\\",\\\"ledger\\\":\\\"usd\\\",\\\"date\\\":\\\"2026-05-02\\\",\\\"description\\\":\\\"AWS invoice for April usage\\\"},\\\"file_id\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:05:33.481Z\\\"}\\n{\\\"id\\\":\\\"cn:06a22562-9314-4dd2-b46b-aa104c19aec2\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"prompt\\\":\\\"Transaction \\\\\\\"Vercel Pro, monthly\\\\\\\" on 2026-05-03 books its debit side to \\\\\\\"usd:expense:software\\\\\\\", whose ledger \\\\\\\"usd\\\\\\\" does not exist here. Opening a ledger is a deliberate act, never an ingest side effect: create the account first (`oled accounts create --id usd:expense:software --name <name> --type expense`), or fix the curre\n…[truncated 13645 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 18,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 20415,
+        "completionTokens": 16,
+        "estimated": false
+      },
+      "durationMs": 1613
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 18,
+      "durationMs": 107,
+      "tool": "oled",
+      "subcommand": "questions",
+      "args": "questions --help",
+      "command": "oled questions --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled questions [options] [command]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled questions [options] [command]\\n\\nList, answer, and defer open questions\\n\\nOptions:\\n  --json                 Emit NDJSON (machine-readable) instead of human output\\n  --no-color             Disable ANSI color output\\n  --config <path>        Config file to use (default ~/.oled/config.json)\\n  -h, --help             display help for command\\n\\nCommands:\\n  list [options]         List questions\\n  answer [options] <id>  Answer a question\\n  defer [options] <id>   Defer a question\\n  help [command]         display help for command\\n\\nBehavior: the harness opens a question when a row is ambiguous; you list them, then answer or defer.\\nTypical flow: list --json, resolve each by kind, then answer (--also <id,id> closes siblings) or defer.\\nBy kind: similar_accounts -> accounts merge; uncategorized -> transactions recategorize, then merchants set-default; unknown_merchant -> merchants upsert or update; dirty_input -> read the question's reason: fix the bad row (date, description, amount) or the account ids it names, then re-run ingest commit; currency_mismatch -> when both ledgers exist, re-post as linked legs through <currency>:equity:conversion (one per ledger, sharing a group); when the named ledger doesn't exist yet, open it with accounts create or fix the prefix, then re-run ingest commit.\\nExample: oled questions list --json\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 19,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 20761,
+        "completionTokens": 17,
+        "estimated": false
+      },
+      "durationMs": 2446
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 19,
+      "durationMs": 119,
+      "tool": "oled",
+      "subcommand": "questions answer",
+      "args": "questions answer --help",
+      "command": "oled questions answer --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled questions answer [options] <id>",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled questions answer [options] <id>\\n\\nAnswer a question\\n\\nOptions:\\n  --answer <text>  the answer text\\n  --also <ids>     additional question ids to answer\\n  --json           Emit NDJSON (machine-readable) instead of human output\\n  --no-color       Disable ANSI color output\\n  --config <path>  Config file to use (default ~/.oled/config.json)\\n  -h, --help       display help for command\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 20,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 20887,
+        "completionTokens": 752,
+        "estimated": false
+      },
+      "durationMs": 4341
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 20,
+      "durationMs": 135,
+      "tool": "oled",
+      "subcommand": "questions answer",
+      "args": "questions answer cn:1ffcf463-4c33-4353-ade7-c18914d79c36 --answer \"Created USD accounts and re-committed transactions\" --also \"cn:a472caa6-f213-4c70-9e59-bf8b80249759,cn:06a22562-9314-4dd2-b46b-aa104c19aec2,cn:557ad630-dc9a-4b13-8eb9-877e6c81b280,cn:028a29e6-5dec-4c9d-8f2d-32aded486d5d,cn:98b39150-a501-4284-9f55-9420f26372b3,cn:6e03c98c-3930-4bf3-b24b-d898f6b05613,cn:6a14dbeb-7bd0-47c4-a91c-71e830\n…[truncated 494 characters]",
+      "command": "oled questions answer cn:1ffcf463-4c33-4353-ade7-c18914d79c36 --answer Created USD accounts and re-committed transactions --also cn:a472caa6-f213-4c70-9e59-bf8b80249759,cn:06a22562-9314-4dd2-b46b-aa104c19aec2,cn:557ad630-dc9a-4b13-8eb9-877e6c81b280,cn:028a29e6-5dec-4c9d-8f2d-32aded486d5d,cn:98b39150-a501-4284-9f55-9420f26372b3,cn:6e03c98c-3930-4bf3-b24b-d898f6b05613,cn:6a14dbeb-7bd0-47c4-a91c-71e8301933cb,cn:b126bc0b-77a8-43d2-9d48-f1026084736d,cn:a6a28337-10db-4f97-a8a7-de49710bd86a,cn:a6b9436d-0602-4cba-b596-2fa32d7397ba,cn:ac163caa-a4f0-4041-93ec-b169608e36f3,cn:bf75f9c2-905f-4e01-9b55-389b6aa19493,cn:c33eece7-34ee-4447-89ba-7c0b6157a450,cn:250fc22f-627f-483b-bc3c-b2370228c952,cn:d37ee22a-7404-4dd8-b775-8799db5b550e,cn:9894e738-b5bf-45ab-9908-dbfd60b9ee70,cn:19ae315c-6f3d-4f23-9a51-64b6f549ae23,cn:ef5f95b2-dc41-451a-8268-b368670a69b6,cn:17d1bb86-a04b-4833-b89b-fc1fb91c47fb --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"cn:1ffcf463-4c33-4353-ade7-c18914d79c36\",\"kind\":\"currency_mismatch\",\"answer\":\"Created USD accounts and re-committed transactions\",\"rule_key\":null}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"cn:1ffcf463-4c33-4353-ade7-c18914d79c36\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:a472caa6-f213-4c70-9e59-bf8b80249759\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:06a22562-9314-4dd2-b46b-aa104c19aec2\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:557ad630-dc9a-4b13-8eb9-877e6c81b280\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:028a29e6-5dec-4c9d-8f2d-32aded486d5d\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:98b39150-a501-4284-9f55-9420f26372b3\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:6e03c98c-3930-4bf3-b24b-d898f6b05613\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:6a14dbeb-7bd0-47c4-a91c-71e8301933cb\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:b126bc0b-77a8-43d2-9d48-f1026084736d\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:a6a28337-10db-4f97-a8a7-de49710bd86a\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:a6b9436d-0602-4cba-b596-2fa32d7397ba\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts and re-committed transactions\\\",\\\"rule_key\\\":null}\\n{\\\"id\\\":\\\"cn:ac163caa-a4f0-4041-93ec-b169608e36f3\\\",\\\"kind\\\":\\\"currency_mismatch\\\",\\\"answer\\\":\\\"Created USD accounts\n…[truncated 1419 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 21,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 22924,
+        "completionTokens": 17,
+        "estimated": false
+      },
+      "durationMs": 1598
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 21,
+      "durationMs": 135,
+      "tool": "oled",
+      "subcommand": "questions list",
+      "args": "questions list --json",
+      "command": "oled questions list --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"summary\",\"total\":0,\"returned\":0,\"has_more\":false,\"limit\":200,\"offset\":0}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"summary\\\",\\\"total\\\":0,\\\"returned\\\":0,\\\"has_more\\\":false,\\\"limit\\\":200,\\\"offset\\\":0}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 22,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 22975,
+        "completionTokens": 17,
+        "estimated": false
+      },
+      "durationMs": 1515
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 22,
+      "durationMs": 143,
+      "tool": "oled",
+      "subcommand": "transactions list",
+      "args": "transactions list --json",
+      "command": "oled transactions list --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"tx:fd77fec4-7e5a-4f48-9974-bcebdd7ad842\",\"group_id\":null,\"date\":\"2026-05-29\",\"description\":\"AWS invoice for May usage\",\"merchant_id\":null,\"raw_descriptor\":null,\"source_file_id\":null,\"source_page\":null,\"debit_account_id\":\"usd:expense:software\",\"credit_account_id\":\"usd:liability:card:visa\",\"amount\":388.19,\"currency\":\"USD\",\"void_of\":null,\"created_at\":\"2026-08-09T17:06:02.211Z\",\"debit_account_name\":\"Software and cloud services\",\"credit_account_name\":\"Visa card 4417\",\"merchant_name\":null}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"tx:fd77fec4-7e5a-4f48-9974-bcebdd7ad842\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-29\\\",\\\"description\\\":\\\"AWS invoice for May usage\\\",\\\"merchant_id\\\":null,\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"usd:expense:software\\\",\\\"credit_account_id\\\":\\\"usd:liability:card:visa\\\",\\\"amount\\\":388.19,\\\"currency\\\":\\\"USD\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:06:02.211Z\\\",\\\"debit_account_name\\\":\\\"Software and cloud services\\\",\\\"credit_account_name\\\":\\\"Visa card 4417\\\",\\\"merchant_name\\\":null}\\n{\\\"id\\\":\\\"tx:538f49bc-712d-417e-a3f2-cbfe8dc1ecf8\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-27\\\",\\\"description\\\":\\\"Apple Developer Program, annual, paid direct\\\",\\\"merchant_id\\\":null,\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"usd:expense:software\\\",\\\"credit_account_id\\\":\\\"usd:asset:bank:checking\\\",\\\"amount\\\":99,\\\"currency\\\":\\\"USD\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:06:02.211Z\\\",\\\"debit_account_name\\\":\\\"Software and cloud services\\\",\\\"credit_account_name\\\":\\\"Business checking\\\",\\\"merchant_name\\\":null}\\n{\\\"id\\\":\\\"tx:fc8ee402-2202-47b5-bf18-31e9da34993a\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-26\\\",\\\"description\\\":\\\"Postmark, transactional email\\\",\\\"merchant_id\\\":null,\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"usd:expense:software\\\",\\\"credit_account_id\\\":\\\"usd:liability:card:visa\\\",\\\"amount\\\":22.5,\\\"currency\\\":\\\"USD\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-09T17:06:02.211Z\\\",\\\"debit_account_name\\\":\\\"Software and cloud services\\\",\\\"credit_account_name\\\":\\\"Visa card 4417\\\",\\\"merchant_name\\\":null}\\n{\\\"id\\\":\\\"tx:fa3f3734-e017-41dd-aeba-1cd8de59b4c9\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-21\\\",\\\"description\\\":\\\"Backblaze B2 storage for backups\\\",\\\"merchant_id\\\":null,\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"usd:expense:software\\\",\\\"credit_account_id\\\":\\\"u\n…[truncated 9145 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 23,
+      "content": "All questions have been answered and resolved. All 20 transactions are cleanly recorded into their appropriate accounts, and nothing remains open, deferred, or uncategorized.",
+      "finishReason": "stop",
+      "toolCalls": 0,
+      "usage": {
+        "promptTokens": 26997,
+        "completionTokens": 33,
+        "estimated": false
+      },
+      "durationMs": 1522
+    },
+    {
+      "type": "phase_end",
+      "phase": "resolve",
+      "reply": "All questions have been answered and resolved. All 20 transactions are cleanly recorded into their appropriate accounts, and nothing remains open, deferred, or uncategorized.",
+      "exit": "answered"
+    }
+  ]
+}
