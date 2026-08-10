@@ -100,13 +100,13 @@ sandbox error; 2 means bad usage.
 One invocation writes one iteration under `reports/<timestamp>/`:
 
 - `leaderboard.md`, ranked per-suite tables: cases passed, pass rate, time,
-  tokens, cost, tool calls. Committed, as the regression trail.
+  tokens, cost, tool calls.
 - `benchmark.json`, the same figures machine-readable, plus the identity every
   one of them was measured against: oled version, skill version and hash, a
-  fingerprint of every prompt the model is shown and the answer contract, eval version. Committed.
+  fingerprint of every prompt the model is shown and the answer contract, eval version.
 - `runs/<model>/<suite>/<case>.json`, one per run: every assertion with its
   want/got evidence, metrics, counters, and the full transcript, down to what
-  each `oled` call was piped and what it replied. Not committed.
+  each `oled` call was piped and what it replied.
 
 A rerun merges back into the report it came from rather than starting a new
 one. If it was measured against a different build (a newer `oled`, an edited
