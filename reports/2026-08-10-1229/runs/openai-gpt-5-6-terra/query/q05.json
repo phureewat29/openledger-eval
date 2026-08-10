@@ -1,0 +1,177 @@
+{
+  "model": "openai/gpt-5.6-terra",
+  "suite": "query",
+  "caseId": "q05",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "q05",
+    "assertions": [
+      {
+        "id": "submit_called",
+        "label": "answer submitted",
+        "passed": true,
+        "evidence": {
+          "want": "one submit_answer call",
+          "got": "an answer was submitted"
+        }
+      },
+      {
+        "id": "answer_correct",
+        "label": "answer",
+        "passed": true,
+        "evidence": {
+          "want": "10522.00 THB ±0.01",
+          "got": "10522.00 THB"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 3,
+    "toolCalls": 3,
+    "tokensIn": 4669,
+    "tokensOut": 116,
+    "tokensEstimated": false,
+    "llmMs": 5493,
+    "toolMs": 223,
+    "durationMs": 5716,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 1,
+    "repeatedCommands": 0,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": 0.005365,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "answer",
+      "title": "What is the total of all my THB expenses in May 2026, as one number? Expenses only: exclude card payments and transfers between my own accounts. Answer with the amount in `value` and its currency code in `unit`."
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1376,
+        "completionTokens": 43,
+        "estimated": false
+      },
+      "durationMs": 2691
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 90,
+      "tool": "oled",
+      "subcommand": "report",
+      "args": "report --help",
+      "command": "oled report --help --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled report [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled report [options]\\n\\nIncome, expenses, and networth\\n\\nOptions:\\n  --from <date>    start date\\n  --to <date>      end date\\n  --json           Emit NDJSON (machine-readable) instead of human output\\n  --no-color       Disable ANSI color output\\n  --config <path>  Config file to use (default ~/.oled/config.json)\\n  -h, --help       display help for command\\n\\nBehavior: sums income, expenses, and networth over a date range. For net worth use oled status.\\nTypical flow: both dates are required and ISO (YYYY-MM-DD).\\nExample: oled report --from 2025-01-01 --to 2025-03-31 --json\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1586,
+        "completionTokens": 42,
+        "estimated": false
+      },
+      "durationMs": 1640
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 2,
+      "durationMs": 133,
+      "tool": "oled",
+      "subcommand": "report",
+      "args": "report --from 2026-05-01 --to 2026-05-31 --json",
+      "command": "oled report --from 2026-05-01 --to 2026-05-31 --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"from\":\"2026-05-01\",\"to\":\"2026-05-31\",\"income\":{\"THB\":85000},\"expenses\":{\"THB\":10522,\"USD\":50},\"net\":{\"THB\":74478,\"USD\":-50}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"from\\\":\\\"2026-05-01\\\",\\\"to\\\":\\\"2026-05-31\\\",\\\"income\\\":{\\\"THB\\\":85000},\\\"expenses\\\":{\\\"THB\\\":10522,\\\"USD\\\":50},\\\"net\\\":{\\\"THB\\\":74478,\\\"USD\\\":-50}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 3,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1707,
+        "completionTokens": 31,
+        "estimated": false
+      },
+      "durationMs": 1162
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 3,
+      "durationMs": 0,
+      "tool": "submit_answer",
+      "subcommand": "submit_answer",
+      "args": "{\"answer\":\"10522 THB\",\"value\":10522,\"unit\":\"THB\"}",
+      "command": "submit_answer",
+      "ok": true,
+      "exitCode": null,
+      "rejected": null,
+      "message": "10522 THB",
+      "hint": null,
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "commit": null,
+      "result": "answer recorded"
+    },
+    {
+      "type": "phase_end",
+      "phase": "answer",
+      "reply": "",
+      "exit": "answered"
+    }
+  ]
+}

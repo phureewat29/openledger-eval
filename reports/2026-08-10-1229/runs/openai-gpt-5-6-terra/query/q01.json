@@ -1,0 +1,177 @@
+{
+  "model": "openai/gpt-5.6-terra",
+  "suite": "query",
+  "caseId": "q01",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "q01",
+    "assertions": [
+      {
+        "id": "submit_called",
+        "label": "answer submitted",
+        "passed": true,
+        "evidence": {
+          "want": "one submit_answer call",
+          "got": "an answer was submitted"
+        }
+      },
+      {
+        "id": "answer_correct",
+        "label": "answer",
+        "passed": true,
+        "evidence": {
+          "want": "40",
+          "got": "40"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 3,
+    "toolCalls": 3,
+    "tokensIn": 4927,
+    "tokensOut": 94,
+    "tokensEstimated": false,
+    "llmMs": 5874,
+    "toolMs": 227,
+    "durationMs": 6101,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 1,
+    "repeatedCommands": 0,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": 0.005491,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "answer",
+      "title": "How many transactions are recorded in my ledger in total? Answer with the whole number in `value`."
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1347,
+        "completionTokens": 41,
+        "estimated": false
+      },
+      "durationMs": 2282
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 119,
+      "tool": "oled",
+      "subcommand": "transactions list",
+      "args": "transactions list --help",
+      "command": "oled transactions list --help --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled transactions list [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled transactions list [options]\\n\\nList transactions with optional filters\\n\\nOptions:\\n  --account <id>      filter by account id (matches either side)\\n  --from <date>       filter from date\\n  --to <date>         filter to date\\n  --query <text>      filter by search text\\n  --amount <decimal>  filter by exact amount (decimal)\\n  --currency <code>   scope rows to that currency's ledger, and the unit\\n                      --amount is given in; --account names a ledger of its own\\n                      and wins\\n  --limit <n>         max rows (default 50, max 500)\\n  --offset <n>        rows to skip; repeat with offset += returned while the\\n                      summary says has_more\\n  --group             fold linked transactions into their group clusters\\n  --include-void      include mirrors voided by `transactions merge` (hidden by\\n                      default)\\n  --no-redact         skip PII redaction (on by default)\\n  --json              Emit NDJSON (machine-readable) instead of human output\\n  --no-color          Disable ANSI color output\\n  --config <path>     Config file to use (default ~/.oled/config.json)\\n  -h, --help          display help for command\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1674,
+        "completionTokens": 27,
+        "estimated": false
+      },
+      "durationMs": 1642
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 2,
+      "durationMs": 108,
+      "tool": "oled",
+      "subcommand": "transactions list",
+      "args": "transactions list --limit 1",
+      "command": "oled transactions list --limit 1 --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"tx:ae2a3c9c-5f49-4a0f-9b9d-929f14cf26c3\",\"group_id\":null,\"date\":\"2026-05-31\",\"description\":\"May salary\",\"merchant_id\":null,\"raw_descriptor\":null,\"source_file_id\":null,\"source_page\":null,\"debit_account_id\":\"thb:asset:bank:kbank\",\"credit_account_id\":\"thb:income:salary\",\"amount\":85000,\"currency\":\"THB\",\"void_of\":null,\"created_at\":\"2026-08-10T05:42:50.518Z\",\"debit_account_name\":\"Kbank\",\"credit_account_name\":\"Salary\",\"merchant_name\":null}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"tx:ae2a3c9c-5f49-4a0f-9b9d-929f14cf26c3\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-31\\\",\\\"description\\\":\\\"May salary\\\",\\\"merchant_id\\\":null,\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"credit_account_id\\\":\\\"thb:income:salary\\\",\\\"amount\\\":85000,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-10T05:42:50.518Z\\\",\\\"debit_account_name\\\":\\\"Kbank\\\",\\\"credit_account_name\\\":\\\"Salary\\\",\\\"merchant_name\\\":null}\\n{\\\"type\\\":\\\"summary\\\",\\\"total\\\":40,\\\"returned\\\":1,\\\"has_more\\\":true,\\\"limit\\\":1,\\\"offset\\\":0}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 3,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1906,
+        "completionTokens": 26,
+        "estimated": false
+      },
+      "durationMs": 1950
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 3,
+      "durationMs": 0,
+      "tool": "submit_answer",
+      "subcommand": "submit_answer",
+      "args": "{\"answer\":\"40\",\"value\":40,\"unit\":\"transactions\"}",
+      "command": "submit_answer",
+      "ok": true,
+      "exitCode": null,
+      "rejected": null,
+      "message": "40",
+      "hint": null,
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "commit": null,
+      "result": "answer recorded"
+    },
+    {
+      "type": "phase_end",
+      "phase": "answer",
+      "reply": "",
+      "exit": "answered"
+    }
+  ]
+}

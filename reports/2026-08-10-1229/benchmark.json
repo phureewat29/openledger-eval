@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "startedAt": "2026-08-10T05:29:43.455Z",
+    "oledVersion": "0.22.0",
+    "skillVersion": "0.22.0",
+    "skillSha256": "2cf3269d1708dc7a549f1644d53409912e0da294c5254cd204c74c869c38f93b",
+    "suiteSha256": "71f7daa6f630885c2212a367aed2d72aa19e5fcd92a3ce3da839bce1067bef5d",
+    "evalVersion": "0.3.0"
+  },
+  "config": {
+    "suites": [
+      "ingest",
+      "record",
+      "query"
+    ],
+    "trials": 1,
+    "concurrency": 2,
+    "modelsRequested": [
+      "deepseek/deepseek-v4-flash",
+      "openai/gpt-5.6-terra"
+    ]
+  },
+  "entries": [
+    {
+      "model": "openai/gpt-5.6-terra",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 117485,
+      "avgTokens": {
+        "in": 262892,
+        "out": 10907
+      },
+      "avgToolCalls": 15,
+      "totalCostUsd": 0.328334,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 400759,
+      "avgTokens": {
+        "in": 779721,
+        "out": 36293
+      },
+      "avgToolCalls": 43,
+      "totalCostUsd": 0.11932298000000001,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-terra",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 43458.4,
+      "avgTokens": {
+        "in": 89971.4,
+        "out": 2845
+      },
+      "avgToolCalls": 32.4,
+      "totalCostUsd": 0.535207,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 175665.4,
+      "avgTokens": {
+        "in": 142711,
+        "out": 8442.4
+      },
+      "avgToolCalls": 58.2,
+      "totalCostUsd": 0.11171705999999999,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-terra",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 7355.333333333333,
+      "avgTokens": {
+        "in": 9356.666666666666,
+        "out": 216.16666666666666
+      },
+      "avgToolCalls": 4.083333333333333,
+      "totalCostUsd": 0.12784399999999999,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 23732.75,
+      "avgTokens": {
+        "in": 16733.083333333332,
+        "out": 1192.8333333333333
+      },
+      "avgToolCalls": 3.6666666666666665,
+      "totalCostUsd": 0.0321195,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    }
+  ],
+  "skippedModels": [],
+  "buildDrift": "spans more than one build: oled 0.22.0 → 0.23.0, SKILL.md 2cf3269d1708 → 63fcbb99be83, the prompts 71f7daa6f630 → 5127b3c3f839"
+}

@@ -1,0 +1,711 @@
+{
+  "model": "openai/gpt-5.6-terra",
+  "suite": "ingest",
+  "caseId": "card-statement-2026-05",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "card-statement-2026-05",
+    "assertions": [
+      {
+        "id": "rows_posted",
+        "label": "posted rows",
+        "passed": true,
+        "evidence": {
+          "want": "126",
+          "got": "126"
+        }
+      },
+      {
+        "id": "charges_count",
+        "label": "charges: rows",
+        "passed": true,
+        "evidence": {
+          "want": "120",
+          "got": "120"
+        }
+      },
+      {
+        "id": "charges_total",
+        "label": "charges: total",
+        "passed": true,
+        "evidence": {
+          "want": "88412.96 ±0.01",
+          "got": "88412.96"
+        }
+      },
+      {
+        "id": "refunds_count",
+        "label": "refunds: rows",
+        "passed": true,
+        "evidence": {
+          "want": "5",
+          "got": "5"
+        }
+      },
+      {
+        "id": "refunds_total",
+        "label": "refunds: total",
+        "passed": true,
+        "evidence": {
+          "want": "3574.50 ±0.01",
+          "got": "3574.50"
+        }
+      },
+      {
+        "id": "payments_count",
+        "label": "payments: rows",
+        "passed": true,
+        "evidence": {
+          "want": "1",
+          "got": "1"
+        }
+      },
+      {
+        "id": "payments_total",
+        "label": "payments: total",
+        "passed": true,
+        "evidence": {
+          "want": "31195.16 ±0.01",
+          "got": "31195.16"
+        }
+      },
+      {
+        "id": "uncategorized_ratio",
+        "label": "uncategorized share",
+        "passed": true,
+        "evidence": {
+          "want": "≤ 5.0%",
+          "got": "0.0% (0 of 127)"
+        }
+      },
+      {
+        "id": "unclassified_rows",
+        "label": "rows outside the statement's groups",
+        "passed": false,
+        "na": true,
+        "evidence": {
+          "want": "not applicable",
+          "got": "1 of 127, usually the opening balance (booked through equity, which groupOf assigns to no group)"
+        }
+      },
+      {
+        "id": "questions_closed",
+        "label": "open questions",
+        "passed": true,
+        "evidence": {
+          "want": "0 open, 0 deferred",
+          "got": "0 open, 0 deferred"
+        }
+      },
+      {
+        "id": "file_ingested",
+        "label": "statement ingested",
+        "passed": true,
+        "evidence": {
+          "want": "≥ 1 file",
+          "got": "1 files"
+        }
+      },
+      {
+        "id": "file_closed",
+        "label": "statement closed",
+        "passed": true,
+        "evidence": {
+          "want": "0 pending",
+          "got": "0 pending"
+        }
+      },
+      {
+        "id": "net_worth",
+        "label": "net worth",
+        "passed": true,
+        "evidence": {
+          "want": "-116033.62 ±1.00",
+          "got": "-116033.62"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 13,
+    "toolCalls": 15,
+    "tokensIn": 262892,
+    "tokensOut": 10907,
+    "tokensEstimated": false,
+    "llmMs": 115356,
+    "toolMs": 2129,
+    "durationMs": 117485,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 1,
+    "repeatedCommands": 3,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": 0.328334,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "ingest",
+      "title": "Ingest the statement"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 2,
+      "usage": {
+        "promptTokens": 1276,
+        "completionTokens": 72,
+        "estimated": false
+      },
+      "durationMs": 6583
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 1,
+      "durationMs": 146,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status",
+      "command": "oled status --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":5,\"transactions\":0,\"merchants\":0,\"notes\":0},\"files\":{\"new\":1,\"ingested\":0,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{},\"liabilities\":{},\"net_worth\":{}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":5,\\\"transactions\\\":0,\\\"merchants\\\":0,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":1,\\\"ingested\\\":0,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{},\\\"liabilities\\\":{},\\\"net_worth\\\":{}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 1,
+      "durationMs": 134,
+      "tool": "oled",
+      "subcommand": "ingest list",
+      "args": "ingest list",
+      "command": "oled ingest list --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"file\",\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/data/bank/card-statement-2026-05.pdf\",\"rel_path\":\"bank/card-statement-2026-05.pdf\",\"hash\":\"d5111fa7bed0cf0a976ff69bacef1587b4caa6cb59ffd5df775ab4ef15a6d862\",\"file_id\":null,\"status\":\"new\",\"encrypted\":true,\"note\":null}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"file\\\",\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/data/bank/card-statement-2026-05.pdf\\\",\\\"rel_path\\\":\\\"bank/card-statement-2026-05.pdf\\\",\\\"hash\\\":\\\"d5111fa7bed0cf0a976ff69bacef1587b4caa6cb59ffd5df775ab4ef15a6d862\\\",\\\"file_id\\\":null,\\\"status\\\":\\\"new\\\",\\\"encrypted\\\":true,\\\"note\\\":null}\\n{\\\"type\\\":\\\"summary\\\",\\\"new\\\":1,\\\"pending\\\":0,\\\"ingested\\\":0,\\\"failed\\\":0,\\\"unreadable\\\":0,\\\"total\\\":1}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 1732,
+        "completionTokens": 37,
+        "estimated": false
+      },
+      "durationMs": 1198
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 2,
+      "durationMs": 235,
+      "tool": "oled",
+      "subcommand": "ingest prepare",
+      "args": "ingest prepare bank/card-statement-2026-05.pdf --password password",
+      "command": "oled ingest prepare bank/card-statement-2026-05.pdf --password password --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"file_id\":\"sf-1496a18f-7e57-4e78-acd4-423529b83191\",\"kind\":\"text\",\"source\":\"text-layer\",\"text_layer\":\"complete\",\"page_count\":6,\"document\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/cache/sf-1496a18f-7e57-4e78-acd4-423529b83191/document.txt\",\"pages\":[{\"page\":1,\"chars\":1985},{\"page\":2,\"chars\":1976},{\"page\":3,\"chars\":2055},{\"page\":4,\"chars\":2059},{\"page\":5,\"chars\":1982},{\"page\":6,\"chars\":1803}]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"file_id\\\":\\\"sf-1496a18f-7e57-4e78-acd4-423529b83191\\\",\\\"kind\\\":\\\"text\\\",\\\"source\\\":\\\"text-layer\\\",\\\"text_layer\\\":\\\"complete\\\",\\\"page_count\\\":6,\\\"document\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/cache/sf-1496a18f-7e57-4e78-acd4-423529b83191/document.txt\\\",\\\"pages\\\":[{\\\"page\\\":1,\\\"chars\\\":1985},{\\\"page\\\":2,\\\"chars\\\":1976},{\\\"page\\\":3,\\\"chars\\\":2055},{\\\"page\\\":4,\\\"chars\\\":2059},{\\\"page\\\":5,\\\"chars\\\":1982},{\\\"page\\\":6,\\\"chars\\\":1803}]}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "operational",
+      "phase": "ingest",
+      "operation": "artifacts_attached",
+      "detail": "the document /var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/cache/sf-1496a18f-7e57-4e78-acd4-423529b83191/document.txt, 12988 bytes"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 3,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 2,
+      "usage": {
+        "promptTokens": 7147,
+        "completionTokens": 81,
+        "estimated": false
+      },
+      "durationMs": 2709
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 3,
+      "durationMs": 131,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --help",
+      "command": "oled ingest commit --help --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": 0,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled ingest commit [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled ingest commit [options]\\n\\nCommit extracted transactions (NDJSON/JSON array via --input file or stdin) into\\nthe ledger\\n\\nOptions:\\n  --file <id>      default source file id for committed rows\\n  --input <path>   read the batch from an NDJSON/JSON file instead of stdin\\n  --json           Emit NDJSON (machine-readable) instead of human output\\n  --no-color       Disable ANSI color output\\n  --config <path>  Config file to use (default ~/.oled/config.json)\\n  -h, --help       display help for command\\n\\nBehavior: posts one batch of statement rows; each item resolves account hints, links merchants, and raises questions instead of failing.\\nItem: {\\\"date\\\":\\\"YYYY-MM-DD\\\",\\\"description\\\":\\\"...\\\",\\\"debit_account\\\":\\\"thb:expense:food\\\",\\\"credit_account\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":135.00,\\\"source_page\\\":2,\\\"row_index\\\":0,\\\"raw_descriptor\\\":\\\"<verbatim bank text>\\\",\\\"merchant\\\":{\\\"canonical_name\\\":\\\"...\\\"}}\\nRules: amount > 0, direction comes from the two accounts, never a sign; account ids are currency-prefixed (<currency>:<type>:<path>) and both sides must share the prefix; ids are taken literally (an exact match posts there, a well-formed path inside an existing ledger is created, a lookalike only raises a question); commit never opens a new ledger: an id whose currency prefix names no existing ledger is refused, naming the ledger and the accounts create command that opens it, and only ids with no usable prefix fall back to the other side's <currency>:expense:uncategorized with a question; set row_index + source_page and pass --file <sf-id> so a re-run is an idempotent duplicate:true no-op.\\nDirection, not sign: debit the account that grows, amount always positive. Card purchase: debit thb:expense:<cat>, credit thb:liability:credit_card:<x>. Bank spend: debit thb:expense:<cat>, credit thb:asset:bank:<x>. Salary: debit thb:asset:bank:<x>, credit thb:income:salary. A refund reverses the purchase's accounts; a card payment deb\n…[truncated 1021 characters]"
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 3,
+      "durationMs": 105,
+      "tool": "oled",
+      "subcommand": "accounts tree",
+      "args": "accounts tree",
+      "command": "oled accounts tree --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"thb:equity\",\"name\":\"Equity (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[{\"id\":\"thb:equity:adjustments\",\"name\":\"Adjustments (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]},{\"id\":\"thb:equity:opening\",\"name\":\"Opening Balance (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]}]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"thb:equity\\\",\\\"name\\\":\\\"Equity (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[{\\\"id\\\":\\\"thb:equity:adjustments\\\",\\\"name\\\":\\\"Adjustments (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:equity:opening\\\",\\\"name\\\":\\\"Opening Balance (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:expense\\\",\\\"name\\\":\\\"Expenses (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[{\\\"id\\\":\\\"thb:expense:uncategorized\\\",\\\"name\\\":\\\"Uncategorized (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"type\\\":\\\"summary\\\",\\\"roots\\\":2}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 4,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 8202,
+        "completionTokens": 2196,
+        "estimated": false
+      },
+      "durationMs": 21895
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 4,
+      "durationMs": 147,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191",
+      "command": "oled ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191 --json",
+      "stdin": true,
+      "stdinPreview": "{\"date\":\"2026-04-10\",\"description\":\"Opening balance\",\"debit_account\":\"thb:equity:opening\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":31195.16,\"source_page\":0,\"row_index\":0}\n{\"date\":\"2026-05-12\",\"description\":\"CORGI BANK APP* TRUEMOVE H POSTPAID\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":899,\"source_page\":1,\"row_index\":1}\n{\"date\":\"2026-05-12\",\"description\":\"7-ELEVEN 12345 ARI\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":187.5,\"source_page\":1,\"row_index\":2}\n{\"date\":\"2026-05-11\",\"description\":\"WWW.TESLA.COM\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":228.41,\"source_page\":1,\"row_index\":3}\n{\"date\":\"2026-05-11\",\"description\":\"GRABFOOD* KRUA KHUN YAI\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":246,\"source_page\":1,\"row_index\":4}\n{\"date\":\"2026-05-11\",\"description\":\"LPTH*PF_LM_Somtam Nua\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":188,\"source_page\":1,\"row_index\":5}\n{\"date\":\"2026-05-11\",\"description\":\"BTS SKYTRAIN SIAM\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":59,\"source_page\":1,\"row_index\":6}\n{\"date\":\"2026-05-10\",\"description\":\"SHOPEEPAY*SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1462,\"source_page\":1,\"row_index\":7}\n{\"date\":\"2026-05-10\",\"description\":\"LPTH*PF_LM_Baan Yai Ka\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":212.5,\"source_page\":1,\"row_index\":8}\n{\"date\":\"2026-05-10\",\"description\":\"TOPS ONLINE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1286.75,\"source_page\":1,\"row_index\":9}\n{\"date\":\"2026-05-10\",\"description\":\"CORGI CAFE ARI\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":145,\"source_page\":1,\"row_index\":10}\n{\"date\":\"2026-05-09\",\"description\":\"LPTH*PF_LM_KhaoMokGai\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":145,\"source_page\":1,\"row_index\":11}\n{\"date\":\"2026-05-09\",\"description\":\"WATSONS EMQUARTIER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":426,\"source_page\":1,\"row_index\":12}\n{\"date\":\"2026-05-09\",\"description\":\"GRABFOOD* SIZZLER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":538,\"source_page\":1,\"row_index\":13}\n{\"date\":\"2026-05-09\",\"description\":\"EVST.C ONNUT DC CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":312.44,\"source_page\":1,\"row_index\":14}\n{\"date\":\"2026-05-08\",\"description\":\"SHOPEEPAY*SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":2158,\"source_page\":1,\"row_index\":15}\n{\"date\":\"2026-05-08\",\"description\":\"GRAB* RIDE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":142,\"source_page\":1,\"row_index\":16}\n{\"date\":\"2026-05-08\",\"description\":\"LPTH*PF_LM_Pizza Pa\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":589,\"source_page\":1,\"row_index\":17}\n{\"date\":\"2026-05-08\",\"description\":\"CORGI CAFE ARI\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":165,\"source_page\":1,\"row_index\":18}\n{\"date\":\"2026-05-07\",\"description\":\"LAZADA*LAZADA\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":934,\"source_page\":1,\"row_index\":19}\n{\"date\":\"2026-05-07\",\"description\":\"LPTH*PF_LM_Auntie Kanom\",\"debit_account\":\"thb:expense:gener\n…[truncated 105 characters]",
+      "stdinDigest": "830267447e5d26f0",
+      "rows": 21,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"result\",\"index\":0,\"ok\":true,\"transaction_id\":\"tx:633b9ed65f25b3d2\",\"duplicate\":false,\"currency_overridden\":false,\"raised_questions\":0,\"merchant\":{\"how\":\"none\"},\"sides\":[{\"side\":\"debit\",\"requested\":\"thb:equity:opening\",\"resolved\":\"thb:equity:opening\",\"how\":\"exact\"},{\"side\":\"credit\",\"requested\":\"thb:liability:credit_card:corgi-7712\",\"resolved\":\"thb:liability:credit_card:corgi-7712\",\"how\":\"placeholder_created\"}]}",
+      "hint": null,
+      "commit": {
+        "posted": 21,
+        "duplicates": 0,
+        "failed": 0,
+        "questionsRaised": 0
+      },
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:633b9ed65f25b3d2\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:equity:opening\\\",\\\"resolved\\\":\\\"thb:equity:opening\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"placeholder_created\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:3f6bbcd6dfb15936\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"placeholder_created\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:e9663bd0396228b8\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:64abed7fa7bc8a76\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:\n…[truncated 8350 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 5,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 12544,
+        "completionTokens": 2239,
+        "estimated": false
+      },
+      "durationMs": 17823
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 5,
+      "durationMs": 144,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191",
+      "command": "oled ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191 --json",
+      "stdin": true,
+      "stdinPreview": "{\"date\":\"2026-05-07\",\"description\":\"LINEPAY LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":227.10,\"source_page\":2,\"row_index\":21}\n{\"date\":\"2026-05-07\",\"description\":\"MRT BLUE LINE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":42,\"source_page\":2,\"row_index\":22}\n{\"date\":\"2026-05-06\",\"description\":\"GRABFOOD MK\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":517,\"source_page\":2,\"row_index\":23}\n{\"date\":\"2026-05-06\",\"description\":\"PET PARADISE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1290,\"source_page\":2,\"row_index\":24}\n{\"date\":\"2026-05-06\",\"description\":\"7-ELEVEN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":121,\"source_page\":2,\"row_index\":25}\n{\"date\":\"2026-05-06\",\"description\":\"MEA E-PAYMENT\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":4862.19,\"source_page\":2,\"row_index\":26}\n{\"date\":\"2026-05-05\",\"description\":\"ANTHROPIC CLAUDE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":737,\"source_page\":2,\"row_index\":27}\n{\"date\":\"2026-05-05\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":649,\"source_page\":2,\"row_index\":28}\n{\"date\":\"2026-05-05\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":232,\"source_page\":2,\"row_index\":29}\n{\"date\":\"2026-05-05\",\"description\":\"BTS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":31,\"source_page\":2,\"row_index\":30}\n{\"date\":\"2026-05-04\",\"description\":\"SHOPEE REFUND\",\"debit_account\":\"thb:liability:credit_card:corgi-7712\",\"credit_account\":\"thb:expense:general\",\"amount\":590,\"source_page\":2,\"row_index\":31}\n{\"date\":\"2026-05-04\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":438,\"source_page\":2,\"row_index\":32}\n{\"date\":\"2026-05-04\",\"description\":\"UNIQLO\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":2390,\"source_page\":2,\"row_index\":33}\n{\"date\":\"2026-05-04\",\"description\":\"STARBUCKS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":215,\"source_page\":2,\"row_index\":34}\n{\"date\":\"2026-05-03\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":161,\"source_page\":2,\"row_index\":35}\n{\"date\":\"2026-05-03\",\"description\":\"VILLA MARKET\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":873.5,\"source_page\":2,\"row_index\":36}\n{\"date\":\"2026-05-03\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":289,\"source_page\":2,\"row_index\":37}\n{\"date\":\"2026-05-03\",\"description\":\"EV CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":287.63,\"source_page\":2,\"row_index\":38}\n{\"date\":\"2026-05-02\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":329,\"source_page\":2,\"row_index\":39}\n{\"date\":\"2026-05-02\",\"description\":\"CENTRAL ONLINE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":5290,\"source_page\":2,\"row_index\":40}\n{\"date\":\"2026-05-02\",\"description\":\"AWS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":142.34,\"source_page\":2,\"row_index\":41}\n{\"date\":\"2026-05-02\",\"description\":\"BTS\",\"debit_account\":\"thb:\n…[truncated 672 characters]",
+      "stdinDigest": "a14e9328bcc3e0cf",
+      "rows": 25,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"result\",\"index\":0,\"ok\":true,\"transaction_id\":\"tx:67b8b4dd2ca5b08a\",\"duplicate\":false,\"currency_overridden\":false,\"raised_questions\":0,\"merchant\":{\"how\":\"none\"},\"sides\":[{\"side\":\"debit\",\"requested\":\"thb:expense:general\",\"resolved\":\"thb:expense:general\",\"how\":\"exact\"},{\"side\":\"credit\",\"requested\":\"thb:liability:credit_card:corgi-7712\",\"resolved\":\"thb:liability:credit_card:corgi-7712\",\"how\":\"exact\"}]}",
+      "hint": null,
+      "commit": {
+        "posted": 25,
+        "duplicates": 0,
+        "failed": 0,
+        "questionsRaised": 0
+      },
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:67b8b4dd2ca5b08a\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:ab35591d6fdb2952\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:9ec95ec6abdd7d93\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:59369c80eec0ec44\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:da98b52e2433de03\\\",\\\"dupli\n…[truncated 10208 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 6,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 17534,
+        "completionTokens": 2152,
+        "estimated": false
+      },
+      "durationMs": 18076
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 6,
+      "durationMs": 144,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191",
+      "command": "oled ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191 --json",
+      "stdin": true,
+      "stdinPreview": "{\"date\":\"2026-05-01\",\"description\":\"GOURMET MARKET\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1742.25,\"source_page\":3,\"row_index\":46}\n{\"date\":\"2026-04-30\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":3417,\"source_page\":3,\"row_index\":47}\n{\"date\":\"2026-04-30\",\"description\":\"SHOPEE REFUND\",\"debit_account\":\"thb:liability:credit_card:corgi-7712\",\"credit_account\":\"thb:expense:general\",\"amount\":237,\"source_page\":3,\"row_index\":48}\n{\"date\":\"2026-04-30\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":219,\"source_page\":3,\"row_index\":49}\n{\"date\":\"2026-04-30\",\"description\":\"PETSMILE VET\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1850,\"source_page\":3,\"row_index\":50}\n{\"date\":\"2026-04-29\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":89,\"source_page\":3,\"row_index\":51}\n{\"date\":\"2026-04-29\",\"description\":\"GRAB RIDE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":186,\"source_page\":3,\"row_index\":52}\n{\"date\":\"2026-04-29\",\"description\":\"YOUTUBE PREMIUM\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":359,\"source_page\":3,\"row_index\":53}\n{\"date\":\"2026-04-29\",\"description\":\"CORGI CAFE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":130,\"source_page\":3,\"row_index\":54}\n{\"date\":\"2026-04-28\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":758,\"source_page\":3,\"row_index\":55}\n{\"date\":\"2026-04-28\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":241.6,\"source_page\":3,\"row_index\":56}\n{\"date\":\"2026-04-28\",\"description\":\"BOOTS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":312,\"source_page\":3,\"row_index\":57}\n{\"date\":\"2026-04-28\",\"description\":\"MRT\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":42,\"source_page\":3,\"row_index\":58}\n{\"date\":\"2026-04-27\",\"description\":\"LINE MAN REFUND\",\"debit_account\":\"thb:liability:credit_card:corgi-7712\",\"credit_account\":\"thb:expense:general\",\"amount\":149.5,\"source_page\":3,\"row_index\":59}\n{\"date\":\"2026-04-27\",\"description\":\"MAKRO ONLINE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":2368.5,\"source_page\":3,\"row_index\":60}\n{\"date\":\"2026-04-27\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":265,\"source_page\":3,\"row_index\":61}\n{\"date\":\"2026-04-27\",\"description\":\"BTS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":44,\"source_page\":3,\"row_index\":62}\n{\"date\":\"2026-04-26\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":486,\"source_page\":3,\"row_index\":63}\n{\"date\":\"2026-04-26\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1199,\"source_page\":3,\"row_index\":64}\n{\"date\":\"2026-04-26\",\"description\":\"DECATHLON\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":3150,\"source_page\":3,\"row_index\":65}\n{\"date\":\"2026-04-26\",\"description\":\"EV CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":298.17,\"source_page\":3,\"row_index\":66}\n{\"date\":\"2026-04-25\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:gener\n…[truncated 1216 characters]",
+      "stdinDigest": "5555bb07839c96cb",
+      "rows": 28,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"result\",\"index\":0,\"ok\":true,\"transaction_id\":\"tx:e3fd56ad039772ab\",\"duplicate\":false,\"currency_overridden\":false,\"raised_questions\":0,\"merchant\":{\"how\":\"none\"},\"sides\":[{\"side\":\"debit\",\"requested\":\"thb:expense:general\",\"resolved\":\"thb:expense:general\",\"how\":\"exact\"},{\"side\":\"credit\",\"requested\":\"thb:liability:credit_card:corgi-7712\",\"resolved\":\"thb:liability:credit_card:corgi-7712\",\"how\":\"exact\"}]}",
+      "hint": null,
+      "commit": {
+        "posted": 28,
+        "duplicates": 0,
+        "failed": 0,
+        "questionsRaised": 0
+      },
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:e3fd56ad039772ab\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:f47eb3a140fe635f\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:50b98a80fe04d95a\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:b704c0139dcad145\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:28246733095e820e\\\",\\\"dupli\n…[truncated 11621 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 7,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 23093,
+        "completionTokens": 235,
+        "estimated": false
+      },
+      "durationMs": 5665
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 7,
+      "durationMs": 131,
+      "tool": "oled",
+      "subcommand": "accounts tree",
+      "args": "accounts tree",
+      "command": "oled accounts tree --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"thb:equity\",\"name\":\"Equity (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":-31195.16},\"children\":[{\"id\":\"thb:equity:adjustments\",\"name\":\"Adjustments (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":0},\"children\":[]},{\"id\":\"thb:equity:opening\",\"name\":\"Opening Balance (THB)\",\"type\":\"equity\",\"currency\":\"THB\",\"balance\":-31195.16,\"rollup\":{\"THB\":-31195.16},\"children\":[]}]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"thb:equity\\\",\\\"name\\\":\\\"Equity (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[{\\\"id\\\":\\\"thb:equity:adjustments\\\",\\\"name\\\":\\\"Adjustments (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:equity:opening\\\",\\\"name\\\":\\\"Opening Balance (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":-31195.16,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:expense\\\",\\\"name\\\":\\\"Expenses (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":51354.49},\\\"children\\\":[{\\\"id\\\":\\\"thb:expense:general\\\",\\\"name\\\":\\\"General\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":51354.49,\\\"rollup\\\":{\\\"THB\\\":51354.49},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:expense:uncategorized\\\",\\\"name\\\":\\\"Uncategorized (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:liability\\\",\\\"name\\\":\\\"Liabilities (THB)\\\",\\\"type\\\":\\\"liability\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":82549.65},\\\"children\\\":[{\\\"id\\\":\\\"thb:liability:credit_card\\\",\\\"name\\\":\\\"Credit Card\\\",\\\"type\\\":\\\"liability\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":82549.65},\\\"children\\\":[{\\\"id\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"name\\\":\\\"Corgi 7712\\\",\\\"type\\\":\\\"liability\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":82549.65,\\\"rollup\\\":{\\\"THB\\\":82549.65},\\\"children\\\":[]}]}]}\\n{\\\"type\\\":\\\"summary\\\",\\\"roots\\\":3}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 8,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 23604,
+        "completionTokens": 1897,
+        "estimated": false
+      },
+      "durationMs": 14050
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 8,
+      "durationMs": 125,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191",
+      "command": "oled ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191 --json",
+      "stdin": true,
+      "stdinPreview": "{\"date\":\"2026-04-24\",\"description\":\"7-ELEVEN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":156,\"source_page\":4,\"row_index\":74}\n{\"date\":\"2026-04-23\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":6842,\"source_page\":4,\"row_index\":75}\n{\"date\":\"2026-04-23\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":372,\"source_page\":4,\"row_index\":76}\n{\"date\":\"2026-04-23\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":110,\"source_page\":4,\"row_index\":77}\n{\"date\":\"2026-04-23\",\"description\":\"BTS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":44,\"source_page\":4,\"row_index\":78}\n{\"date\":\"2026-04-22\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":75,\"source_page\":4,\"row_index\":79}\n{\"date\":\"2026-04-22\",\"description\":\"WATSONS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":287,\"source_page\":4,\"row_index\":80}\n{\"date\":\"2026-04-22\",\"description\":\"Payment via Corgi Bank app\",\"debit_account\":\"thb:liability:credit_card:corgi-7712\",\"credit_account\":\"thb:asset:bank:corgi\",\"amount\":31195.16,\"source_page\":4,\"row_index\":81}\n{\"date\":\"2026-04-22\",\"description\":\"CORGI CAFE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":195,\"source_page\":4,\"row_index\":82}\n{\"date\":\"2026-04-21\",\"description\":\"SPOTIFY\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":139,\"source_page\":4,\"row_index\":83}\n{\"date\":\"2026-04-21\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":196,\"source_page\":4,\"row_index\":84}\n{\"date\":\"2026-04-21\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":421,\"source_page\":4,\"row_index\":85}\n{\"date\":\"2026-04-21\",\"description\":\"PTT STATION\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":500,\"source_page\":4,\"row_index\":86}\n{\"date\":\"2026-04-20\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":110,\"source_page\":4,\"row_index\":87}\n{\"date\":\"2026-04-20\",\"description\":\"MUJI\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1590,\"source_page\":4,\"row_index\":88}\n{\"date\":\"2026-04-20\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":254,\"source_page\":4,\"row_index\":89}\n{\"date\":\"2026-04-20\",\"description\":\"3BB FIBRE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":802.5,\"source_page\":4,\"row_index\":90}\n{\"date\":\"2026-04-19\",\"description\":\"SHOPEE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":2184,\"source_page\":4,\"row_index\":91}\n{\"date\":\"2026-04-19\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":429,\"source_page\":4,\"row_index\":92}\n{\"date\":\"2026-04-19\",\"description\":\"NINTENDO\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":537.9,\"source_page\":4,\"row_index\":93}\n{\"date\":\"2026-04-19\",\"description\":\"EV CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":265.88,\"source_page\":4,\"row_index\":94}\n{\"date\":\"2026-04-18\",\"description\":\"LAZADA\",\"debit_account\":\"thb:expense:general\",\"credit_ac\n…[truncated 1033 characters]",
+      "stdinDigest": "eae1e7fa7c0a35a2",
+      "rows": 27,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"result\",\"index\":0,\"ok\":true,\"transaction_id\":\"tx:9dc99f236adf8f8c\",\"duplicate\":false,\"currency_overridden\":false,\"raised_questions\":0,\"merchant\":{\"how\":\"none\"},\"sides\":[{\"side\":\"debit\",\"requested\":\"thb:expense:general\",\"resolved\":\"thb:expense:general\",\"how\":\"exact\"},{\"side\":\"credit\",\"requested\":\"thb:liability:credit_card:corgi-7712\",\"resolved\":\"thb:liability:credit_card:corgi-7712\",\"how\":\"exact\"}]}",
+      "hint": null,
+      "commit": {
+        "posted": 27,
+        "duplicates": 0,
+        "failed": 0,
+        "questionsRaised": 0
+      },
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:9dc99f236adf8f8c\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:f2a2fa88f046108a\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:36623d1dc7b273c1\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:518131853e58d3e3\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:a15881c933d75b99\\\",\\\"dupli\n…[truncated 11167 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 9,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 29009,
+        "completionTokens": 1712,
+        "estimated": false
+      },
+      "durationMs": 13210
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 9,
+      "durationMs": 197,
+      "tool": "oled",
+      "subcommand": "ingest commit",
+      "args": "ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191",
+      "command": "oled ingest commit --file sf-1496a18f-7e57-4e78-acd4-423529b83191 --json",
+      "stdin": true,
+      "stdinPreview": "{\"date\":\"2026-04-17\",\"description\":\"GRAB RIDE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":224,\"source_page\":5,\"row_index\":101}\n{\"date\":\"2026-04-17\",\"description\":\"FASCINO PHARMACY\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":385,\"source_page\":5,\"row_index\":102}\n{\"date\":\"2026-04-16\",\"description\":\"LINE MAN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":518.4,\"source_page\":5,\"row_index\":103}\n{\"date\":\"2026-04-16\",\"description\":\"GRABFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":341,\"source_page\":5,\"row_index\":104}\n{\"date\":\"2026-04-16\",\"description\":\"DTAC POSTPAID\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":418.51,\"source_page\":5,\"row_index\":105}\n{\"date\":\"2026-04-16\",\"description\":\"EV CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":342.1,\"source_page\":5,\"row_index\":106}\n{\"date\":\"2026-04-15\",\"description\":\"KOH CHANG GRAND RESORT\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":4850,\"source_page\":5,\"row_index\":107}\n{\"date\":\"2026-04-15\",\"description\":\"PAKBUNG SEAFOOD\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1462,\"source_page\":5,\"row_index\":108}\n{\"date\":\"2026-04-15\",\"description\":\"KOH CHANG FERRY\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":160,\"source_page\":5,\"row_index\":109}\n{\"date\":\"2026-04-15\",\"description\":\"EV CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":228.9,\"source_page\":5,\"row_index\":110}\n{\"date\":\"2026-04-14\",\"description\":\"BAAN KWAN CHANG CAFE\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":340,\"source_page\":5,\"row_index\":111}\n{\"date\":\"2026-04-14\",\"description\":\"7-ELEVEN\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":248.75,\"source_page\":5,\"row_index\":112}\n{\"date\":\"2026-04-14\",\"description\":\"WHITE SAND BEACH RESTAURANT\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":986,\"source_page\":5,\"row_index\":113}\n{\"date\":\"2026-04-14\",\"description\":\"APPLE ITUNES\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":19,\"source_page\":5,\"row_index\":114}\n{\"date\":\"2026-04-13\",\"description\":\"KOH CHANG KAYAK TOURS\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":1200,\"source_page\":5,\"row_index\":115}\n{\"date\":\"2026-04-13\",\"description\":\"EV CHARGER\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":352.4,\"source_page\":5,\"row_index\":116}\n{\"date\":\"2026-04-13\",\"description\":\"STEAM GAMES\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":553.13,\"source_page\":5,\"row_index\":117}\n{\"date\":\"2026-04-13\",\"description\":\"SALT PEPPER BISTRO\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":745,\"source_page\":5,\"row_index\":118}\n{\"date\":\"2026-04-12\",\"description\":\"KOH CHANG FERRY\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":160,\"source_page\":5,\"row_index\":119}\n{\"date\":\"2026-04-12\",\"description\":\"MAKRO\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"amount\":684.5,\"source_page\":5,\"row_index\":120}\n{\"date\":\"2026-04-12\",\"description\":\"PTT STATION\",\"debit_account\":\"thb:expense:general\",\"credit_account\":\"thb:liability:credit_card:corgi-7712\",\"am\n…[truncated 992 characters]",
+      "stdinDigest": "595292f2636dc1b6",
+      "rows": 26,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"result\",\"index\":0,\"ok\":true,\"transaction_id\":\"tx:98ab501dcc8c9036\",\"duplicate\":false,\"currency_overridden\":false,\"raised_questions\":0,\"merchant\":{\"how\":\"none\"},\"sides\":[{\"side\":\"debit\",\"requested\":\"thb:expense:general\",\"resolved\":\"thb:expense:general\",\"how\":\"exact\"},{\"side\":\"credit\",\"requested\":\"thb:liability:credit_card:corgi-7712\",\"resolved\":\"thb:liability:credit_card:corgi-7712\",\"how\":\"exact\"}]}",
+      "hint": null,
+      "commit": {
+        "posted": 26,
+        "duplicates": 0,
+        "failed": 0,
+        "questionsRaised": 0
+      },
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"result\\\",\\\"index\\\":0,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:98ab501dcc8c9036\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":1,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:1008e6332073fc8e\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":2,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:012cf720c167c262\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":3,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:b9849db973e00be8\\\",\\\"duplicate\\\":false,\\\"currency_overridden\\\":false,\\\"raised_questions\\\":0,\\\"merchant\\\":{\\\"how\\\":\\\"none\\\"},\\\"sides\\\":[{\\\"side\\\":\\\"debit\\\",\\\"requested\\\":\\\"thb:expense:general\\\",\\\"resolved\\\":\\\"thb:expense:general\\\",\\\"how\\\":\\\"exact\\\"},{\\\"side\\\":\\\"credit\\\",\\\"requested\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"resolved\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"how\\\":\\\"exact\\\"}]}\\n{\\\"type\\\":\\\"result\\\",\\\"index\\\":4,\\\"ok\\\":true,\\\"transaction_id\\\":\\\"tx:b73f9d27894c92e3\\\",\\\"dupli\n…[truncated 10680 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 10,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 34227,
+        "completionTokens": 130,
+        "estimated": false
+      },
+      "durationMs": 6930
+    },
+    {
+      "type": "tool_call",
+      "phase": "ingest",
+      "turn": 10,
+      "durationMs": 129,
+      "tool": "oled",
+      "subcommand": "ingest done",
+      "args": "ingest done sf-1496a18f-7e57-4e78-acd4-423529b83191 --account thb:liability:credit_card:corgi-7712 --closing-balance 84838.46",
+      "command": "oled ingest done sf-1496a18f-7e57-4e78-acd4-423529b83191 --account thb:liability:credit_card:corgi-7712 --closing-balance 84838.46 --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"file_id\":\"sf-1496a18f-7e57-4e78-acd4-423529b83191\",\"status\":\"ingested\",\"cache_removed\":[\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/cache/sf-1496a18f-7e57-4e78-acd4-423529b83191\"],\"reconciliation\":{\"account\":\"thb:liability:credit_card:corgi-7712\",\"closing\":84838.46,\"balance\":84838.46}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"file_id\\\":\\\"sf-1496a18f-7e57-4e78-acd4-423529b83191\\\",\\\"status\\\":\\\"ingested\\\",\\\"cache_removed\\\":[\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/cache/sf-1496a18f-7e57-4e78-acd4-423529b83191\\\"],\\\"reconciliation\\\":{\\\"account\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"closing\\\":84838.46,\\\"balance\\\":84838.46}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "ingest",
+      "turn": 11,
+      "content": "Ingested and reconciled the May 2026 Corgi credit-card statement. Closing balance matches: THB 84,838.46.",
+      "finishReason": "stop",
+      "toolCalls": 0,
+      "usage": {
+        "promptTokens": 34460,
+        "completionTokens": 35,
+        "estimated": false
+      },
+      "durationMs": 1350
+    },
+    {
+      "type": "phase_end",
+      "phase": "ingest",
+      "reply": "Ingested and reconciled the May 2026 Corgi credit-card statement. Closing balance matches: THB 84,838.46.",
+      "exit": "answered"
+    },
+    {
+      "type": "phase_start",
+      "phase": "resolve",
+      "title": "Resolve what is left open"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 12,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 3,
+      "usage": {
+        "promptTokens": 34534,
+        "completionTokens": 102,
+        "estimated": false
+      },
+      "durationMs": 2679
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 12,
+      "durationMs": 116,
+      "tool": "oled",
+      "subcommand": "questions list",
+      "args": "questions list",
+      "command": "oled questions list --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"summary\",\"total\":0,\"returned\":0,\"has_more\":false,\"limit\":200,\"offset\":0}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"summary\\\",\\\"total\\\":0,\\\"returned\\\":0,\\\"has_more\\\":false,\\\"limit\\\":200,\\\"offset\\\":0}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 12,
+      "durationMs": 130,
+      "tool": "oled",
+      "subcommand": "accounts tree",
+      "args": "accounts tree",
+      "command": "oled accounts tree --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"thb:asset\",\"name\":\"Assets (THB)\",\"type\":\"asset\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":-31195.16},\"children\":[{\"id\":\"thb:asset:bank\",\"name\":\"Bank\",\"type\":\"asset\",\"currency\":\"THB\",\"balance\":0,\"rollup\":{\"THB\":-31195.16},\"children\":[{\"id\":\"thb:asset:bank:corgi\",\"name\":\"Corgi\",\"type\":\"asset\",\"currency\":\"THB\",\"balance\":-31195.16,\"rollup\":{\"THB\":-31195.16},\"children\":[]}]}]}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"thb:asset\\\",\\\"name\\\":\\\"Assets (THB)\\\",\\\"type\\\":\\\"asset\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[{\\\"id\\\":\\\"thb:asset:bank\\\",\\\"name\\\":\\\"Bank\\\",\\\"type\\\":\\\"asset\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[{\\\"id\\\":\\\"thb:asset:bank:corgi\\\",\\\"name\\\":\\\"Corgi\\\",\\\"type\\\":\\\"asset\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":-31195.16,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[]}]}]}\\n{\\\"id\\\":\\\"thb:equity\\\",\\\"name\\\":\\\"Equity (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[{\\\"id\\\":\\\"thb:equity:adjustments\\\",\\\"name\\\":\\\"Adjustments (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:equity:opening\\\",\\\"name\\\":\\\"Opening Balance (THB)\\\",\\\"type\\\":\\\"equity\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":-31195.16,\\\"rollup\\\":{\\\"THB\\\":-31195.16},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:expense\\\",\\\"name\\\":\\\"Expenses (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":84838.46},\\\"children\\\":[{\\\"id\\\":\\\"thb:expense:general\\\",\\\"name\\\":\\\"General\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":84838.46,\\\"rollup\\\":{\\\"THB\\\":84838.46},\\\"children\\\":[]},{\\\"id\\\":\\\"thb:expense:uncategorized\\\",\\\"name\\\":\\\"Uncategorized (THB)\\\",\\\"type\\\":\\\"expense\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":0},\\\"children\\\":[]}]}\\n{\\\"id\\\":\\\"thb:liability\\\",\\\"name\\\":\\\"Liabilities (THB)\\\",\\\"type\\\":\\\"liability\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":84838.46},\\\"children\\\":[{\\\"id\\\":\\\"thb:liability:credit_card\\\",\\\"name\\\":\\\"Credit Card\\\",\\\"type\\\":\\\"liability\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":0,\\\"rollup\\\":{\\\"THB\\\":84838.46},\\\"children\\\":[{\\\"id\\\":\\\"thb:liability:credit_card:corgi-7712\\\",\\\"name\\\":\\\"Corgi 7712\\\",\\\"type\\\":\\\"liability\\\",\\\"currency\\\":\\\"THB\\\",\\\"balance\\\":84838.46,\\\"rollup\\\":{\\\"THB\\\":84838.46},\\\"children\\\":[]}]}]}\\n{\\\"type\\\":\\\"summary\\\",\\\"root\n…[truncated 22 characters]"
+    },
+    {
+      "type": "tool_call",
+      "phase": "resolve",
+      "turn": 12,
+      "durationMs": 115,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status",
+      "command": "oled status --json",
+      "stdin": true,
+      "stdinPreview": "",
+      "stdinDigest": "e3b0c44298fc1c14",
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":12,\"transactions\":127,\"merchants\":0,\"notes\":0},\"files\":{\"new\":0,\"ingested\":1,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{\"THB\":-31195.16},\"liabilities\":{\"THB\":84838.46},\"net_worth\":{\"THB\":-116033.62}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-VtFCG6/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":12,\\\"transactions\\\":127,\\\"merchants\\\":0,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":0,\\\"ingested\\\":1,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{\\\"THB\\\":-31195.16},\\\"liabilities\\\":{\\\"THB\\\":84838.46},\\\"net_worth\\\":{\\\"THB\\\":-116033.62}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "resolve",
+      "turn": 13,
+      "content": "No open or deferred questions remain. Uncategorized balance is THB 0.",
+      "finishReason": "stop",
+      "toolCalls": 0,
+      "usage": {
+        "promptTokens": 35530,
+        "completionTokens": 19,
+        "estimated": false
+      },
+      "durationMs": 3188
+    },
+    {
+      "type": "phase_end",
+      "phase": "resolve",
+      "reply": "No open or deferred questions remain. Uncategorized balance is THB 0.",
+      "exit": "answered"
+    }
+  ]
+}
