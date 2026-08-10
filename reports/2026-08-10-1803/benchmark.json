@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "startedAt": "2026-08-10T11:03:14.537Z",
+    "oledVersion": "0.23.0",
+    "skillVersion": "0.23.0",
+    "skillSha256": "63fcbb99be83222545c4dbce2dd240583b78e801529589e330bce7261317c1fa",
+    "suiteSha256": "5127b3c3f839e7826983c6e67c037f255f5271f389dae644a7c1adf13c5c4e7d",
+    "evalVersion": "0.3.0"
+  },
+  "config": {
+    "suites": [
+      "ingest",
+      "record",
+      "query"
+    ],
+    "trials": 1,
+    "concurrency": 2,
+    "modelsRequested": [
+      "openai/gpt-5.6-luna"
+    ]
+  },
+  "entries": [
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 92833,
+      "avgTokens": {
+        "in": 280695,
+        "out": 12346
+      },
+      "avgToolCalls": 13,
+      "totalCostUsd": 0.0354771,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 46900.4,
+      "avgTokens": {
+        "in": 89127.6,
+        "out": 3562.6
+      },
+      "avgToolCalls": 26.4,
+      "totalCostUsd": 0.055251600000000005,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 11047.5,
+      "avgTokens": {
+        "in": 14870.916666666666,
+        "out": 355
+      },
+      "avgToolCalls": 5.083333333333333,
+      "totalCostUsd": 0.020401099999999995,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    }
+  ],
+  "skippedModels": [],
+  "buildDrift": null
+}
