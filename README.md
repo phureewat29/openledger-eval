@@ -9,10 +9,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/phureewat29/openledger">The CLI under test →</a>
-</p>
-
-<p align="center">
   <img src=".github/dashboard.png" width="900" alt="The dashboard mid-run: one grid per suite with models down the side and cases across the top, each cell showing the checks it passed, over a live feed of the oled calls each run is making." />
 </p>
 
