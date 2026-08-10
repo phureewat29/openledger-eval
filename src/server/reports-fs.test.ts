@@ -121,14 +121,13 @@ test("takes the newest live.json there is, and null when there is none", () => {
   const root = fixture();
   try {
     const newest = newestLive(root);
-    assert.ok(newest.ok);
-    assert.equal(newest.value?.slug, "2026-08-07-1144");
-    assert.equal(newest.value?.doc.status, "running");
+    assert.equal(newest?.slug, "2026-08-07-1144");
+    assert.equal(newest?.doc.status, "running");
 
     const empty = scratch();
     try {
       put(empty, "2026-08-06-1000/benchmark.json", benchmarkJson());
-      assert.deepEqual(newestLive(empty), { ok: true, value: null });
+      assert.equal(newestLive(empty), null);
     } finally {
       rmSync(empty, { recursive: true, force: true });
     }

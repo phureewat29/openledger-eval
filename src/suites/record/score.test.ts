@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { LedgerPosting, LedgerProbe } from "../../oled/ledger.js";
-import { buildCounters } from "../../report/counters.js";
+import { buildCounters, type RunCounters } from "../../report/counters.js";
 import { createRecorder } from "../../report/recorder.js";
-import { countChecks, type AssertionResult, type CaseGrade, type RunCounters } from "../types.js";
+import { countChecks, type AssertionResult, type CaseGrade } from "../types.js";
 import type { RecordCase } from "./cases.js";
 import { gradeRecord } from "./score.js";
 
@@ -50,7 +50,6 @@ function probeWith(patch: Partial<LedgerProbe> = {}): LedgerProbe {
     filesIngested: 0,
     filesPending: 0,
     postedRows: 2,
-    linkedRows: 0,
     uncategorizedRows: 0,
     questionsOpen: 0,
     questionsDeferred: 0,

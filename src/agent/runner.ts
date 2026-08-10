@@ -118,6 +118,32 @@ async function runToolCall(
   return { answer, attachment: attached.message, terminal };
 }
 
+/**
+ * Every call in the turn is answered, terminal or not: the history carries on
+ * into the next phase, and an unanswered tool_call invalidates it. Attachments
+ * follow the answers and never sit between them, because a user turn in the
+ * middle would leave a tool_call unanswered and the endpoint rejects the
+ * request. True when a tool answered for the whole phase.
+ */
+async function answerToolCalls(
+  deps: RunnerDeps,
+  messages: ChatCompletionMessageParam[],
+  phase: PhaseId,
+  turn: number,
+  calls: ChatReply["toolCalls"],
+): Promise<boolean> {
+  const attachments: ChatCompletionMessageParam[] = [];
+  let terminal = false;
+  for (const call of calls) {
+    const invoked = await runToolCall(deps, phase, turn, call);
+    messages.push(invoked.answer);
+    if (invoked.attachment) attachments.push(invoked.attachment);
+    terminal = terminal || invoked.terminal;
+  }
+  messages.push(...attachments);
+  return terminal;
+}
+
 /** A failure means the endpoint itself is unusable; everything the model gets wrong is recorded, not raised. */
 export async function runPhase(
   deps: RunnerDeps,
@@ -154,19 +180,7 @@ export async function runPhase(
     if (answer.content.trim()) reply = answer.content.trim();
 
     if (answer.toolCalls.length > 0) {
-      const attachments: ChatCompletionMessageParam[] = [];
-      let terminal = false;
-      // Every call in the turn is answered, terminal or not: the history carries
-      // on into the next phase, and an unanswered tool_call invalidates it.
-      for (const toolCall of answer.toolCalls) {
-        const invoked = await runToolCall(deps, phase.id, turn, toolCall);
-        messages.push(invoked.answer);
-        if (invoked.attachment) attachments.push(invoked.attachment);
-        terminal = terminal || invoked.terminal;
-      }
-      // After the answers, never between them: a user turn in the middle would
-      // leave a tool_call unanswered and the endpoint rejects the request.
-      messages.push(...attachments);
+      const terminal = await answerToolCalls(deps, messages, phase.id, turn, answer.toolCalls);
       if (!terminal) continue;
       exit = "answered";
       break;

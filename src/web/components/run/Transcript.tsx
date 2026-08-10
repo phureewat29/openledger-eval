@@ -1,11 +1,17 @@
 import type { ReactNode } from "react";
 import type { RunEvent } from "../../../report/events.js";
+import { plural } from "../../lib/format.js";
 
 // The raw event log behind one run's grade, collapsed by default — a reader
 // wants the verdict first and the transcript only when it disagrees with them.
 
 const PRE =
   "tnum mt-1 max-h-[22rem] overflow-auto whitespace-pre-wrap break-all rounded-md border border-line bg-surface-2 p-3";
+
+function outcomeOf(event: Extract<RunEvent, { type: "tool_call" }>): string {
+  if (event.rejected !== null) return `refused: ${event.message}`;
+  return event.exitCode === null ? "no exit" : `exit ${event.exitCode}`;
+}
 
 /**
  * One renderer per RunEvent variant, keyed on the same `type` field the union
@@ -31,12 +37,7 @@ const RENDER: { [K in RunEvent["type"]]: (event: Extract<RunEvent, { type: K }>)
     ),
 
   tool_call: (event) => {
-    const outcome =
-      event.rejected !== null
-        ? `refused: ${event.message}`
-        : event.exitCode === null
-          ? "no exit"
-          : `exit ${event.exitCode}`;
+    const outcome = outcomeOf(event);
     return (
       <div className="mt-2">
         <p className="tnum text-muted">
@@ -71,9 +72,7 @@ export function Transcript({ events }: { events: RunEvent[] }) {
 
   return (
     <details className="mt-4">
-      <summary className="cursor-pointer text-muted">
-        transcript · {turns} turn{turns === 1 ? "" : "s"}
-      </summary>
+      <summary className="cursor-pointer text-muted">transcript · {plural(turns, "turn")}</summary>
       <div className="mt-2">
         {events.map((event, index) => {
           const node = renderEvent(event);

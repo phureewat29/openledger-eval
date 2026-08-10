@@ -1,5 +1,6 @@
 import { uniq } from "es-toolkit";
-import type { SuiteId } from "../config.js";
+import { duration, tokens, usd } from "../shared/format.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import type { Benchmark, BenchmarkEntry } from "./benchmark.js";
 
 // Renders a Benchmark straight to the markdown an operator reads. The ranking
@@ -7,40 +8,9 @@ import type { Benchmark, BenchmarkEntry } from "./benchmark.js";
 
 export const MEDALS = ["🥇", "🥈", "🥉"];
 
-function trimZero(text: string): string {
-  return text.replace(/\.0$/, "");
-}
-
-/** Under 1000 verbatim; K/M above that, so the column stays narrow at any scale. */
-export function humanTokens(value: number): string {
-  const count = Math.round(value);
-  if (count < 1_000) return String(count);
-  if (count < 1_000_000) return `${trimZero((count / 1_000).toFixed(1))}K`;
-  return `${trimZero((count / 1_000_000).toFixed(1))}M`;
-}
-
-function pad2(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-/** Drops the smaller unit once a bigger one is in play: "1h02m", never "1h02m03s". */
-export function humanDuration(ms: number): string {
-  const totalSeconds = Math.round(ms / 1_000);
-  if (totalSeconds < 60) return `${totalSeconds}s`;
-  if (totalSeconds < 3_600) return `${Math.floor(totalSeconds / 60)}m${pad2(totalSeconds % 60)}s`;
-  const hours = Math.floor(totalSeconds / 3_600);
-  const minutes = Math.floor((totalSeconds % 3_600) / 60);
-  return `${hours}h${pad2(minutes)}m`;
-}
-
 export function passRateCell(entry: BenchmarkEntry): string {
   const pct = `${(entry.meanPassRate * 100).toFixed(1)}%`;
   return entry.stddevPassRate === null ? pct : `${pct} ±${(entry.stddevPassRate * 100).toFixed(1)}`;
-}
-
-/** null is a cost nobody knows, which is not the same as free, so it never prints as a number. */
-export function usd(value: number | null): string {
-  return value === null ? "—" : `$${value.toFixed(4)}`;
 }
 
 function notesCell(entry: BenchmarkEntry): string {
@@ -79,8 +49,8 @@ export function suiteRows(entries: BenchmarkEntry[]): string[][] {
     entry.model,
     `${entry.cases.passed}/${entry.cases.total}`,
     passRateCell(entry),
-    humanDuration(entry.avgDurationMs),
-    `${humanTokens(entry.avgTokens.in)} / ${humanTokens(entry.avgTokens.out)}`,
+    duration(entry.avgDurationMs),
+    `${tokens(entry.avgTokens.in)} / ${tokens(entry.avgTokens.out)}`,
     usd(entry.totalCostUsd),
     entry.avgToolCalls.toFixed(1),
     notesCell(entry),
@@ -106,7 +76,7 @@ function identityBlock(benchmark: Benchmark): string {
   const { identity, config } = benchmark;
   return [
     `oled \`${identity.oledVersion}\` · skill \`${identity.skillVersion}\` \`${identity.skillSha256.slice(0, 12)}\` · ` +
-      `questions \`${identity.suiteSha256.slice(0, 12)}\` · eval \`${identity.evalVersion}\``,
+      `prompts \`${identity.suiteSha256.slice(0, 12)}\` · eval \`${identity.evalVersion}\``,
     `suites: ${config.suites.join(", ")} · trials: ${config.trials} · concurrency: ${config.concurrency}`,
     // Only when there is something to say: an ordinary report carries no such line.
     ...(benchmark.buildDrift === null ? [] : [`\n> **This report ${benchmark.buildDrift}.** A rerun landed here measured against something else.`]),

@@ -1,9 +1,9 @@
+import { mapValues } from "es-toolkit";
 import * as z from "zod";
 import { ACCOUNT_TYPES, uncategorizedAccount } from "../core/accounts.js";
 import { minorUnits } from "../core/money.js";
 import type { Result } from "../core/result.js";
-import type { OpenLedgerRunner } from "./command.js";
-import { parseNdjson } from "./ndjson.js";
+import { runNdjson, type OpenLedgerRunner } from "./command.js";
 
 /**
  * Reads the ledger back through the same CLI the model uses, so the scorecard
@@ -13,7 +13,8 @@ import { parseNdjson } from "./ndjson.js";
  */
 
 /** The three groups a card statement's own totals are printed as. */
-type MoneyGroup = "charges" | "refunds" | "payments";
+export const MONEY_GROUPS = ["charges", "refunds", "payments"] as const;
+type MoneyGroup = (typeof MONEY_GROUPS)[number];
 
 interface LedgerGroup {
   count: number;
@@ -70,8 +71,6 @@ export interface LedgerProbe {
   /** Files oled still holds as pending, i.e. never closed with `ingest done`. */
   filesPending: number;
   postedRows: number;
-  /** Rows oled links to a statement file, from the listing's own `source_file_id`. */
-  linkedRows: number;
   uncategorizedRows: number;
   questionsOpen: number;
   questionsDeferred: number;
@@ -96,7 +95,8 @@ const STATUS = z.object({
   net_worth: z.object({ net_worth: z.record(z.string(), z.number()) }).nullable(),
 });
 
-const ROW = z.object({
+/** The one authority on a listed row's shape; a reader wanting more of the row extends it. */
+export const TRANSACTION_ROW = z.object({
   date: z.string(),
   debit_account_id: z.string(),
   credit_account_id: z.string(),
@@ -106,7 +106,7 @@ const ROW = z.object({
 });
 
 /** The summary `transactions list` closes with; `has_more` is how a capped read admits it. */
-const LIST_SUMMARY = z.object({
+export const LIST_SUMMARY = z.object({
   type: z.literal("summary"),
   total: z.number(),
   returned: z.number(),
@@ -134,28 +134,11 @@ const ACCOUNTS_SUMMARY = z.object({
   returned: z.number(),
 });
 
-type Row = z.infer<typeof ROW>;
-type StatusReport = z.infer<typeof STATUS>;
+type Row = z.infer<typeof TRANSACTION_ROW>;
+export type StatusReport = z.infer<typeof STATUS>;
 
-const LIST_LIMIT = 500;
-
-async function readJson(
-  runner: OpenLedgerRunner,
-  label: string,
-  argv: string[],
-): Promise<Result<Record<string, unknown>[]>> {
-  const result = await runner.run(argv);
-  if (!result.ok) return { ok: false, error: `${label} did not run: ${result.message}` };
-
-  const command = result.value;
-  if (command.exitCode !== 0) {
-    return {
-      ok: false,
-      error: `${label} exited ${command.exitCode}: ${command.stderr.trim() || command.stdout.trim()}`,
-    };
-  }
-  return { ok: true, value: parseNdjson(command.stdout) };
-}
+/** The CLI's own maximum for `transactions list --limit`; asking for more is a usage error. */
+export const LIST_LIMIT = 500;
 
 function rootOf(accountId: string): string {
   return accountId.split(":")[1] ?? "";
@@ -187,22 +170,22 @@ function groupOf(row: Row): MoneyGroup | null {
 /** Totals come back 0 across more than one ledger, same rule as `soleLedgerTotal`.
  *  Ledger membership is read off the debit account's id. */
 export function tallyMoney(rows: Row[]): LedgerMoney {
-  const count: Record<MoneyGroup, number> = { charges: 0, refunds: 0, payments: 0 };
-  const minor: Record<MoneyGroup, number> = { charges: 0, refunds: 0, payments: 0 };
+  const tallies = Object.fromEntries(MONEY_GROUPS.map((group) => [group, { count: 0, minor: 0 }])) as Record<
+    MoneyGroup,
+    { count: number; minor: number }
+  >;
   const ledgers = new Set<string>();
   for (const row of rows) {
     const group = groupOf(row);
     if (group === null) continue;
     ledgers.add(ledgerOf(row.debit_account_id));
-    count[group] += 1;
-    minor[group] += minorUnits(row.amount);
+    tallies[group].count += 1;
+    tallies[group].minor += minorUnits(row.amount);
   }
-  const total = (group: MoneyGroup): number => (ledgers.size > 1 ? 0 : minor[group] / 100);
-  return {
-    charges: { count: count.charges, total: total("charges") },
-    refunds: { count: count.refunds, total: total("refunds") },
-    payments: { count: count.payments, total: total("payments") },
-  };
+  return mapValues(tallies, ({ count, minor }) => ({
+    count,
+    total: ledgers.size > 1 ? 0 : minor / 100,
+  }));
 }
 
 function toPosting(row: Row): LedgerPosting {
@@ -215,34 +198,31 @@ function toPosting(row: Row): LedgerPosting {
 }
 
 function liveRows(records: Record<string, unknown>[]): Row[] {
-  const rows: Row[] = [];
+  return records.flatMap((record) => {
+    const parsed = TRANSACTION_ROW.safeParse(record);
+    if (!parsed.success || parsed.data.void_of) return [];
+    return [parsed.data];
+  });
+}
+
+/** The first record a schema accepts; what precedes or follows it in the listing is not this caller's concern. */
+function firstParsed<T>(records: Record<string, unknown>[], schema: z.ZodType<T>): T | null {
   for (const record of records) {
-    const parsed = ROW.safeParse(record);
-    if (!parsed.success) continue;
-    if (parsed.data.void_of) continue;
-    rows.push(parsed.data);
+    const parsed = schema.safeParse(record);
+    if (parsed.success) return parsed.data;
   }
-  return rows;
+  return null;
 }
 
 /** Absent on an empty listing, and null unless the cap actually bit. */
 function truncationOf(records: Record<string, unknown>[]): ListTruncation | null {
-  for (const record of records) {
-    const parsed = LIST_SUMMARY.safeParse(record);
-    if (!parsed.success) continue;
-    const { has_more: hasMore, limit, total, returned } = parsed.data;
-    return hasMore ? { limit, total, returned } : null;
-  }
-  return null;
+  const summary = firstParsed(records, LIST_SUMMARY);
+  return summary?.has_more ? { limit: summary.limit, total: summary.total, returned: summary.returned } : null;
 }
 
 /** How many accounts oled says it wrote, or null when the terminator is missing. */
 function accountsWritten(records: Record<string, unknown>[]): number | null {
-  for (const record of records) {
-    const parsed = ACCOUNTS_SUMMARY.safeParse(record);
-    if (parsed.success) return parsed.data.returned;
-  }
-  return null;
+  return firstParsed(records, ACCOUNTS_SUMMARY)?.returned ?? null;
 }
 
 /**
@@ -283,7 +263,7 @@ function soleLedgerTotal(totals: Record<string, number> | undefined): number {
   return only !== undefined && rest.length === 0 ? only : 0;
 }
 
-function readStatus(records: Record<string, unknown>[]): Result<StatusReport> {
+export function readStatus(records: Record<string, unknown>[]): Result<StatusReport> {
   const parsed = STATUS.safeParse(records[0]);
   if (!parsed.success) {
     return {
@@ -302,13 +282,13 @@ function readStatus(records: Record<string, unknown>[]): Result<StatusReport> {
  * holds the rows themselves, and the account listing holds the balances.
  */
 export async function probeLedger(runner: OpenLedgerRunner): Promise<Result<LedgerProbe>> {
-  const status = await readJson(runner, "oled status", ["status", "--no-redact", "--json"]);
+  const status = await runNdjson(runner, "oled status", ["status", "--no-redact", "--json"]);
   if (!status.ok) return status;
 
   const report = readStatus(status.value);
   if (!report.ok) return report;
 
-  const listed = await readJson(runner, "oled transactions list", [
+  const listed = await runNdjson(runner, "oled transactions list", [
     "transactions",
     "list",
     "--limit",
@@ -318,7 +298,7 @@ export async function probeLedger(runner: OpenLedgerRunner): Promise<Result<Ledg
   ]);
   if (!listed.ok) return listed;
 
-  const accounts = await readJson(runner, "oled accounts list", [
+  const accounts = await runNdjson(runner, "oled accounts list", [
     "accounts",
     "list",
     "--no-redact",
@@ -337,7 +317,6 @@ export async function probeLedger(runner: OpenLedgerRunner): Promise<Result<Ledg
       filesIngested: files?.ingested ?? 0,
       filesPending: files?.pending ?? 0,
       postedRows: counts?.transactions ?? 0,
-      linkedRows: rows.filter((row) => !!row.source_file_id).length,
       uncategorizedRows: rows.filter(isUncategorized).length,
       questionsOpen: questions?.open ?? 0,
       questionsDeferred: questions?.deferred ?? 0,

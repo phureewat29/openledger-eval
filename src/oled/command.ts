@@ -1,85 +1,38 @@
-import { spawn } from "node:child_process";
-
-/**
- * A non-zero exit is data (`CommandOk.exitCode`), not a failure: the harness
- * scores it. Failure means the command never ran or never finished.
- */
-
-interface CommandOk {
-  argv: string[];
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-}
-
-interface CommandFailure {
-  ok: false;
-  reason: "spawn_failed" | "timeout";
-  message: string;
-}
-
-type CommandResult = { ok: true; value: CommandOk } | CommandFailure;
-
-interface ExecOptions {
-  cwd?: string;
-  env?: NodeJS.ProcessEnv;
-  stdin?: string;
-  timeoutMs?: number;
-}
-
-export function execCapture(
-  command: string,
-  argv: string[],
-  opts: ExecOptions = {},
-): Promise<CommandResult> {
-  return new Promise((resolve) => {
-    const child = spawn(command, argv, {
-      cwd: opts.cwd,
-      env: opts.env ?? process.env,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    let stdout = "";
-    let stderr = "";
-    let timedOut = false;
-    const timer = opts.timeoutMs
-      ? setTimeout(() => {
-          timedOut = true;
-          child.kill("SIGKILL");
-        }, opts.timeoutMs)
-      : null;
-    const done = (): void => {
-      if (timer) clearTimeout(timer);
-    };
-
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk;
-    });
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk;
-    });
-
-    child.on("error", (err) => {
-      done();
-      resolve({ ok: false, reason: "spawn_failed", message: err.message });
-    });
-
-    child.on("close", (code) => {
-      done();
-      if (timedOut) {
-        resolve({ ok: false, reason: "timeout", message: `${command} exceeded ${opts.timeoutMs}ms` });
-        return;
-      }
-      resolve({ ok: true, value: { argv, exitCode: code ?? 1, stdout, stderr } });
-    });
-
-    if (opts.stdin !== undefined) child.stdin.write(opts.stdin);
-    child.stdin.end();
-  });
-}
+import { execCapture, type CommandOk, type CommandResult } from "../core/exec.js";
+import type { Result } from "../core/result.js";
+import { parseNdjson } from "./ndjson.js";
 
 export interface OpenLedgerRunner {
   run(argv: string[], opts?: { stdin?: string }): Promise<CommandResult>;
+}
+
+/** Runs one command and holds it to the contract every caller repeats: it ran, and it exited 0. */
+export async function runOk(
+  runner: OpenLedgerRunner,
+  label: string,
+  argv: string[],
+  opts?: { stdin?: string },
+): Promise<Result<CommandOk>> {
+  const result = await runner.run(argv, opts);
+  if (!result.ok) return { ok: false, error: `${label} did not run: ${result.message}` };
+  if (result.value.exitCode !== 0) {
+    return {
+      ok: false,
+      error: `${label} exited ${result.value.exitCode}: ${result.value.stderr.trim() || result.value.stdout.trim()}`,
+    };
+  }
+  return { ok: true, value: result.value };
+}
+
+/** One `--json` read, as its lines: under --json every stdout line is one JSON object. */
+export async function runNdjson(
+  runner: OpenLedgerRunner,
+  label: string,
+  argv: string[],
+): Promise<Result<Record<string, unknown>[]>> {
+  const result = await runOk(runner, label, argv);
+  if (!result.ok) return result;
+  return { ok: true, value: parseNdjson(result.value.stdout) };
 }
 
 export function createOpenLedgerRunner(args: {

@@ -3,7 +3,7 @@
  * `oled` are deliberately absent: SKILL.md and `--help` are the surface under
  * test, so repeating their advice here would measure this text instead.
  */
-const ENVIRONMENT_ADAPTER = `## This environment
+export const ENVIRONMENT_ADAPTER = `## This environment
 
 - You have one tool, \`oled\`, and no filesystem: no shell operators, and no way to create or read files yourself.
 - Whatever a command produces for you to read is delivered into this conversation automatically.

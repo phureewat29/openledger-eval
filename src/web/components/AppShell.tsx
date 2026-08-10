@@ -2,7 +2,7 @@ import { Activity, Cpu, LayoutList, Plus } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import type { LivePayload, SandboxesPayload } from "../../shared/payloads.js";
-import { useChannel, useConnection, useServerIdentity } from "../lib/channel.js";
+import { useChannel, useConnection, useServerIdentity, type ConnectionStatus } from "../lib/channel.js";
 import { LaunchDialog } from "./LaunchDialog.js";
 import { Tip } from "./Tip.js";
 import { TopBar } from "./TopBar.js";
@@ -19,14 +19,14 @@ const NAV = [
   { to: "/system", label: "System", Icon: Cpu, end: false, hint: "processes and sandboxes" },
 ] as const;
 
-const STATUS_DOT: Record<string, string> = {
+const STATUS_DOT: Record<ConnectionStatus, string> = {
   open: "bg-accent",
   connecting: "bg-warn breathe",
   closed: "bg-bad",
 };
 
 /** The dot is the only thing on screen with no word beside it, so hovering it has to answer for itself. */
-const STATUS_WORDS: Record<string, string> = {
+const STATUS_WORDS: Record<ConnectionStatus, string> = {
   open: "Connected",
   connecting: "Connecting to the dashboard…",
   closed: "Disconnected — the dashboard is not answering; retrying",
@@ -85,6 +85,7 @@ export function AppShell() {
 
   const running = live?.kind === "running-fresh" || live?.kind === "starting";
   const held = live?.kind === "running-paused";
+  const runDotLabel = held ? "Run held" : "Run in flight";
   const orphans = (sandboxes?.entries ?? []).filter((entry) => entry.owner === "none").length;
 
   return (
@@ -128,10 +129,13 @@ export function AppShell() {
             navigates. A held run keeps the dot and loses the breath, because the
             breath is what says the run is working. */}
         {(running || held) && (
-          <span
-            className={`-mt-1 h-1 w-1 rounded-full ${held ? "bg-warn" : "bg-accent breathe"}`}
-            aria-hidden
-          />
+          <Tip label={runDotLabel}>
+            <span
+              role="status"
+              aria-label={runDotLabel}
+              className={`-mt-1 h-1 w-1 rounded-full ${held ? "bg-warn" : "bg-accent breathe"}`}
+            />
+          </Tip>
         )}
 
         <div className="flex-1" />
@@ -146,11 +150,11 @@ export function AppShell() {
             <Plus size={17} strokeWidth={1.75} />
           </button>
         </Tip>
-        <Tip label={STATUS_WORDS[connection] ?? connection}>
+        <Tip label={STATUS_WORDS[connection]}>
           <span
             role="status"
-            aria-label={STATUS_WORDS[connection] ?? connection}
-            className={`mt-2 h-1.5 w-1.5 rounded-full ${STATUS_DOT[connection] ?? "bg-subtle"}`}
+            aria-label={STATUS_WORDS[connection]}
+            className={`mt-2 h-1.5 w-1.5 rounded-full ${STATUS_DOT[connection]}`}
           />
         </Tip>
       </nav>

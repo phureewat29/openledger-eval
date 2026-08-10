@@ -1,11 +1,10 @@
-import chalk from "chalk";
 import { range, zip } from "es-toolkit";
-import type { SuiteId } from "../config.js";
 import { tryExecute } from "../core/result.js";
 import type { ValidatedModel } from "../model/capabilities.js";
 import { buildCounters } from "../report/counters.js";
-import type { RunRecord, TerminalState } from "../report/record.js";
+import type { RunRecord } from "../report/record.js";
 import { createRecorder } from "../report/recorder.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import type { AnySuite, EvalCase } from "../suites/types.js";
 
 /** One cell of the matrix: a model, a case of one suite, and which trial of it this is. */
@@ -77,15 +76,10 @@ async function settle(deps: MatrixDeps, planned: PlannedRun): Promise<RunRecord>
 }
 
 /**
- * Records come back in plan order however the runs interleave, so a report of
- * the same matrix reads the same twice.
+ * A finished run leaves through `onProgress` and nowhere else, so whoever keeps
+ * the records keeps the same set whether the matrix ran out or was interrupted.
  */
-export async function runMatrix(
-  plan: PlannedRun[],
-  deps: MatrixDeps,
-  concurrency: number,
-): Promise<RunRecord[]> {
-  const records: RunRecord[] = new Array(plan.length);
+export async function runMatrix(plan: PlannedRun[], deps: MatrixDeps, concurrency: number): Promise<void> {
   let next = 0;
 
   const worker = async (): Promise<void> => {
@@ -93,30 +87,10 @@ export async function runMatrix(
       const planned = plan[index];
       if (!planned) return;
       deps.onStart(planned);
-      const record = await settle(deps, planned);
-      records[index] = record;
-      deps.onProgress(record);
+      deps.onProgress(await settle(deps, planned));
     }
   };
 
   const size = Math.max(1, Math.min(concurrency, plan.length));
   await Promise.all(range(size).map(() => worker()));
-  return records;
-}
-
-const STATE_COLOR: Record<TerminalState, (text: string) => string> = {
-  graded: chalk.green,
-  endpoint_error: chalk.yellow,
-  sandbox_error: chalk.red,
-};
-
-/** Written as each run finishes: a matrix of long runs has to show it is moving. */
-export function printRunLine(record: RunRecord): void {
-  const grade = record.grade ? `${Math.round(record.grade.passRate * 100)}%` : "—";
-  const trial = record.trial > 1 ? ` t${record.trial}` : "";
-  process.stdout.write(
-    `${chalk.bold(record.model)} · ${record.suite} · ${record.caseId}${trial} · ` +
-      `${STATE_COLOR[record.state](record.state)} · ${grade} · ` +
-      `${(record.metrics.durationMs / 1_000).toFixed(1)}s\n`,
-  );
 }

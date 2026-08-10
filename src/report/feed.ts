@@ -2,31 +2,19 @@ import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 import { tryExecute, type Result } from "../core/result.js";
 import type { PlannedRun } from "../runner/matrix.js";
+import type { FeedKind, FeedLine } from "../shared/feed.js";
+import { duration } from "../shared/format.js";
+import { FEED_FILE } from "../shared/paths.js";
 import { countChecks } from "../suites/types.js";
 import type { CommitCounters, RunEvent } from "./events.js";
-import { humanDuration } from "./leaderboard.js";
 import type { RunRecord, TerminalState } from "./record.js";
+import { warnOnce } from "./warn.js";
 
 // One line per thing worth reading, appended to reports/<ts>/feed.ndjson while a
 // matrix runs, so a reader watches the runs talk instead of watching dots change
 // colour. Append-only rather than an array inside live.json, which is rewritten
 // whole on every transition: an ingest run fires ~70 events and eight can be in
 // flight at once.
-
-/** A list as well as a type, because the reader has to recognise a kind at runtime. */
-export const FEED_KINDS = ["header", "run", "phase", "tool", "says", "note", "result"] as const;
-
-export type FeedKind = (typeof FEED_KINDS)[number];
-
-export interface FeedLine {
-  at: string;
-  /** Which cell is speaking: short model name, case id, and the trial past the first. */
-  scope: string;
-  kind: FeedKind;
-  text: string;
-}
-
-export const FEED_FILE = "feed.ndjson";
 
 /** One screen line: a feed nobody can scan is no better than the dots it replaces. */
 const MAX_TEXT = 200;
@@ -143,7 +131,7 @@ function failureText(record: RunRecord): string {
 const RESULT_TEXT: Record<TerminalState, (record: RunRecord) => string> = {
   graded: (record) => {
     const { passed, total } = countChecks(record.grade?.assertions ?? []);
-    return `scored ${passed}/${total} checks · ${humanDuration(record.metrics.durationMs)}`;
+    return `scored ${passed}/${total} checks · ${duration(record.metrics.durationMs)}`;
   },
   endpoint_error: failureText,
   sandbox_error: failureText,
@@ -174,17 +162,14 @@ function appendFeed(dir: string, lines: FeedLine[]): Result<void> {
 
 /**
  * Appends every line straight through to reports/<ts>/feed.ndjson. A failed
- * append warns once to stderr and keeps trying silently after — a feed hiccup
- * must never look like a reason to kill a paid run.
+ * append is reported once via `warnOnce` and retried silently after.
  */
 export function createFeedWriter(dir: string): FeedWriter {
-  let warned = false;
+  const warn = warnOnce();
 
   function persist(lines: FeedLine[]): void {
     const written = appendFeed(dir, lines);
-    if (written.ok || warned) return;
-    warned = true;
-    process.stderr.write(`${written.error}; will keep retrying silently\n`);
+    if (!written.ok) warn(`${written.error}; will keep retrying silently`);
   }
 
   return {

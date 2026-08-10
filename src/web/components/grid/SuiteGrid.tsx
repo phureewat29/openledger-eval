@@ -1,6 +1,6 @@
-import { groupBy } from "es-toolkit";
+import { groupBy, uniq } from "es-toolkit";
 import { RotateCw } from "lucide-react";
-import type { LiveItem } from "../../../report/live.js";
+import type { LiveItem } from "../../../report/live-item.js";
 import { GridCell } from "./GridCell.js";
 import { SectionHeading } from "../Badge.js";
 import { Tip } from "../Tip.js";
@@ -76,8 +76,8 @@ export function SuiteGrid({
 }) {
   // Plan order, not sorted order: the matrix is planned in the order a reader
   // asked for it, and re-sorting here would move a row under a moving cursor.
-  const models = [...new Set(items.map((item) => item.model))];
-  const caseIds = [...new Set(items.map((item) => item.caseId))];
+  const models = uniq(items.map((item) => item.model));
+  const caseIds = uniq(items.map((item) => item.caseId));
   const byCell = groupCells(items);
 
   const trials = Math.max(1, ...Object.values(byCell).map((group) => group.length));
@@ -95,74 +95,76 @@ export function SuiteGrid({
        */}
       <GridBox>
         <table className="table-fixed border-collapse">
-        <caption className="sr-only">{`${suite}: one row per model, one column per case`}</caption>
-        <colgroup>
-          <col style={{ width: `${MODEL_COL_CH}ch` }} />
-          {caseIds.map((caseId) => (
-            <col key={caseId} style={{ width: `${CASE_COL_CH * trials}ch` }} />
-          ))}
-        </colgroup>
-        <thead>
-          <tr>
-            <td />
-            {caseIds.map((caseId, index) => (
-              <th key={caseId} scope="col" className="px-1.5 pb-2 align-bottom font-normal text-fg">
-                {/* The code is the label; the id is what hovering it answers with. */}
-                <Tip label={caseId} side="top">
-                  <span className={`${HEAD} mx-auto cursor-default`} tabIndex={0}>
-                    {shortCase(caseId, suite, index)}
-                  </span>
-                </Tip>
-              </th>
+          <caption className="sr-only">{`${suite}: one row per model, one column per case`}</caption>
+          <colgroup>
+            <col style={{ width: `${MODEL_COL_CH}ch` }} />
+            {caseIds.map((caseId) => (
+              <col key={caseId} style={{ width: `${CASE_COL_CH * trials}ch` }} />
             ))}
-          </tr>
-        </thead>
-        <tbody>
-          {models.map((model) => (
-            <tr key={model} className="group/row">
-              <th scope="row" className="tnum py-1 pr-3 text-left font-normal text-muted">
-                <div className="flex min-w-0 items-center gap-1.5">
-                  {/* The truncation lives on the span, never on the cell: a tooltip
-                      is the cell's child and would be clipped by its own row. */}
-                  <Tip label={model} side="top">
-                    <span className="block min-w-0 truncate">{model}</span>
+          </colgroup>
+          <thead>
+            <tr>
+              <td />
+              {caseIds.map((caseId, index) => (
+                <th key={caseId} scope="col" className="px-1.5 pb-2 align-bottom font-normal text-fg">
+                  {/* The code is the label; the id is what hovering it answers with. */}
+                  <Tip label={caseId} side="top">
+                    <span className={`${HEAD} mx-auto cursor-default`} tabIndex={0}>
+                      {shortCase(caseId, suite, index)}
+                    </span>
                   </Tip>
-                  {/* Revealed on hover, as the reports table reveals its chevron.
-                      Always in the layout, so showing it cannot shift the row. */}
-                  {onRerun !== undefined && (
-                    <Tip label={`Rerun the ${suite} suite for this model`} side="top">
-                      <button
-                        type="button"
-                        aria-label={`Rerun ${suite} for ${model}`}
-                        onClick={() => onRerun(model, [])}
-                        className="shrink-0 text-subtle opacity-0 transition-opacity hover:text-accent focus-visible:opacity-100 group-hover/row:opacity-100"
-                      >
-                        <RotateCw size={11} strokeWidth={2.25} aria-hidden />
-                      </button>
-                    </Tip>
-                  )}
-                </div>
-              </th>
-              {caseIds.map((caseId) => (
-                <td key={caseId} className="p-0 align-middle">
-                  {/* Trials sit side by side in the one cell, in trial order, as the plan ran them. */}
-                  <div className="flex items-center justify-center gap-1 px-1 py-1.5">
-                    {(byCell[cellKey(model, caseId)] ?? [])
-                      .toSorted((left, right) => left.trial - right.trial)
-                      .map((item) => (
-                        <GridCell
-                          key={item.trial}
-                          item={item}
-                          onOpen={onOpen}
-                          onRerun={onRerun === undefined ? undefined : (cell) => onRerun(cell.model, [cell.caseId])}
-                        />
-                      ))}
-                  </div>
-                </td>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
+          </thead>
+          <tbody>
+            {models.map((model) => (
+              <tr key={model} className="group/row">
+                <th scope="row" className="tnum py-1 pr-3 text-left font-normal text-muted">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    {/* The truncation lives on the span, never on the cell: a tooltip
+                        is the cell's child and would be clipped by its own row. */}
+                    <Tip label={model} side="top">
+                      <span className="block min-w-0 truncate">{model}</span>
+                    </Tip>
+                    {/* Revealed on hover, as the reports table reveals its chevron.
+                        Always in the layout, so showing it cannot shift the row. */}
+                    {onRerun !== undefined && (
+                      <Tip label={`Rerun the ${suite} suite for this model`} side="top">
+                        <button
+                          type="button"
+                          aria-label={`Rerun ${suite} for ${model}`}
+                          onClick={() => onRerun(model, [])}
+                          className="shrink-0 text-subtle opacity-0 transition-opacity hover:text-accent focus-visible:opacity-100 group-hover/row:opacity-100"
+                        >
+                          <RotateCw size={11} strokeWidth={2.25} aria-hidden />
+                        </button>
+                      </Tip>
+                    )}
+                  </div>
+                </th>
+                {caseIds.map((caseId) => (
+                  <td key={caseId} className="p-0 align-middle">
+                    {/* Trials sit side by side in the one cell, in trial order, as the plan ran them. */}
+                    <div className="flex items-center justify-center gap-1 px-1 py-1.5">
+                      {(byCell[cellKey(model, caseId)] ?? [])
+                        .toSorted((left, right) => left.trial - right.trial)
+                        .map((item) => (
+                          <GridCell
+                            key={item.trial}
+                            item={item}
+                            onOpen={onOpen}
+                            onRerun={
+                              onRerun === undefined ? undefined : (cell) => onRerun(cell.model, [cell.caseId])
+                            }
+                          />
+                        ))}
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
         </table>
       </GridBox>
     </section>

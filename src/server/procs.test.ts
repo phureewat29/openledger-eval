@@ -1,15 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import {
-  groupOf,
-  inGroup,
-  isSafeGroup,
-  nest,
-  parseElapsed,
-  parsePs,
-  selfProc,
-  type ProcInfo,
-} from "./procs.js";
+import type { ProcInfo } from "../shared/payloads.js";
+import { groupOf, inGroup, isSafeGroup, nest, parseElapsed, parsePs, selfProc } from "./procs.js";
 
 /** A real `ps -Ao pid,ppid,pgid,stat,%cpu,rss,etime,command` header and body, spacing included. */
 const PS_OUTPUT = [

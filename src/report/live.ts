@@ -2,6 +2,7 @@ import { renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tryExecute, type Result } from "../core/result.js";
 import type { PlannedRun } from "../runner/matrix.js";
+import { LIVE_FILE } from "../shared/paths.js";
 import type { ConfigEcho } from "./benchmark.js";
 import {
   isSameItem,
@@ -12,8 +13,8 @@ import {
   type LiveItem,
 } from "./live-item.js";
 import type { RunIdentity, RunRecord } from "./record.js";
-
-export { type LiveItem, type LiveItemState } from "./live-item.js";
+import { SCHEMA_VERSION } from "./schema.js";
+import { warnOnce } from "./warn.js";
 
 // The runner's mid-flight status, written to reports/<ts>/live.json while a
 // matrix runs so a separate reader (the dashboard) can watch it progress
@@ -74,7 +75,7 @@ function withItem(doc: LiveDoc, key: ItemKey, update: (item: LiveItem) => LiveIt
 export function buildLiveDoc(identity: RunIdentity, config: ConfigEcho, plan: PlannedRun[], now: Date): LiveDoc {
   const nowIso = now.toISOString();
   return {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     status: "running",
     startedAt: nowIso,
     openedAt: nowIso,
@@ -120,7 +121,7 @@ export function reopenLiveDoc(
   const keys = [...priorKeys, ...planKeys.filter((key) => !priorKeys.some((held) => isSameItem(held, key)))];
 
   const empty: LiveDoc = {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     status: "running",
     startedAt,
     openedAt: now.toISOString(),
@@ -147,7 +148,7 @@ export function finalizeDoc(doc: LiveDoc): LiveDoc {
 
 /** Same-directory rename is one filesystem operation, so a reader mid-poll never sees a torn write. */
 export function writeLive(dir: string, doc: LiveDoc): Result<void> {
-  const path = join(dir, "live.json");
+  const path = join(dir, LIVE_FILE);
   const written = tryExecute(() => {
     writeFileSync(`${path}.tmp`, `${JSON.stringify(doc, null, 2)}\n`);
     renameSync(`${path}.tmp`, path);
@@ -167,18 +168,15 @@ const HEARTBEAT_MS = 5_000;
 /**
  * Owns the current LiveDoc and persists it on every transition, plus every
  * 5s of idle time, so a reader can tell a slow-but-alive run from a dead one.
- * A write failure warns once to stderr and keeps retrying silently after —
- * a live-file hiccup must never look like a reason to kill a paid run.
+ * A write failure is reported once via `warnOnce` and retried silently after.
  */
 export function createLiveWriter(dir: string, initialDoc: LiveDoc): LiveWriter {
   let doc = initialDoc;
-  let warned = false;
+  const warn = warnOnce();
 
   function persist(): void {
     const written = writeLive(dir, doc);
-    if (written.ok || warned) return;
-    warned = true;
-    process.stderr.write(`${written.error}; will keep retrying silently\n`);
+    if (!written.ok) warn(`${written.error}; will keep retrying silently`);
   }
 
   function commit(next: LiveDoc): void {

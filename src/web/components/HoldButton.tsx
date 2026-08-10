@@ -1,8 +1,9 @@
 import { Pause, Play } from "lucide-react";
 import { useState } from "react";
 import type { LiveDoc } from "../../report/live.js";
-import type { PauseTarget } from "../../server/launch.js";
+import type { PauseTarget } from "../../shared/payloads.js";
 import { post } from "../lib/api.js";
+import { inFlight, plural } from "../lib/format.js";
 import { Confirm } from "./Confirm.js";
 
 // Holding a run and letting it go again. Pausing is a hard freeze — SIGSTOP to
@@ -14,11 +15,6 @@ const FACE = {
   pause: { label: "Pause", Icon: Pause, hover: "hover:border-warn hover:text-warn" },
   resume: { label: "Resume", Icon: Play, hover: "hover:border-accent hover:text-accent" },
 } as const;
-
-/** How many cells are mid-flight, which is exactly what a freeze would catch. */
-function inFlight(doc: LiveDoc | null): number {
-  return doc?.items.filter((item) => item.state === "running").length ?? 0;
-}
 
 export function HoldButton({ hold, doc }: { hold: PauseTarget; doc: LiveDoc | null }) {
   const [confirming, setConfirming] = useState(false);
@@ -65,7 +61,7 @@ export function HoldButton({ hold, doc }: { hold: PauseTarget; doc: LiveDoc | nu
           </p>
           {running > 0 && (
             <p>
-              {running === 1 ? "One run is" : `${running} runs are`} mid-request. A freeze holds{" "}
+              {plural(running, "run")} {running === 1 ? "is" : "are"} mid-request. A freeze holds{" "}
               {running === 1 ? "it" : "them"} inside the call to the model, and the clock those calls time out
               on keeps running — so a pause of more than a few minutes can turn{" "}
               {running === 1 ? "it" : "them"} into endpoint errors when you let go.

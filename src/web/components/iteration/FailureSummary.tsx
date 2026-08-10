@@ -1,7 +1,7 @@
 import { groupBy } from "es-toolkit";
 import { topFailures } from "../../../report/failures.js";
 import type { LoadedRun } from "../../../server/reports-fs.js";
-import { shortModel } from "../../lib/format.js";
+import { plural, shortModel } from "../../lib/format.js";
 
 // Why a model's cases failed, not just how many did — grouped per model so a
 // reader chasing one model's row in the leaderboard can jump straight to what
@@ -42,9 +42,7 @@ export function FailureSummary({ runs }: { runs: LoadedRun[] }) {
                 {group.failures.map((failure) => (
                   <tr key={failure.id} className="border-t border-line">
                     <td className="py-0.5 pr-4">{failure.label}</td>
-                    <td className="py-0.5 text-bad">
-                      failed in {failure.runs} run{failure.runs === 1 ? "" : "s"}
-                    </td>
+                    <td className="py-0.5 text-bad">failed in {plural(failure.runs, "run")}</td>
                   </tr>
                 ))}
               </tbody>

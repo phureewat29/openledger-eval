@@ -1,14 +1,11 @@
 import type { Tool } from "../agent/tools.js";
-import type { SuiteId } from "../config.js";
 import type { Result } from "../core/result.js";
 import type { OpenLedgerRunner } from "../oled/command.js";
 import type { LedgerProbe } from "../oled/ledger.js";
 import type { RunCounters } from "../report/counters.js";
 import type { RunMetrics } from "../report/recorder.js";
-import type { Workspace } from "../sandbox/workspace.js";
-
-/** Re-exported so the whole suite contract reads from one file; the report owns the tallies. */
-export type { RunCounters, RunMetrics };
+import type { Workspace, WorkspaceGuard } from "../sandbox/workspace.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 
 /**
  * One graded claim about the ledger a run left behind. `evidence` is what a
@@ -33,6 +30,15 @@ export interface CaseGrade {
 
 export function notApplicable(id: string, label: string, why: string): AssertionResult {
   return { id, label, passed: false, na: true, evidence: { want: "not applicable", got: why } };
+}
+
+export function check(id: string, label: string, passed: boolean, want: string, got: string): AssertionResult {
+  return { id, label, passed, evidence: { want, got } };
+}
+
+/** `na` keeps a figure out of the pass rate; the want and got columns still carry it. */
+export function reported(id: string, label: string, want: string, got: string): AssertionResult {
+  return { id, label, passed: false, na: true, evidence: { want, got } };
 }
 
 export interface CheckCounts {
@@ -105,10 +111,19 @@ export interface ScoreInput<C extends EvalCase> {
  */
 export type AnySuite = Suite<EvalCase>;
 
-export interface Suite<C extends EvalCase> {
+export interface Suite<C extends EvalCase, U extends EvalCase = C> {
   id: SuiteId;
   /** Runs before any API spend, so a fixture that disagrees with itself fails cheaply. */
-  cases(fixturesDir: string): Result<C[]>;
+  cases(fixturesDir: string): Result<U[]>;
+  /**
+   * Whatever a case can only learn from a real ledger, answered once for the
+   * whole invocation in sandboxes of the suite's own: a suite scored against
+   * figures oled publishes reads them here rather than reproducing its
+   * arithmetic. It runs after bootstrap and before a token is spent, and a
+   * refusal refuses the invocation. Absent when the fixture already carries a
+   * complete case.
+   */
+  resolve?(cases: U[], guard: WorkspaceGuard): Promise<Result<C[]>>;
   prepare(ctx: SuiteContext, kase: C): Promise<Result<SuitePhase[]>>;
   systemPrompt(skillText: string): string;
   tools(ctx: SuiteContext, sink: AnswerSink): Tool[];

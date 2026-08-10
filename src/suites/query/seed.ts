@@ -1,10 +1,9 @@
 import { capitalize } from "es-toolkit";
 import { typeOf } from "../../core/accounts.js";
 import type { Result } from "../../core/result.js";
-import type { OpenLedgerRunner } from "../../oled/command.js";
+import { runOk, type OpenLedgerRunner } from "../../oled/command.js";
 import { probeLedger } from "../../oled/ledger.js";
 import { parseNdjson } from "../../oled/ndjson.js";
-import type { SuiteContext } from "../types.js";
 import type { SeedRow } from "./rows.js";
 
 /**
@@ -39,7 +38,7 @@ async function createAccount(runner: OpenLedgerRunner, id: string): Promise<Resu
   const type = typeOf(id);
   if (!type) return { ok: false, error: `${id} names no account type` };
 
-  const result = await runner.run([
+  const result = await runOk(runner, `creating ${id}`, [
     "accounts",
     "create",
     "--id",
@@ -50,13 +49,7 @@ async function createAccount(runner: OpenLedgerRunner, id: string): Promise<Resu
     type,
     "--json",
   ]);
-  if (!result.ok) return { ok: false, error: `creating ${id} did not run: ${result.message}` };
-  if (result.value.exitCode !== 0) {
-    return {
-      ok: false,
-      error: `creating ${id} exited ${result.value.exitCode}: ${result.value.stderr.trim()}`,
-    };
-  }
+  if (!result.ok) return result;
   return { ok: true, value: undefined };
 }
 
@@ -89,35 +82,33 @@ function commitFault(summary: CommitSummary, expected: number): string | null {
 }
 
 async function commitRows(runner: OpenLedgerRunner, rows: SeedRow[]): Promise<Result<void>> {
-  const result = await runner.run(["ingest", "commit", "--json"], { stdin: toNdjson(rows) });
-  if (!result.ok) return { ok: false, error: `ingest commit did not run: ${result.message}` };
+  const result = await runOk(runner, "ingest commit", ["ingest", "commit", "--json"], {
+    stdin: toNdjson(rows),
+  });
+  if (!result.ok) return result;
 
-  const commit = result.value;
-  if (commit.exitCode !== 0) {
-    return {
-      ok: false,
-      error: `ingest commit exited ${commit.exitCode}: ${commit.stderr.trim() || commit.stdout.trim()}`,
-    };
-  }
-
-  const summary = summaryOf(commit.stdout);
+  const summary = summaryOf(result.value.stdout);
   if (!summary) return { ok: false, error: "ingest commit printed no summary row" };
 
   const fault = commitFault(summary, rows.length);
   return fault === null ? { ok: true, value: undefined } : { ok: false, error: `seeding: ${fault}` };
 }
 
-/** Accounts first, then one batch: the goldens only hold if every row lands where it was written to. */
-export async function seedLedger(ctx: SuiteContext, rows: SeedRow[]): Promise<Result<void>> {
+/**
+ * Accounts first, then one batch: the goldens only hold if every row lands where
+ * it was written to. One seeding for both the run's own sandbox and the
+ * throwaway one the goldens are read out of, so the two ledgers cannot differ.
+ */
+export async function seedLedger(runner: OpenLedgerRunner, rows: SeedRow[]): Promise<Result<void>> {
   for (const id of QUERY_ACCOUNTS) {
-    const created = await createAccount(ctx.runner, id);
+    const created = await createAccount(runner, id);
     if (!created.ok) return created;
   }
 
-  const committed = await commitRows(ctx.runner, rows);
+  const committed = await commitRows(runner, rows);
   if (!committed.ok) return committed;
 
-  const probe = await probeLedger(ctx.runner);
+  const probe = await probeLedger(runner);
   if (!probe.ok) return probe;
   if (probe.value.questionsOpen > 0) {
     return { ok: false, error: `seeding left ${probe.value.questionsOpen} questions open` };

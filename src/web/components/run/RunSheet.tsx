@@ -1,15 +1,17 @@
 import { RotateCw, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import type { RunRecord, TerminalState } from "../../../report/record.js";
+import { duration, tokens, usd } from "../../../shared/format.js";
 import { countChecks } from "../../../suites/types.js";
 import { get } from "../../lib/api.js";
-import { duration, tokens, usd } from "../../lib/format.js";
+import { useEscape } from "../../lib/hooks.js";
+import { useRunSheet } from "../../lib/run-sheet.js";
+import { Badge, Panel, type Tone } from "../Badge.js";
 import { Empty } from "../Empty.js";
 import type { RerunScope } from "../RerunDialog.js";
 import { ChecksTable } from "./ChecksTable.js";
 import { Transcript } from "./Transcript.js";
-import { Badge, Panel, type Tone } from "../Badge.js";
 
 // One run, in full: opened by putting model/suite/case in the URL's search
 // params so the panel is shareable and survives a refresh. `slug` names which
@@ -81,32 +83,13 @@ export function RunSheet({
   slug: slugProp,
   onRerun,
 }: { slug?: string; onRerun?: (scope: RerunScope) => void } = {}) {
-  const params = useParams<{ slug?: string }>();
-  const slug = slugProp ?? params.slug ?? null;
+  const routeParams = useParams<{ slug?: string }>();
+  const slug = slugProp ?? routeParams.slug ?? null;
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const model = searchParams.get("model");
-  const suite = searchParams.get("suite");
-  const caseId = searchParams.get("case");
+  const { params, close } = useRunSheet();
+  const { model, suite, caseId } = params;
 
-  const close = useCallback(() => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete("model");
-      next.delete("suite");
-      next.delete("case");
-      return next;
-    });
-  }, [setSearchParams]);
-
-  useEffect(() => {
-    if (slug === null || model === null || suite === null || caseId === null) return;
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [slug, model, suite, caseId, close]);
+  useEscape(slug !== null && model !== null && suite !== null && caseId !== null, close);
 
   const [state, setState] = useState<LoadState>({ kind: "loading" });
 

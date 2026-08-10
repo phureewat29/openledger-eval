@@ -1,8 +1,7 @@
 import { groupBy, meanBy, sumBy } from "es-toolkit";
-import type { SuiteId } from "../config.js";
-import type { Benchmark } from "../report/benchmark.js";
+import { sumOrNull, type Benchmark } from "../report/benchmark.js";
 import { isRunningFresh, type LiveDoc } from "../report/live.js";
-import { TERMINAL_STATES } from "../shared/vocabulary.js";
+import { isTerminal, type SuiteId } from "../shared/vocabulary.js";
 import { readBenchmark, readLive, type IterationSummary } from "./reports-fs.js";
 
 // One line's worth of every iteration on disk, so the list of them can be read
@@ -56,20 +55,16 @@ function scoresByModel(benchmark: Benchmark): ModelScore[] {
     .toSorted((a, b) => b.passRate - a.passRate);
 }
 
-/** null the moment one run's cost is unknown: a partial sum understates the bill silently. */
 function costOf(benchmark: Benchmark): number | null {
-  let total = 0;
-  for (const entry of benchmark.entries) {
-    if (entry.totalCostUsd === null) return null;
-    total += entry.totalCostUsd;
-  }
-  return total;
+  return sumOrNull(benchmark.entries.map((entry) => entry.totalCostUsd));
 }
 
-function fromBenchmark(benchmark: Benchmark): Pick<
+type DigestBody = Pick<
   IterationDigest,
   "suites" | "models" | "runs" | "finished" | "meanPassRate" | "best" | "worst" | "costUsd" | "startedAt"
-> {
+>;
+
+function fromBenchmark(benchmark: Benchmark): DigestBody {
   const scores = scoresByModel(benchmark);
   const runs = sumBy(benchmark.entries, (entry) => entry.cases.total);
   const rated = benchmark.entries.filter((entry) => entry.cases.total > 0);
@@ -89,17 +84,14 @@ function fromBenchmark(benchmark: Benchmark): Pick<
 }
 
 /** A run still going has no benchmark, so everything comes off the plan it is working through. */
-function fromLive(doc: LiveDoc): Pick<
-  IterationDigest,
-  "suites" | "models" | "runs" | "finished" | "meanPassRate" | "best" | "worst" | "costUsd" | "startedAt"
-> {
+function fromLive(doc: LiveDoc): DigestBody {
   const graded = doc.items.filter((item) => item.state === "graded" && item.passRate !== null);
   return {
     startedAt: doc.startedAt,
     suites: doc.config.suites,
     models: new Set(doc.items.map((item) => item.model)).size,
     runs: doc.items.length,
-    finished: doc.items.filter((item) => TERMINAL_STATES.includes(item.state)).length,
+    finished: doc.items.filter((item) => isTerminal(item.state)).length,
     meanPassRate: graded.length === 0 ? null : meanBy(graded, (item) => item.passRate ?? 0),
     best: null,
     worst: null,
@@ -108,9 +100,9 @@ function fromLive(doc: LiveDoc): Pick<
   };
 }
 
-const EMPTY = {
+const EMPTY: DigestBody = {
   startedAt: null,
-  suites: [] as SuiteId[],
+  suites: [],
   models: 0,
   runs: 0,
   finished: 0,

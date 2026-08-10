@@ -1,39 +1,20 @@
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import * as z from "zod";
 import { planHostTransport } from "../agent/attach.js";
 import { runPhase } from "../agent/runner.js";
 import { tryExecute, type Result } from "../core/result.js";
 import { createOpenAiCompatibleModel } from "../model/chat.js";
 import { resolveContextBudget, type Modality } from "../model/capabilities.js";
-import { createOpenLedgerRunner, type OpenLedgerRunner } from "../oled/command.js";
+import { runOk, type OpenLedgerRunner } from "../oled/command.js";
 import { probeLedger } from "../oled/ledger.js";
 import { buildCounters } from "../report/counters.js";
 import type { EventSink, RunEvent } from "../report/events.js";
 import { computeCostUsd, type RunRecord, type TerminalState } from "../report/record.js";
 import { createRecorder, type Recorder } from "../report/recorder.js";
+import { createSandboxRunner, initConfig } from "../sandbox/session.js";
 import { createWorkspace, type Workspace, type WorkspaceGuard } from "../sandbox/workspace.js";
 import type { AnswerSink, CaseGrade, SuiteContext } from "../suites/types.js";
 import type { PlannedRun } from "./matrix.js";
-
-// Long enough for a statement extraction, short enough that a hung CLI cannot own the matrix.
-const CLI_TIMEOUT_MS = 120_000;
-
-/**
- * The CLI under test, as a user would have it: `oled` resolved from PATH, from
- * whatever `npm install -g` or `npm link` put there. The harness used to pack a
- * sibling checkout and install that tarball into every sandbox, which tied a run
- * to a source tree it had no business knowing about.
- */
-const OLED_BIN = "oled";
-
-/** Every sandbox runs the CLI the same way: one binary, the workspace's own env and cwd. */
-export function createSandboxRunner(workspace: Workspace): OpenLedgerRunner {
-  return createOpenLedgerRunner({
-    bin: OLED_BIN,
-    env: workspace.env,
-    cwd: workspace.cwd,
-    timeoutMs: CLI_TIMEOUT_MS,
-  });
-}
 
 /** Shared by every run of one invocation; only the planned cell changes between them. */
 export interface RunEnvironment {
@@ -59,33 +40,7 @@ function failure(state: TerminalState, error: string): Outcome {
   return { state, error, grade: null };
 }
 
-/**
- * Every command that touches the ledger refuses until this has run. The three
- * paths are stated rather than defaulted, so the harness and the CLI agree on
- * where a statement is read from and a ledger written to; the home redirect
- * would keep them in the sandbox either way, but not at a path the harness knows.
- */
-async function initConfig(runner: OpenLedgerRunner, workspace: Workspace): Promise<Result<void>> {
-  const result = await runner.run([
-    "config",
-    "--init",
-    "--db",
-    workspace.dbPath,
-    "--data-dir",
-    workspace.data,
-    "--cache-dir",
-    workspace.cache,
-    "--json",
-  ]);
-  if (!result.ok) return { ok: false, error: `oled config --init did not run: ${result.message}` };
-  if (result.value.exitCode !== 0) {
-    return {
-      ok: false,
-      error: `oled config --init exited ${result.value.exitCode}: ${result.value.stderr.trim()}`,
-    };
-  }
-  return { ok: true, value: undefined };
-}
+const CONFIG_ECHO = z.object({ ocrBaseUrl: z.string() });
 
 /**
  * A configured OCR endpoint would turn a scanned page into text before the
@@ -94,14 +49,19 @@ async function initConfig(runner: OpenLedgerRunner, workspace: Workspace): Promi
  * default held: no inherited profile, no changed default, no stray flag.
  */
 async function assertNoOcr(runner: OpenLedgerRunner): Promise<Result<void>> {
-  const result = await runner.run(["config", "--json"]);
-  if (!result.ok) return { ok: false, error: `oled config did not run: ${result.message}` };
+  const result = await runOk(runner, "oled config", ["config", "--json"]);
+  if (!result.ok) return result;
 
   const line = result.value.stdout.split("\n").find((text) => text.trim() !== "") ?? "";
-  const parsed = tryExecute(() => JSON.parse(line) as { ocrBaseUrl?: unknown });
-  if (!parsed.ok) return { ok: false, error: `oled config emitted no readable JSON: ${parsed.error}` };
-  if (parsed.value.ocrBaseUrl !== "") {
-    return { ok: false, error: `the sandbox has an OCR endpoint configured: ${String(parsed.value.ocrBaseUrl)}` };
+  const json = tryExecute(() => JSON.parse(line) as unknown);
+  if (!json.ok) return { ok: false, error: `oled config emitted no readable JSON: ${json.error}` };
+
+  const parsed = CONFIG_ECHO.safeParse(json.value);
+  if (!parsed.success) {
+    return { ok: false, error: `oled config emitted no readable JSON: ${z.prettifyError(parsed.error)}` };
+  }
+  if (parsed.data.ocrBaseUrl !== "") {
+    return { ok: false, error: `the sandbox has an OCR endpoint configured: ${parsed.data.ocrBaseUrl}` };
   }
   return { ok: true, value: undefined };
 }

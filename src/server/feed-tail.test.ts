@@ -133,8 +133,8 @@ test("the offset advances to the end of what was read, so a reader can resume", 
   withFile((path) => {
     const text = line("one");
     writeFileSync(path, text);
-    const tail = createFeedTail();
-    tail.read(path);
-    assert.equal(tail.offset(), Buffer.byteLength(text));
+    const read = createFeedTail().read(path);
+    assert.ok(read.ok);
+    assert.equal(read.value.offset, Buffer.byteLength(text));
   });
 });

@@ -4,8 +4,8 @@ import { tryExecute, type Result } from "../../core/result.js";
 
 /**
  * The seeded ledger's rows, in the shape `oled ingest commit` reads from stdin.
- * One authority for both the seeder and the golden derivation, so a golden can
- * only ever be derived from the rows the sandbox actually holds.
+ * They are what a sandbox is filled with and nothing else: a golden is read back
+ * out of oled afterwards, never computed from these.
  */
 const ROW = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),

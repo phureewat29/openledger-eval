@@ -1,5 +1,6 @@
 import { isRunningFresh } from "../report/live.js";
-import { launchFailed, ownsRun, type SlotView } from "./launch.js";
+import type { SlotView } from "../shared/payloads.js";
+import { launchFailed, ownsRun } from "./launch/slot.js";
 import type { LiveSnapshot } from "./reports-fs.js";
 
 // What the dashboard believes is happening, decided from the launch slot, the

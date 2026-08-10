@@ -47,6 +47,14 @@ export interface ErrorMessage {
 
 export type ServerMessage = WelcomeMessage | DataMessage | ErrorMessage;
 
+// The payload field is left as z.unknown(): each channel's own payload type is
+// declared in shared/payloads.ts and checked downstream, not re-validated here.
+export const SERVER_MESSAGE = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("welcome"), serverId: z.string() }),
+  z.object({ type: z.literal("message"), channel: z.enum(CHANNELS), payload: z.unknown() }),
+  z.object({ type: z.literal("error"), channel: z.enum(CHANNELS).nullable(), error: z.string() }),
+]);
+
 export function parseClientMessage(text: string): ClientMessage | null {
   const json = ((): unknown => {
     try {
@@ -56,5 +64,18 @@ export function parseClientMessage(text: string): ClientMessage | null {
     }
   })();
   const parsed = CLIENT_MESSAGE.safeParse(json);
+  return parsed.success ? parsed.data : null;
+}
+
+/** null on anything unparseable or mismatching, which a caller treats as an expected, droppable frame. */
+export function parseServerMessage(text: string): ServerMessage | null {
+  const json = ((): unknown => {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      return null;
+    }
+  })();
+  const parsed = SERVER_MESSAGE.safeParse(json);
   return parsed.success ? parsed.data : null;
 }

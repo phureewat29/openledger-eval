@@ -1,11 +1,10 @@
-import { groupedRows, type LedgerProbe } from "../../oled/ledger.js";
-import { gradeOf, notApplicable, type AssertionResult, type CaseGrade } from "../types.js";
+import { money, moneyMatches, MONEY_TOLERANCE } from "../../core/money.js";
+import { groupedRows, MONEY_GROUPS, type LedgerProbe } from "../../oled/ledger.js";
+import { check, gradeOf, notApplicable, type AssertionResult, type CaseGrade } from "../types.js";
 import {
   expectedNetWorth,
   expectedRows,
-  moneyMatches,
   MAX_UNCATEGORIZED_RATIO,
-  MONEY_TOLERANCE,
   NET_WORTH_TOLERANCE,
   type StatementFacts,
 } from "./truth.js";
@@ -13,28 +12,12 @@ import {
 // What the statement says against what oled holds. Nothing here reads the
 // model's prose: a run is judged only by the ledger it left behind.
 
-const GROUPS = ["charges", "refunds", "payments"] as const;
-
-function money(amount: number): string {
-  return amount.toFixed(2);
-}
-
-function within(amount: number, tolerance: number): string {
+function toleranceBand(amount: number, tolerance: number): string {
   return `${money(amount)} ±${money(tolerance)}`;
 }
 
 function percent(ratio: number): string {
   return `${(ratio * 100).toFixed(1)}%`;
-}
-
-function check(
-  id: string,
-  label: string,
-  passed: boolean,
-  want: string,
-  got: string,
-): AssertionResult {
-  return { id, label, passed, evidence: { want, got } };
 }
 
 /** `tallyMoney` reports no total once rows span two currency ledgers, and a bare 0.00 would read as a miscount. */
@@ -46,7 +29,7 @@ function totalGot(got: { count: number; total: number }, want: number): string {
 }
 
 function groupChecks(facts: StatementFacts, probe: LedgerProbe): AssertionResult[] {
-  return GROUPS.flatMap((group) => {
+  return MONEY_GROUPS.flatMap((group) => {
     const want = facts.groups[group];
     const got = probe.money[group];
     return [
@@ -61,7 +44,7 @@ function groupChecks(facts: StatementFacts, probe: LedgerProbe): AssertionResult
         `${group}_total`,
         `${group}: total`,
         moneyMatches(got.total, want.total, MONEY_TOLERANCE),
-        within(want.total, MONEY_TOLERANCE),
+        toleranceBand(want.total, MONEY_TOLERANCE),
         totalGot(got, want.total),
       ),
     ];
@@ -144,7 +127,7 @@ export function gradeIngest(
       "net_worth",
       "net worth",
       moneyMatches(probe.netWorth, netWorth, NET_WORTH_TOLERANCE),
-      within(netWorth, NET_WORTH_TOLERANCE),
+      toleranceBand(netWorth, NET_WORTH_TOLERANCE),
       money(probe.netWorth),
     ),
   ]);

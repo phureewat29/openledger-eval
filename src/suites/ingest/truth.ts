@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import * as z from "zod";
-import { minorUnits } from "../../core/money.js";
+import { minorUnits, money } from "../../core/money.js";
 import { tryExecute, type Result } from "../../core/result.js";
 
 /**
@@ -34,9 +34,6 @@ const FACTS = z.object({
 
 export type StatementFacts = z.infer<typeof FACTS>;
 
-/** A total the model reproduces to the cent. */
-export const MONEY_TOLERANCE = 0.01;
-
 /** Net worth also carries whatever rounding the model's own arithmetic added. */
 export const NET_WORTH_TOLERANCE = 1;
 
@@ -47,10 +44,6 @@ const PDF_SUFFIX = /\.pdf$/i;
 /** The 1-1 link: `card-statement-2026-05.pdf` → `card-statement-2026-05.expected.json`. */
 function factsPathFor(pdfPath: string): string {
   return `${pdfPath.replace(PDF_SUFFIX, "")}.expected.json`;
-}
-
-export function moneyMatches(got: number, want: number, tolerance: number): boolean {
-  return Math.abs(minorUnits(got) - minorUnits(want)) <= minorUnits(tolerance);
 }
 
 export function expectedRows(facts: StatementFacts): number {
@@ -81,7 +74,7 @@ function reconcile(facts: StatementFacts): string[] {
   const disagreements: string[] = [];
   const compare = (label: string, group: number, stated: number): void => {
     if (minorUnits(group) === minorUnits(stated)) return;
-    disagreements.push(`${label}: groups say ${group.toFixed(2)}, the box says ${stated.toFixed(2)}`);
+    disagreements.push(`${label}: groups say ${money(group)}, the box says ${money(stated)}`);
   };
 
   compare("charges", charges.total, box.purchasesAndFees);
@@ -95,7 +88,7 @@ function reconcile(facts: StatementFacts): string[] {
     minorUnits(payments.total);
   if (due !== minorUnits(box.totalAmountDue)) {
     disagreements.push(
-      `total amount due: the rows add up to ${(due / 100).toFixed(2)}, the box says ${box.totalAmountDue.toFixed(2)}`,
+      `total amount due: the rows add up to ${money(due / 100)}, the box says ${money(box.totalAmountDue)}`,
     );
   }
   return disagreements;

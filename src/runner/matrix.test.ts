@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { delay } from "es-toolkit";
-import type { SuiteId } from "../config.js";
+import { delay, sortBy } from "es-toolkit";
 import type { ValidatedModel } from "../model/capabilities.js";
 import { buildCounters } from "../report/counters.js";
 import type { RunRecord } from "../report/record.js";
 import { createRecorder } from "../report/recorder.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import { gradeOf, type AnySuite, type EvalCase } from "../suites/types.js";
 import { expandPlan, runMatrix, type MatrixDeps, type PlannedRun } from "./matrix.js";
 
 function model(id: string): ValidatedModel {
-  return { id, modalities: ["text"], contextLength: 128_000, supportsTools: true, pricing: null };
+  return { id, modalities: ["text"], contextLength: 128_000, pricing: null };
 }
 
 function suite(id: SuiteId): AnySuite {
@@ -102,36 +102,46 @@ function graded(planned: PlannedRun): RunRecord {
   };
 }
 
-function withRunOne(runOne: MatrixDeps["runOne"]): MatrixDeps {
-  return { runOne, onStart: () => {}, onProgress: () => {} };
+/** The matrix returns nothing: onProgress is the only way out, and it fires in completion order. */
+async function collect(
+  plan: PlannedRun[],
+  runOne: MatrixDeps["runOne"],
+  concurrency: number,
+): Promise<RunRecord[]> {
+  const records: RunRecord[] = [];
+  const onProgress = (record: RunRecord): void => {
+    records.push(record);
+  };
+  await runMatrix(plan, { runOne, onStart: () => {}, onProgress }, concurrency);
+  return records;
 }
 
 /** runOne owns its own failures; if one ever escapes, the other cells must still be reported. */
 test("turns a run that throws or rejects into a sandbox error, and keeps the rest", async () => {
-  const records = await runMatrix(
+  const records = await collect(
     planOf("throws", "rejects", "fine"),
-    withRunOne((planned) => {
+    (planned) => {
       if (planned.kase.id === "throws") throw new Error("threw before the promise");
       if (planned.kase.id === "rejects") return Promise.reject(new Error("rejected"));
       return Promise.resolve(graded(planned));
-    }),
+    },
     2,
   );
 
   assert.deepEqual(
-    records.map((record) => [record.caseId, record.state, record.error]),
+    sortBy(records, ["caseId"]).map((record) => [record.caseId, record.state, record.error]),
     [
-      ["throws", "sandbox_error", "threw before the promise"],
-      ["rejects", "sandbox_error", "rejected"],
       ["fine", "graded", null],
+      ["rejects", "sandbox_error", "rejected"],
+      ["throws", "sandbox_error", "threw before the promise"],
     ],
   );
   assert.ok(records.every((record) => record.grade === null || record.caseId === "fine"));
 });
 
-test("returns records in plan order however the runs interleave", async () => {
+test("reports each run as it finishes, whatever its place in the plan", async () => {
   const finished: string[] = [];
-  const records = await runMatrix(
+  await runMatrix(
     planOf("slow", "quick", "quicker", "quickest"),
     {
       runOne: async (planned) => {
@@ -144,17 +154,14 @@ test("returns records in plan order however the runs interleave", async () => {
     4,
   );
 
-  assert.deepEqual(
-    records.map((record) => record.caseId),
-    ["slow", "quick", "quicker", "quickest"],
-  );
+  assert.equal(finished.length, 4, "every planned cell is reported once");
   assert.equal(finished[finished.length - 1], "slow", "the slow run should finish last");
 });
 
 /** onStart has to land before runOne is even called, not merely before onProgress: the live view marks a cell running while it is still in flight. */
 test("starts every planned cell exactly once, each before its own run and its own finish", async () => {
   const events: string[] = [];
-  const records = await runMatrix(
+  await runMatrix(
     planOf("c1", "c2", "c3", "c4"),
     {
       runOne: async (planned) => {
@@ -171,7 +178,7 @@ test("starts every planned cell exactly once, each before its own run and its ow
     2,
   );
 
-  assert.equal(records.length, 4);
+  assert.equal(events.filter((event) => event.startsWith("finish:")).length, 4);
   for (const id of ["c1", "c2", "c3", "c4"]) {
     assert.equal(events.filter((event) => event === `start:${id}`).length, 1, `${id} must start exactly once`);
     assert.ok(
@@ -184,15 +191,15 @@ test("starts every planned cell exactly once, each before its own run and its ow
 test("never runs more at once than the concurrency allows", async () => {
   let inFlight = 0;
   let peak = 0;
-  const records = await runMatrix(
+  const records = await collect(
     planOf("c1", "c2", "c3", "c4", "c5", "c6"),
-    withRunOne(async (planned) => {
+    async (planned) => {
       inFlight += 1;
       peak = Math.max(peak, inFlight);
       await delay(5);
       inFlight -= 1;
       return graded(planned);
-    }),
+    },
     2,
   );
 
@@ -201,11 +208,7 @@ test("never runs more at once than the concurrency allows", async () => {
 });
 
 test("runs a lone case without waiting on an idle pool", async () => {
-  const records = await runMatrix(
-    planOf("only"),
-    withRunOne(async (planned) => graded(planned)),
-    8,
-  );
+  const records = await collect(planOf("only"), async (planned) => graded(planned), 8);
   assert.equal(records.length, 1);
   assert.equal(records[0]?.state, "graded");
 });

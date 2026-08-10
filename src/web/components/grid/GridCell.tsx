@@ -1,6 +1,6 @@
-import type { LiveItem, LiveItemState } from "../../../report/live.js";
-import { gradeShade, STATE_LEGEND, TERMINAL_STATES, type GradeShade } from "../../../shared/vocabulary.js";
-import { duration } from "../../lib/format.js";
+import type { LiveItem, LiveItemState } from "../../../report/live-item.js";
+import { duration } from "../../../shared/format.js";
+import { gradeShade, isTerminal, STATE_LEGEND, type GradeShade } from "../../../shared/vocabulary.js";
 import { Tip } from "../Tip.js";
 import {
   ArrowUpRight,
@@ -14,7 +14,7 @@ import {
 
 // One cell of the matrix, and the whole vocabulary the grid and its legend read
 // from — so a legend entry can never describe a glyph that is no longer drawn.
-//
+
 /**
  * What a cell prints, and how loud it prints it.
  *
@@ -61,7 +61,7 @@ const STATE_FACE: Record<Exclude<LiveItemState, "graded">, CellFace> = {
  * empty sheet is worse than offering none.
  */
 function hasResult(item: LiveItem): boolean {
-  return TERMINAL_STATES.includes(item.state);
+  return isTerminal(item.state);
 }
 
 /** The counts when the run recorded them, the rate when it is an older live.json that did not. */

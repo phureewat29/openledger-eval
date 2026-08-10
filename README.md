@@ -98,14 +98,14 @@ One invocation writes one iteration under `reports/<timestamp>/`:
   tokens, cost, tool calls. Committed, as the regression trail.
 - `benchmark.json`, the same figures machine-readable, plus the identity every
   one of them was measured against: oled version, skill version and hash, a
-  fingerprint of the questions and the answer contract, eval version. Committed.
+  fingerprint of every prompt the model is shown and the answer contract, eval version. Committed.
 - `runs/<model>/<suite>/<case>.json`, one per run: every assertion with its
   want/got evidence, metrics, counters, and the full transcript, down to what
   each `oled` call was piped and what it replied. Not committed.
 
 A rerun merges back into the report it came from rather than starting a new
 one. If it was measured against a different build (a newer `oled`, an edited
-`SKILL.md`, a reworded question) it still lands, and the leaderboard says the
+`SKILL.md`, a reworded prompt) it still lands, and the leaderboard says the
 report spans more than one build rather than averaging across them in silence.
 
 Cost is OpenRouter's published pricing times reported usage, and reads `—` when

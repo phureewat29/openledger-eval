@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { SuiteId } from "../../config.js";
+import type { SuiteId } from "../../shared/vocabulary.js";
 import { post } from "../lib/api.js";
+import { plural } from "../lib/format.js";
 import { estimate, useScale } from "../lib/scale.js";
 import { Confirm } from "./Confirm.js";
 
@@ -21,6 +22,12 @@ export interface RerunScope {
   cases: string[];
 }
 
+function whatOf(scope: RerunScope): string {
+  if (scope.cases.length === 1) return `case ${scope.cases[0]}`;
+  if (scope.cases.length > 1) return `${scope.cases.length} cases`;
+  return `the whole ${scope.suite} suite`;
+}
+
 export function RerunDialog({ scope, onClose }: { scope: RerunScope | null; onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -30,12 +37,6 @@ export function RerunDialog({ scope, onClose }: { scope: RerunScope | null; onCl
   if (scope === null) return null;
 
   const runs = scope.cases.length > 0 ? scope.cases.length : (scale.cases[scope.suite] ?? 0);
-  const what =
-    scope.cases.length === 1
-      ? `case ${scope.cases[0]}`
-      : scope.cases.length > 1
-        ? `${scope.cases.length} cases`
-        : `the whole ${scope.suite} suite`;
 
   const close = (): void => {
     setError(null);
@@ -60,8 +61,8 @@ export function RerunDialog({ scope, onClose }: { scope: RerunScope | null; onCl
 
   return (
     <Confirm
-      title={`Rerun ${what}?`}
-      action={runs > 0 ? `Rerun ${runs} ${runs === 1 ? "run" : "runs"}` : "Rerun"}
+      title={`Rerun ${whatOf(scope)}?`}
+      action={runs > 0 ? `Rerun ${plural(runs, "run")}` : "Rerun"}
       tone="accent"
       busy={sending}
       error={error}
@@ -70,7 +71,7 @@ export function RerunDialog({ scope, onClose }: { scope: RerunScope | null; onCl
     >
       <p className="tnum">
         {scope.model} · {scope.suite}
-        {runs > 0 && ` · ${runs} ${runs === 1 ? "run" : "runs"}`}
+        {runs > 0 && ` · ${plural(runs, "run")}`}
         {estimate(scale, runs)}
       </p>
       <p>

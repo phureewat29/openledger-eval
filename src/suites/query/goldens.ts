@@ -1,35 +1,30 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { mapValues } from "es-toolkit";
 import * as z from "zod";
-import {
-  ACCOUNT_TYPES,
-  currencyOf,
-  isDebitNormal,
-  typeOf,
-  type AccountType,
-} from "../../core/accounts.js";
-import { majorUnits, minorUnits } from "../../core/money.js";
+import { ACCOUNT_TYPES } from "../../core/accounts.js";
+import { money } from "../../core/money.js";
 import { tryExecute, type Result } from "../../core/result.js";
 import type { EvalCase } from "../types.js";
 import { readRows, type SeedRow } from "./rows.js";
 
 /**
- * Goldens are declared in the fixture and re-derived from the seed rows here.
- * A question whose two answers disagree fails the load, so no run is ever
- * scored against a number nobody can reproduce.
+ * A question states the shape its answer takes and how oled is asked for the
+ * number. It states no number: the goldens are read out of a seeded ledger
+ * through the CLI itself (`derive.ts`), once per invocation. Nothing here
+ * reproduces oled's arithmetic, so no golden can disagree with the ledger a
+ * model reads.
  */
 
 const CURRENCY = z.string().regex(/^[A-Z]{3}$/, "a currency is a 3-letter uppercase code");
 const ISO_DATE = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "a date is YYYY-MM-DD");
 const TOLERANCE = z.number().positive().optional();
 
-/** Every declared field must hold. `currency` is the row's ledger: oled refuses
- *  any row whose two sides sit in different ones, so either side names it. */
+/** Every declared field must hold, and each is read off the row oled printed. */
 const FILTER = z.object({
   debit: z.array(z.string().min(1)).min(1).optional(),
   credit: z.array(z.string().min(1)).min(1).optional(),
   debitType: z.enum(ACCOUNT_TYPES).optional(),
+  /** The row's own ledger, as oled prints it; the two sides always share one. */
   currency: CURRENCY.optional(),
   merchant: z.string().min(1).optional(),
   /** Inclusive. */
@@ -40,165 +35,71 @@ const FILTER = z.object({
   amountOver: z.number().nonnegative().optional(),
 });
 
+/**
+ * Which reading of the seeded ledger answers the question. `expenses` and
+ * `net_worth` and `balance` name a figure oled publishes itself; the rest are
+ * aggregates over the rows `transactions list` prints, which is the only
+ * arithmetic the harness still does.
+ */
 const DERIVATION = z.discriminatedUnion("op", [
-  z.object({ op: z.literal("count"), where: FILTER }),
-  z.object({ op: z.literal("sum"), where: FILTER }),
-  z.object({ op: z.literal("balance"), account: z.string().min(1) }),
-  z.object({ op: z.literal("net_worth"), currency: CURRENCY }),
-  z.object({ op: z.literal("top_merchant"), where: FILTER }),
-  z.object({ op: z.literal("delta"), of: FILTER, minus: FILTER }),
-  z.object({ op: z.literal("per_currency_sum"), where: FILTER }),
+  z.strictObject({ op: z.literal("count"), where: FILTER }),
+  z.strictObject({ op: z.literal("sum"), where: FILTER }),
+  z.strictObject({ op: z.literal("delta"), of: FILTER, minus: FILTER }),
+  z.strictObject({ op: z.literal("top_merchant"), where: FILTER }),
+  z.strictObject({ op: z.literal("balance"), account: z.string().min(1) }),
+  z.strictObject({ op: z.literal("net_worth"), currency: CURRENCY }),
+  z.strictObject({ op: z.literal("expenses"), from: ISO_DATE, to: ISO_DATE, currency: CURRENCY }),
+  z.strictObject({ op: z.literal("expenses_by_currency"), from: ISO_DATE, to: ISO_DATE }),
 ]);
 
-const GOLDEN = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("count"), value: z.number().int().nonnegative() }),
-  z.object({ kind: z.literal("money"), value: z.number(), unit: CURRENCY, tolerance: TOLERANCE }),
-  z.object({ kind: z.literal("number"), value: z.number(), tolerance: TOLERANCE }),
-  z.object({ kind: z.literal("string"), value: z.string().min(1) }),
-  z.object({
-    kind: z.literal("per_currency"),
-    perCurrency: z
-      .record(CURRENCY, z.number())
-      .refine((totals) => Object.keys(totals).length > 0, "name at least one currency"),
-    tolerance: TOLERANCE,
-  }),
+/**
+ * What the answer must look like, with no value in it. Strict, so a golden
+ * value left behind in the fixture fails the load instead of being ignored by
+ * a harness that no longer reads one.
+ */
+const SHAPE = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("count") }),
+  z.strictObject({ kind: z.literal("money"), unit: CURRENCY, tolerance: TOLERANCE }),
+  z.strictObject({ kind: z.literal("number"), tolerance: TOLERANCE }),
+  z.strictObject({ kind: z.literal("string") }),
+  z.strictObject({ kind: z.literal("per_currency"), tolerance: TOLERANCE }),
 ]);
 
-const QUESTION = z.object({
+const QUESTION = z.strictObject({
   id: z.string().min(1),
   /** Verbatim what the model is asked; nothing is appended at run time. */
   prompt: z.string().min(1),
-  golden: GOLDEN,
+  shape: SHAPE,
   derivation: DERIVATION,
   extraSeed: z.literal("paging").optional(),
 });
 
-const QUESTIONS = z.object({ note: z.string().min(1), cases: z.array(QUESTION).min(1) });
+const QUESTIONS = z.strictObject({ note: z.string().min(1), cases: z.array(QUESTION).min(1) });
 
-type RowFilter = z.infer<typeof FILTER>;
+export type RowFilter = z.infer<typeof FILTER>;
 export type Derivation = z.infer<typeof DERIVATION>;
-export type Golden = z.infer<typeof GOLDEN>;
+export type GoldenShape = z.infer<typeof SHAPE>;
 
-export interface QueryCase extends EvalCase {
+/** A shape with the ledger's own answer in it: the one thing a run is scored against. */
+export type Golden =
+  | { kind: "count"; value: number }
+  | { kind: "money"; value: number; unit: string; tolerance?: number }
+  | { kind: "number"; value: number; tolerance?: number }
+  | { kind: "string"; value: string }
+  | { kind: "per_currency"; perCurrency: Record<string, number>; tolerance?: number };
+
+export interface QueryQuestion extends EvalCase {
   prompt: string;
-  golden: Golden;
+  shape: GoldenShape;
   derivation: Derivation;
   extraSeed?: "paging";
   /** Resolved at load time so `prepare` reads no fixture from inside a sandbox. */
   rows: SeedRow[];
 }
 
-export type Derived =
-  | { kind: "number"; value: number }
-  | { kind: "string"; value: string }
-  | { kind: "perCurrency"; value: Record<string, number> };
-
-function matches(row: SeedRow, filter: RowFilter): boolean {
-  if (filter.debit && !filter.debit.includes(row.debit_account)) return false;
-  if (filter.credit && !filter.credit.includes(row.credit_account)) return false;
-  if (filter.debitType && typeOf(row.debit_account) !== filter.debitType) return false;
-  if (filter.currency && currencyOf(row.debit_account) !== filter.currency) return false;
-  if (filter.merchant && row.merchant?.canonical_name !== filter.merchant) return false;
-  if (filter.from && row.date < filter.from) return false;
-  if (filter.to && row.date > filter.to) return false;
-  if (filter.amountOver !== undefined && minorUnits(row.amount) <= minorUnits(filter.amountOver)) {
-    return false;
-  }
-  return true;
-}
-
-function select(rows: SeedRow[], filter: RowFilter): SeedRow[] {
-  return rows.filter((row) => matches(row, filter));
-}
-
-function sumMinor(rows: SeedRow[]): number {
-  return rows.reduce((total, row) => total + minorUnits(row.amount), 0);
-}
-
-function balanceMinor(rows: SeedRow[], account: string, type: AccountType): number {
-  const debits = sumMinor(rows.filter((row) => row.debit_account === account));
-  const credits = sumMinor(rows.filter((row) => row.credit_account === account));
-  return isDebitNormal(type) ? debits - credits : credits - debits;
-}
-
-function accountsOf(rows: SeedRow[]): string[] {
-  return [...new Set(rows.flatMap((row) => [row.debit_account, row.credit_account]))];
-}
-
-function number(value: number): Result<Derived> {
-  return { ok: true, value: { kind: "number", value } };
-}
-
-function deriveBalance(rows: SeedRow[], account: string): Result<Derived> {
-  const type = typeOf(account);
-  if (!type) return { ok: false, error: `${account} names no account type` };
-  return number(majorUnits(balanceMinor(rows, account, type)));
-}
-
-function deriveNetWorth(rows: SeedRow[], currency: string): Result<Derived> {
-  const scoped = accountsOf(rows).filter((id) => currencyOf(id) === currency);
-  if (scoped.length === 0) return { ok: false, error: `no row touches the ${currency} ledger` };
-
-  const held = (type: AccountType): number =>
-    scoped
-      .filter((id) => typeOf(id) === type)
-      .reduce((total, id) => total + balanceMinor(rows, id, type), 0);
-  return number(majorUnits(held("asset") - held("liability")));
-}
-
-function deriveTopMerchant(rows: SeedRow[], filter: RowFilter): Result<Derived> {
-  const totals = new Map<string, number>();
-  for (const row of select(rows, filter)) {
-    const name = row.merchant?.canonical_name;
-    if (!name) continue;
-    totals.set(name, (totals.get(name) ?? 0) + minorUnits(row.amount));
-  }
-
-  const ranked = [...totals.entries()].sort(([, a], [, b]) => b - a);
-  const top = ranked[0];
-  if (!top) return { ok: false, error: "no matching row names a merchant" };
-
-  const runnerUp = ranked[1];
-  if (runnerUp && runnerUp[1] === top[1]) {
-    return { ok: false, error: `${top[0]} and ${runnerUp[0]} tie at ${majorUnits(top[1])}` };
-  }
-  return { ok: true, value: { kind: "string", value: top[0] } };
-}
-
-function derivePerCurrencySum(rows: SeedRow[], filter: RowFilter): Result<Derived> {
-  const totals: Record<string, number> = {};
-  for (const row of select(rows, filter)) {
-    const currency = currencyOf(row.debit_account);
-    totals[currency] = (totals[currency] ?? 0) + minorUnits(row.amount);
-  }
-  if (Object.keys(totals).length === 0) return { ok: false, error: "no row matches" };
-  return { ok: true, value: { kind: "perCurrency", value: mapValues(totals, majorUnits) } };
-}
-
-/** One entry per op: a new op fails to compile until it can be derived. */
-const OPS: {
-  [K in Derivation["op"]]: (
-    rows: SeedRow[],
-    derivation: Extract<Derivation, { op: K }>,
-  ) => Result<Derived>;
-} = {
-  count: (rows, { where }) => number(select(rows, where).length),
-  sum: (rows, { where }) => number(majorUnits(sumMinor(select(rows, where)))),
-  balance: (rows, { account }) => deriveBalance(rows, account),
-  net_worth: (rows, { currency }) => deriveNetWorth(rows, currency),
-  top_merchant: (rows, { where }) => deriveTopMerchant(rows, where),
-  delta: (rows, { of, minus }) =>
-    number(majorUnits(sumMinor(select(rows, of)) - sumMinor(select(rows, minus)))),
-  per_currency_sum: (rows, { where }) => derivePerCurrencySum(rows, where),
-};
-
-export function derive(rows: SeedRow[], derivation: Derivation): Result<Derived> {
-  const op = OPS[derivation.op] as (rows: SeedRow[], d: Derivation) => Result<Derived>;
-  return op(rows, derivation);
-}
-
-function money(amount: number): string {
-  return amount.toFixed(2);
+/** A question the seeded ledger has answered; the shape is spent once it is filled. */
+export interface QueryCase extends Omit<QueryQuestion, "shape"> {
+  golden: Golden;
 }
 
 function currencyList(totals: Record<string, number>): string {
@@ -216,51 +117,6 @@ export function describeGolden(golden: Golden): string {
   return money(golden.value);
 }
 
-function describeDerived(derived: Derived): string {
-  if (derived.kind === "string") return JSON.stringify(derived.value);
-  if (derived.kind === "perCurrency") return currencyList(derived.value);
-  return money(derived.value);
-}
-
-function sameMoney(a: number, b: number): boolean {
-  return minorUnits(a) === minorUnits(b);
-}
-
-function perCurrencyDisagreement(
-  want: Record<string, number>,
-  got: Record<string, number>,
-): boolean {
-  const currencies = new Set([...Object.keys(want), ...Object.keys(got)]);
-  return [...currencies].some((currency) => {
-    const wanted = want[currency];
-    const gotten = got[currency];
-    return wanted === undefined || gotten === undefined || !sameMoney(wanted, gotten);
-  });
-}
-
-/** null when the two agree exactly; the fixture is not held to a tolerance. */
-function disagreement(golden: Golden, derived: Derived): string | null {
-  const mismatch = `golden says ${describeGolden(golden)}, the rows say ${describeDerived(derived)}`;
-  if (golden.kind === "string") {
-    return derived.kind === "string" && derived.value === golden.value ? null : mismatch;
-  }
-  if (golden.kind === "per_currency") {
-    if (derived.kind !== "perCurrency") return mismatch;
-    return perCurrencyDisagreement(golden.perCurrency, derived.value) ? mismatch : null;
-  }
-  if (derived.kind !== "number") return mismatch;
-  return sameMoney(golden.value, derived.value) ? null : mismatch;
-}
-
-/** Every case is replayed against the rows its own sandbox would hold. */
-export function selfCheck(kase: QueryCase): string | null {
-  const derived = derive(kase.rows, kase.derivation);
-  if (!derived.ok) return `${kase.id}: the derivation failed: ${derived.error}`;
-
-  const disagreed = disagreement(kase.golden, derived.value);
-  return disagreed === null ? null : `${kase.id}: ${disagreed}`;
-}
-
 function readQuestions(path: string): Result<z.infer<typeof QUESTIONS>> {
   const json = tryExecute(() => JSON.parse(readFileSync(path, "utf8")) as unknown);
   if (!json.ok) return { ok: false, error: `cannot read ${path}: ${json.error}` };
@@ -276,10 +132,10 @@ function readQuestions(path: string): Result<z.infer<typeof QUESTIONS>> {
  *
  * It lives here rather than only in the fixture so a question and the check that
  * grades it cannot drift apart: `expectationGap` refuses to load a case whose
- * prompt does not carry the sentence its golden kind calls for, which is the
- * same posture the derived goldens take. q09 was scored wrong for exactly this —
- * it asked for a merchant and the model wrote a sentence, because the only
- * instruction it had about `answer` said "a one-line summary".
+ * prompt does not carry the sentence its golden kind calls for. q09 was scored
+ * wrong for exactly this — it asked for a merchant and the model wrote a
+ * sentence, because the only instruction it had about `answer` said "a one-line
+ * summary".
  *
  * `per_currency` is deliberately null. Naming its shape would answer the
  * question: the one case with that golden asks whether a single total is even
@@ -295,13 +151,17 @@ export const ANSWER_EXPECTATION: Record<Golden["kind"], string | null> = {
 };
 
 /** Why this question does not say what shape its answer takes, or null when it does. */
-export function expectationGap(kase: { id: string; prompt: string; golden: Golden }): string | null {
-  const wanted = ANSWER_EXPECTATION[kase.golden.kind];
+export function expectationGap(kase: {
+  id: string;
+  prompt: string;
+  shape: { kind: Golden["kind"] };
+}): string | null {
+  const wanted = ANSWER_EXPECTATION[kase.shape.kind];
   if (wanted === null || kase.prompt.includes(wanted)) return null;
-  return `${kase.id} (${kase.golden.kind}) must end with ${JSON.stringify(wanted)}`;
+  return `${kase.id} (${kase.shape.kind}) must end with ${JSON.stringify(wanted)}`;
 }
 
-export function loadQueryCases(fixturesDir: string): Result<QueryCase[]> {
+export function loadQueryQuestions(fixturesDir: string): Result<QueryQuestion[]> {
   const dir = join(fixturesDir, "query");
   const questions = readQuestions(join(dir, "questions.json"));
   if (!questions.ok) return questions;
@@ -312,22 +172,17 @@ export function loadQueryCases(fixturesDir: string): Result<QueryCase[]> {
   const paging = readRows(join(dir, "paging-rows.ndjson"));
   if (!paging.ok) return paging;
 
-  const cases: QueryCase[] = questions.value.cases.map((question) => ({
+  const cases: QueryQuestion[] = questions.value.cases.map((question) => ({
     ...question,
     rows: question.extraSeed ? [...seed.value, ...paging.value] : seed.value,
   }));
 
-  // Before the goldens are checked, because this one costs no derivation: a
-  // question that does not say where its answer goes scores the model's reading
-  // of the tool description rather than its work on the ledger.
+  // Costs no ledger and no spend: a question that does not say where its answer
+  // goes scores the model's reading of the tool description rather than its work.
   const unstated = cases.map(expectationGap).filter((line) => line !== null);
-  if (unstated.length > 0) {
-    return { ok: false, error: `a query question does not state what its answer must look like: ${unstated.join("; ")}` };
-  }
-
-  const disagreements = cases.map(selfCheck).filter((line) => line !== null);
-  if (disagreements.length > 0) {
-    return { ok: false, error: `the query goldens disagree with the rows: ${disagreements.join("; ")}` };
-  }
-  return { ok: true, value: cases };
+  if (unstated.length === 0) return { ok: true, value: cases };
+  return {
+    ok: false,
+    error: `a query question does not state what its answer must look like: ${unstated.join("; ")}`,
+  };
 }

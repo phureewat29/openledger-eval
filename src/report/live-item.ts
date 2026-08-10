@@ -1,4 +1,4 @@
-import type { SuiteId } from "../config.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import { countChecks } from "../suites/types.js";
 import type { RunSummary, TerminalState } from "./record.js";
 
@@ -7,9 +7,7 @@ import type { RunSummary, TerminalState } from "./record.js";
 // Apart from live.ts because that file writes live.json and so imports node:fs,
 // which the browser cannot follow. The grid is drawn from a run in flight and
 // from a run on disk by the same component, and it could only be true that both
-// mean the same thing by the two sharing this projection — which, until this
-// module existed, they did not: the runner had one copy and the report page
-// another, field for field.
+// mean the same thing by the two sharing this projection.
 
 export type LiveItemState = "pending" | "running" | TerminalState;
 

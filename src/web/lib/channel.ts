@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Channel, ServerMessage } from "../../shared/protocol.js";
+import { parseServerMessage, type Channel } from "../../shared/protocol.js";
 
 // One socket for the whole page, shared by every channel any component asks for.
 // The server pushes only when something changed, so a message arriving is always
@@ -34,7 +34,6 @@ function createClient(): ChannelClient {
   const serverListeners = new Set<(serverId: string) => void>();
   let socket: WebSocket | null = null;
   let attempt = 0;
-  let closed = false;
 
   const setStatus = (status: ConnectionStatus): void => {
     for (const listener of statusListeners) listener(status);
@@ -45,7 +44,6 @@ function createClient(): ChannelClient {
   };
 
   function connect(): void {
-    if (closed) return;
     setStatus("connecting");
     const next = new WebSocket(socketUrl());
     socket = next;
@@ -59,7 +57,8 @@ function createClient(): ChannelClient {
     });
 
     next.addEventListener("message", (event) => {
-      const message = JSON.parse(String(event.data)) as ServerMessage;
+      const message = parseServerMessage(String(event.data));
+      if (message === null) return;
       if (message.type === "welcome") {
         for (const listener of serverListeners) listener(message.serverId);
         return;
@@ -71,7 +70,7 @@ function createClient(): ChannelClient {
     });
 
     const retry = (): void => {
-      if (closed || socket !== next) return;
+      if (socket !== next) return;
       socket = null;
       setStatus("closed");
       const wait = BACKOFF_MS[Math.min(attempt, BACKOFF_MS.length - 1)] ?? 5_000;

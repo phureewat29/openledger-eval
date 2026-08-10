@@ -1,11 +1,15 @@
-import { closeSync, existsSync, fstatSync, openSync, readdirSync, readFileSync, readSync, type Dirent } from "node:fs";
+import { closeSync, existsSync, fstatSync, openSync, readdirSync, readSync, type Dirent } from "node:fs";
 import { join } from "node:path";
+import { readJsonFile } from "../core/fs.js";
 import { tryExecute, type Result } from "../core/result.js";
 import type { Benchmark } from "../report/benchmark.js";
-import { FEED_FILE, FEED_KINDS, type FeedKind, type FeedLine } from "../report/feed.js";
 import type { LiveDoc } from "../report/live.js";
 import { readRecordFile } from "../report/read.js";
 import { summarise, type RunRecord, type RunSummary } from "../report/record.js";
+import { isVersionOne } from "../report/schema.js";
+import { readBenchmarkFile } from "../report/write.js";
+import { parseFeedLine, type FeedLine } from "../shared/feed.js";
+import { BENCHMARK_FILE, FEED_FILE, LIVE_FILE, RUNS_DIR } from "../shared/paths.js";
 import { ITERATION_SLUG_RE } from "../shared/vocabulary.js";
 
 // Every read the dashboard makes, fresh per request: no cache, no watcher. A
@@ -52,8 +56,8 @@ function summarize(reportsRoot: string, slug: string): IterationSummary {
   const dir = join(reportsRoot, slug);
   return {
     slug,
-    hasBenchmark: existsSync(join(dir, "benchmark.json")),
-    hasLive: existsSync(join(dir, "live.json")),
+    hasBenchmark: existsSync(join(dir, BENCHMARK_FILE)),
+    hasLive: existsSync(join(dir, LIVE_FILE)),
   };
 }
 
@@ -74,50 +78,45 @@ export function findIteration(reportsRoot: string, slug: string): Result<Iterati
   return { ok: true, value: iterations.value.find((iteration) => iteration.slug === slug) ?? null };
 }
 
-function isVersionOne(value: unknown): boolean {
-  if (typeof value !== "object" || value === null) return false;
-  return (value as { schemaVersion?: unknown }).schemaVersion === 1;
-}
-
 /**
- * `schemaVersion` is the whole contract. A v1 document may carry fields this
- * build never heard of — an older report directory does — so the guard admits
- * it and the renderers read only the fields they know. This cast is the single
- * place that trust is granted; nothing downstream re-validates.
+ * `schemaVersion` is the whole contract: a v1 document may carry fields this
+ * build never heard of, and the guard admits it so renderers read only the
+ * fields they know. This cast is the one place a document's shape is
+ * trusted; nothing downstream re-validates.
  */
 function readDoc<T>(reportsRoot: string, slug: string, file: string): Result<T> {
   if (!isIterationSlug(slug)) return { ok: false, error: `not an iteration: ${slug}` };
 
   const path = join(reportsRoot, slug, file);
-  const text = tryExecute(() => readFileSync(path, "utf8"));
-  if (!text.ok) return { ok: false, error: `cannot read ${path}: ${text.error}` };
-
-  const json = tryExecute(() => JSON.parse(text.value) as unknown);
-  if (!json.ok) return { ok: false, error: `${path} is not JSON: ${json.error}` };
+  const json = readJsonFile(path);
+  if (!json.ok) return json;
 
   if (!isVersionOne(json.value)) return { ok: false, error: `${path}: not a schemaVersion 1 document` };
   return { ok: true, value: json.value as T };
 }
 
 export function readBenchmark(reportsRoot: string, slug: string): Result<Benchmark> {
-  return readDoc<Benchmark>(reportsRoot, slug, "benchmark.json");
+  if (!isIterationSlug(slug)) return { ok: false, error: `not an iteration: ${slug}` };
+  return readBenchmarkFile(join(reportsRoot, slug, BENCHMARK_FILE));
 }
 
 export function readLive(reportsRoot: string, slug: string): Result<LiveDoc> {
-  return readDoc<LiveDoc>(reportsRoot, slug, "live.json");
+  return readDoc<LiveDoc>(reportsRoot, slug, LIVE_FILE);
 }
 
-/** null when no iteration has a live.json at all; the live panel's "no runs yet" state. */
-export function newestLive(reportsRoot: string): Result<LiveSnapshot | null> {
+/**
+ * null when no iteration has a live.json at all, or the newest one could not
+ * be read — both read as the live panel's "no runs yet" state.
+ */
+export function newestLive(reportsRoot: string): LiveSnapshot | null {
   const iterations = listIterations(reportsRoot);
-  if (!iterations.ok) return iterations;
+  if (!iterations.ok) return null;
 
   const newest = iterations.value.find((iteration) => iteration.hasLive);
-  if (!newest) return { ok: true, value: null };
+  if (!newest) return null;
 
   const doc = readLive(reportsRoot, newest.slug);
-  if (!doc.ok) return doc;
-  return { ok: true, value: { slug: newest.slug, doc: doc.value } };
+  return doc.ok ? { slug: newest.slug, doc: doc.value } : null;
 }
 
 /** More lines than any page shows, and a bounded read whatever a long matrix appended. */
@@ -149,24 +148,6 @@ function readTail(path: string, maxBytes: number): Result<Tail> {
   return read;
 }
 
-function isFeedKind(value: unknown): value is FeedKind {
-  return typeof value === "string" && (FEED_KINDS as readonly string[]).includes(value);
-}
-
-/**
- * Written by our own writer, but this file is also hand-edited and read while it
- * is being appended to, so a line reaches a renderer only once every field it
- * renders is known to be a string.
- */
-export function parseFeedLine(line: string): FeedLine | null {
-  const parsed = tryExecute(() => JSON.parse(line) as unknown);
-  if (!parsed.ok || typeof parsed.value !== "object" || parsed.value === null) return null;
-
-  const { at, scope, kind, text } = parsed.value as Record<string, unknown>;
-  if (typeof at !== "string" || typeof scope !== "string" || typeof text !== "string") return null;
-  return isFeedKind(kind) ? { at, scope, kind, text } : null;
-}
-
 /**
  * The last `maxLines` of one iteration's feed, oldest first. A missing file is an
  * empty feed and not an error: a run that has not written its first line, and
@@ -193,7 +174,7 @@ export function readFeedTail(reportsRoot: string, slug: string, maxLines: number
 export function listRunFiles(reportsRoot: string, slug: string): Result<RunGroup[]> {
   if (!isIterationSlug(slug)) return { ok: false, error: `not an iteration: ${slug}` };
 
-  const runsDir = join(reportsRoot, slug, "runs");
+  const runsDir = join(reportsRoot, slug, RUNS_DIR);
   if (!existsSync(runsDir)) return { ok: true, value: [] };
 
   const models = subdirs(runsDir);
@@ -246,7 +227,7 @@ function resolveRunFile(
 ): Result<string> {
   if (!isIterationSlug(slug)) return { ok: false, error: `not an iteration: ${slug}` };
 
-  const modelDir = childOf(join(reportsRoot, slug, "runs"), model);
+  const modelDir = childOf(join(reportsRoot, slug, RUNS_DIR), model);
   if (!modelDir.ok) return modelDir;
 
   const suiteDir = childOf(modelDir.value, suite);
@@ -276,11 +257,10 @@ export interface LoadedRun extends Omit<RunGroup, "stems"> {
 }
 
 /**
- * Every run file of one iteration, transcripts left behind. An iteration's runs
- * are read to draw a grid, a leaderboard and a failure tally, none of which look
- * at an event — and carrying them made this the heaviest response the server
- * sends, megabytes of transcript parsed and re-serialised to be discarded. The
- * sheet for a single open run reads its events through `readRunRecord`.
+ * Every run file of one iteration, transcripts left behind: carrying every
+ * event here would make this the heaviest response the server sends, and none
+ * of a grid, a leaderboard or a failure tally look at one. The sheet for a
+ * single open run reads its events through `readRunRecord`.
  *
  * An unreadable record is carried as null rather than dropped: the run happened,
  * and its cell must still lead to whatever the run left behind.

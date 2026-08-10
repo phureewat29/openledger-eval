@@ -1,5 +1,5 @@
-import type { SuiteId } from "../config.js";
 import type { ModelPricing } from "../model/capabilities.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import type { CaseGrade } from "../suites/types.js";
 import type { RunCounters } from "./counters.js";
 import type { RunEvent } from "./events.js";
@@ -11,7 +11,7 @@ export interface RunIdentity {
   oledVersion: string;
   skillVersion: string;
   skillSha256: string;
-  /** The questions and the answer contract, so a reworded prompt is visible as a different build. */
+  /** Every prompt the model is shown and the answer contract, so a reworded ask is visible as a different build. */
   suiteSha256: string;
   evalVersion: string;
 }

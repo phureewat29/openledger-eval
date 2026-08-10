@@ -1,21 +1,11 @@
-import { minorUnits } from "../../core/money.js";
+import { money, moneyMatches, MONEY_TOLERANCE } from "../../core/money.js";
 import { gradeOf, type AssertionResult, type CaseGrade, type SubmittedAnswer } from "../types.js";
 import { describeGolden, type Golden, type QueryCase } from "./goldens.js";
 
 // The answer as submitted against the golden the fixture derived. Nothing here
 // reads the model's prose: an answer arrives through `submit_answer` or not at all.
 
-const MONEY_TOLERANCE = 0.01;
-
 const UNSUBMITTED = "no answer submitted";
-
-function money(amount: number): string {
-  return amount.toFixed(2);
-}
-
-function within(got: number, want: number, tolerance: number): boolean {
-  return Math.abs(minorUnits(got) - minorUnits(want)) <= minorUnits(tolerance);
-}
 
 function sameUnit(got: string | undefined, want: string): boolean {
   return got !== undefined && got.trim().toLowerCase() === want.toLowerCase();
@@ -47,7 +37,7 @@ function matchesPerCurrency(
   return wanted.every((currency) => {
     const amount = got[currency];
     const target = want[currency];
-    return amount !== undefined && target !== undefined && within(amount, target, tolerance);
+    return amount !== undefined && target !== undefined && moneyMatches(amount, target, tolerance);
   });
 }
 
@@ -58,10 +48,10 @@ const CORRECT: {
   count: (golden, got) => got.value !== undefined && Number.isInteger(got.value) && got.value === golden.value,
   money: (golden, got) =>
     got.value !== undefined &&
-    within(got.value, golden.value, golden.tolerance ?? MONEY_TOLERANCE) &&
+    moneyMatches(got.value, golden.value, golden.tolerance ?? MONEY_TOLERANCE) &&
     sameUnit(got.unit, golden.unit),
   number: (golden, got) =>
-    got.value !== undefined && within(got.value, golden.value, golden.tolerance ?? MONEY_TOLERANCE),
+    got.value !== undefined && moneyMatches(got.value, golden.value, golden.tolerance ?? MONEY_TOLERANCE),
   string: (golden, got) => got.answer.trim().toLowerCase() === golden.value.trim().toLowerCase(),
   per_currency: (golden, got) =>
     matchesPerCurrency(golden.perCurrency, got, golden.tolerance ?? MONEY_TOLERANCE),

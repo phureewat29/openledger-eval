@@ -1,8 +1,9 @@
 import { groupBy, mean, meanBy, sum, sumBy } from "es-toolkit";
-import type { SuiteId } from "../config.js";
 import type { SkippedModel } from "../model/capabilities.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import type { CaseGrade } from "../suites/types.js";
 import type { RunIdentity, RunRecord, TerminalState } from "./record.js";
+import { SCHEMA_VERSION } from "./schema.js";
 import { tallyStates } from "./write.js";
 
 // Aggregates the matrix's raw RunRecords into one ranked entry per model and
@@ -50,24 +51,6 @@ export interface Benchmark {
   buildDrift: string | null;
 }
 
-interface RunGroup {
-  model: string;
-  suite: SuiteId;
-  records: RunRecord[];
-}
-
-/** One group per (model, suite) pair the matrix actually ran. */
-function groupRuns(records: RunRecord[]): RunGroup[] {
-  const byKey = new Map<string, RunGroup>();
-  for (const record of records) {
-    const key = `${record.model} ${record.suite}`;
-    const group = byKey.get(key);
-    if (group) group.records.push(record);
-    else byKey.set(key, { model: record.model, suite: record.suite, records: [record] });
-  }
-  return [...byKey.values()];
-}
-
 type GradedRecord = RunRecord & { grade: CaseGrade };
 
 function isGraded(record: RunRecord): record is GradedRecord {
@@ -91,14 +74,18 @@ function sampleStddev(values: number[]): number | null {
   return Math.sqrt(sumBy(values, (value) => (value - avg) ** 2) / (values.length - 1));
 }
 
-/** null once any graded run's cost is unknown: a partial sum would understate the total silently. */
-function totalCost(graded: GradedRecord[]): number | null {
-  const costs: number[] = [];
-  for (const record of graded) {
-    if (record.costUsd === null) return null;
-    costs.push(record.costUsd);
+/** null the moment one value is unknown: a partial sum would understate the total silently. */
+export function sumOrNull(values: (number | null)[]): number | null {
+  const known: number[] = [];
+  for (const value of values) {
+    if (value === null) return null;
+    known.push(value);
   }
-  return sum(costs);
+  return sum(known);
+}
+
+function totalCost(graded: GradedRecord[]): number | null {
+  return sumOrNull(graded.map((record) => record.costUsd));
 }
 
 /** meanBy on an empty array is NaN; every average in a BenchmarkEntry reads as 0 with nothing graded instead. */
@@ -106,13 +93,14 @@ function meanOrZero(graded: GradedRecord[], selector: (record: GradedRecord) => 
   return graded.length === 0 ? 0 : meanBy(graded, selector);
 }
 
-function buildEntry(group: RunGroup, trials: number): BenchmarkEntry {
-  const graded = group.records.filter(isGraded);
+function buildEntry(records: RunRecord[], trials: number): BenchmarkEntry {
+  const { model, suite } = records[0]!;
+  const graded = records.filter(isGraded);
   return {
-    model: group.model,
-    suite: group.suite,
+    model,
+    suite,
     trials,
-    cases: caseTotals(group.records),
+    cases: caseTotals(records),
     meanPassRate: meanOrZero(graded, (record) => record.grade.passRate),
     stddevPassRate: sampleStddev(graded.map((record) => record.grade.passRate)),
     avgDurationMs: meanOrZero(graded, (record) => record.metrics.durationMs),
@@ -122,7 +110,7 @@ function buildEntry(group: RunGroup, trials: number): BenchmarkEntry {
     },
     avgToolCalls: meanOrZero(graded, (record) => record.metrics.toolCalls),
     totalCostUsd: totalCost(graded),
-    terminal: tallyStates(group.records),
+    terminal: tallyStates(records),
   };
 }
 
@@ -141,8 +129,8 @@ export function buildBenchmark(
   skippedModels: SkippedModel[],
   buildDrift: string | null = null,
 ): Benchmark {
-  const entries = groupRuns(records)
-    .map((group) => buildEntry(group, config.trials))
-    .toSorted(byRank(config.suites));
-  return { schemaVersion: 1, identity, config, entries, skippedModels, buildDrift };
+  // One group per (model, suite) pair the matrix actually ran.
+  const groups = Object.values(groupBy(records, (record) => `${record.model} ${record.suite}`));
+  const entries = groups.map((group) => buildEntry(group, config.trials)).toSorted(byRank(config.suites));
+  return { schemaVersion: SCHEMA_VERSION, identity, config, entries, skippedModels, buildDrift };
 }

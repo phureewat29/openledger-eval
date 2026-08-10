@@ -101,11 +101,11 @@ test("identityDrift is null while every pinned field still matches", () => {
   assert.equal(identityDrift(pinned, current), null);
 });
 
-test("identityDrift names the questions when only their wording moved", () => {
+test("identityDrift names the prompts when only their wording moved", () => {
   const pinned = identity();
   const current = identity({ suiteSha256: "c".repeat(64) });
   const message = identityDrift(pinned, current);
-  assert.ok(message?.includes("the questions"));
+  assert.ok(message?.includes("the prompts"));
   assert.ok(!message?.includes("SKILL.md"));
 });
 
@@ -121,13 +121,13 @@ test("identityDrift names SKILL.md when only the skill hash moved", () => {
   const current = identity({ skillSha256: "c".repeat(64) });
   const message = identityDrift(pinned, current);
   assert.ok(message?.includes("SKILL.md"));
-  assert.ok(!message?.includes("the questions"));
+  assert.ok(!message?.includes("the prompts"));
 });
 
 test("identityDrift names every field that moved, not just the first", () => {
   const pinned = identity();
   const current = identity({ suiteSha256: "c".repeat(64), skillSha256: "d".repeat(64) });
   const message = identityDrift(pinned, current);
-  assert.ok(message?.includes("the questions"));
+  assert.ok(message?.includes("the prompts"));
   assert.ok(message?.includes("SKILL.md"));
 });

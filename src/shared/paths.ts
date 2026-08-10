@@ -13,3 +13,10 @@
  * iteration and re-parsing a live.json to compare one string.
  */
 export const LAUNCH_LOG = "logs/dashboard-launch.log";
+
+/** The files and the one directory an iteration under reports/<ts>/ is made of. */
+export const BENCHMARK_FILE = "benchmark.json";
+export const LIVE_FILE = "live.json";
+export const FEED_FILE = "feed.ndjson";
+export const RUNS_DIR = "runs";
+export const LEADERBOARD_FILE = "leaderboard.md";

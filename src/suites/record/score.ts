@@ -1,14 +1,16 @@
-import { countBy } from "es-toolkit";
+import { countBy, sumBy } from "es-toolkit";
 import { adjustmentsAccount, netWorthMinor, uncategorizedAccount } from "../../core/accounts.js";
+import { majorUnits, money as formatMoney } from "../../core/money.js";
 import type { LedgerPosting, LedgerProbe } from "../../oled/ledger.js";
-import { exitTally, rejectedTotal } from "../../report/counters.js";
+import { exitTally, rejectedTotal, type RunCounters } from "../../report/counters.js";
+import type { RunMetrics } from "../../report/recorder.js";
 import {
+  check,
   gradeOf,
   notApplicable,
+  reported,
   type AssertionResult,
   type CaseGrade,
-  type RunCounters,
-  type RunMetrics,
 } from "../types.js";
 import { RESOLVE_MAX_CALLS, type RecordCase } from "./cases.js";
 
@@ -24,22 +26,7 @@ const EVIDENCE_SAMPLE = 3;
 
 /** Both sides are minor units, so a decimal from oled never meets a float here. */
 function money(minor: number): string {
-  return (minor / 100).toFixed(2);
-}
-
-function check(
-  id: string,
-  label: string,
-  passed: boolean,
-  want: string,
-  got: string,
-): AssertionResult {
-  return { id, label, passed, evidence: { want, got } };
-}
-
-/** `na` keeps a figure out of the pass rate; the want and got columns still carry it. */
-function reported(id: string, label: string, want: string, got: string): AssertionResult {
-  return { id, label, passed: false, na: true, evidence: { want, got } };
+  return formatMoney(majorUnits(minor));
 }
 
 /**
@@ -140,20 +127,17 @@ function balanceChecks(kase: RecordCase, probe: LedgerProbe): AssertionResult[] 
 }
 
 /** An account and everything under it: money parked one level down is still parked. */
-function subtreeMinor(probe: LedgerProbe, root: string): number {
-  return sumSubtree(probe.balancesMinor, root);
-}
-
 function sumSubtree(figures: Record<string, number>, root: string): number {
-  return Object.entries(figures)
-    .filter(([id]) => id === root || id.startsWith(`${root}:`))
-    .reduce((total, [, minor]) => total + minor, 0);
+  return sumBy(
+    Object.entries(figures).filter(([id]) => id === root || id.startsWith(`${root}:`)),
+    ([, minor]) => minor,
+  );
 }
 
 /** Money under the fallback account, children included, is a row that fell through the resolver. */
 function uncategorizedCheck(kase: RecordCase, probe: LedgerProbe): AssertionResult {
   const root = uncategorizedAccount(kase.currency);
-  const minor = subtreeMinor(probe, root);
+  const minor = sumSubtree(probe.balancesMinor, root);
   const rows = probe.uncategorizedRows;
   return check(
     "nothing_uncategorized",

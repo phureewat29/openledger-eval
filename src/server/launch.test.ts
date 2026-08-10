@@ -2,24 +2,16 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { LiveDoc } from "../report/live.js";
 import type { RunIdentity } from "../report/record.js";
+import type { SlotView, StopTarget } from "../shared/payloads.js";
+import { createLauncher, type ChildHandle } from "./launch/launcher.js";
 import {
-  busyReason,
-  createLauncher,
-  IDLE_SLOT,
-  launchFailed,
-  ownsRun,
   parseLaunchRequest,
   parseRerunRequest,
-  pauseTarget,
   rerunArgs,
-  runPid,
   spawnArgs,
-  stopTarget,
-  type ChildHandle,
   type LaunchRequest,
-  type SlotView,
-  type StopTarget,
-} from "./launch.js";
+} from "./launch/request.js";
+import { busyReason, IDLE_SLOT, launchFailed, ownsRun, pauseTarget, runPid, stopTarget } from "./launch/slot.js";
 import type { LiveSnapshot } from "./reports-fs.js";
 
 const NOW = new Date("2026-08-07T05:00:00.000Z");
@@ -539,4 +531,45 @@ test("hold offers nothing on a child that is still packing, which has no live.js
   launcher.launch(REQUEST, null, NOW);
 
   assert.deepEqual(launcher.holdTarget(null, NOW, false), { kind: "none" });
+});
+
+// ok means a signal was sent. A slot holding nothing has nothing to send one to,
+// and has to say so rather than answer for a signal that never left.
+test("pauses by the handle the slot holds, and holds nothing at all when it holds none", () => {
+  const { launcher, children } = harness();
+  launcher.launch(REQUEST, null, NOW);
+
+  assert.deepEqual(launcher.hold("pause", opened(), NOW), { ok: true });
+  assert.deepEqual(children[0]?.signals, ["SIGSTOP"]);
+
+  const empty = harness().launcher;
+  assert.deepEqual(empty.hold("pause", null, NOW), {
+    ok: false,
+    reason: "idle",
+    message: "nothing to pause: no run is in flight",
+  });
+  assert.deepEqual(empty.hold("resume", null, NOW), {
+    ok: false,
+    reason: "idle",
+    message: "nothing to resume: no run is paused",
+  });
+});
+
+// A frozen process queues a SIGINT rather than acting on it, so the continue is
+// what makes the interrupt land. One that failed leaves a run still frozen and
+// still running, whatever the interrupt behind it reported.
+test("fails a stop it could not continue first, rather than calling a frozen run stopped", () => {
+  const launcher = createLauncher({
+    start: () => ({ ok: false, error: "unused" }),
+    tail: () => "",
+    exists: runExists,
+    interrupt: () => ({ ok: true, value: undefined }),
+    hold: () => ({ ok: false, error: "kill ESRCH" }),
+    stopped: () => true,
+  });
+
+  const stopped = launcher.stop(snapshot("running", beat(2)), NOW);
+  assert.equal(stopped.ok, false);
+  assert.equal(stopped.ok === false && stopped.reason, "signal");
+  assert.ok(stopped.ok === false && stopped.message.includes("kill ESRCH"));
 });

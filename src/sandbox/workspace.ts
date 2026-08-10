@@ -3,7 +3,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { tryExecute, type Result } from "../core/result.js";
-import type { OpenLedgerRunner } from "../oled/command.js";
+import { runOk, type OpenLedgerRunner } from "../oled/command.js";
 
 // Never touches the caller's real ~/.oled: the tree carries its own home, and
 // the CLI resolves every default it has from there.
@@ -14,8 +14,6 @@ export interface Workspace {
   cwd: string;
   cache: string;
   agent: string;
-  /** npm --global --prefix target for the packed CLI. */
-  npm: string;
   dbPath: string;
   env: NodeJS.ProcessEnv;
 }
@@ -24,11 +22,10 @@ export interface SkillPack {
   path: string;
   version: string;
   sha256: string;
-  length: number;
   text: string;
 }
 
-const DIRS = ["home", "data", "cwd", "cache", "agent", "npm"] as const;
+const DIRS = ["home", "data", "cwd", "cache", "agent"] as const;
 
 /**
  * The home redirect is the whole isolation mechanism. Since 0.21.0 the CLI
@@ -40,11 +37,8 @@ const DIRS = ["home", "data", "cwd", "cache", "agent", "npm"] as const;
  * pinned again on the command line at init.
  */
 function buildEnv(paths: Omit<Workspace, "env">): NodeJS.ProcessEnv {
-  const bin = join(paths.npm, "bin");
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    // Prepended: an `oled` on the operator's global PATH must never win over the packed one.
-    PATH: `${bin}${process.env.PATH ? `:${process.env.PATH}` : ""}`,
     HOME: paths.home,
     USERPROFILE: paths.home,
     NO_COLOR: "1",
@@ -54,9 +48,10 @@ function buildEnv(paths: Omit<Workspace, "env">): NodeJS.ProcessEnv {
   // parses. Inheriting either from the operator would corrupt a run's output.
   delete env.FORCE_COLOR;
   delete env.CLICOLOR_FORCE;
-  // 0.21.0 reads none of these, but the harness packs whatever checkout it is
-  // pointed at: against an older CLI an inherited OLED_DIR would send the run
-  // to the operator's own ledger. Dropped rather than merely left unset.
+  // 0.21.0 reads none of these, but the CLI under test is whatever `oled` on
+  // PATH resolves to: against an older build that still reads OLED_DIR, an
+  // inherited value would send the run to the operator's own ledger. Dropped
+  // rather than merely left unset.
   for (const key of Object.keys(env)) {
     if (key.startsWith("OLED_")) delete env[key];
   }
@@ -73,7 +68,6 @@ export function createWorkspace(): Result<Workspace> {
       cwd: join(root, "cwd"),
       cache: join(root, "cache"),
       agent: join(root, "agent"),
-      npm: join(root, "npm"),
       dbPath: join(root, "db.sqlite"),
     };
     for (const dir of DIRS) mkdirSync(paths[dir], { recursive: true });
@@ -98,20 +92,18 @@ export function seedFiles(workspace: Workspace, files: string[], subdir: string)
   return seeded;
 }
 
-/** The system prompt is the INSTALLED file, so its hash and length are what
- *  the report can be trusted against. */
+/**
+ * The system prompt is the INSTALLED file, so its hash is what the report can
+ * be trusted against. An empty install is refused outright, because the
+ * sha256 of "" looks as valid as any other and every run would then measure
+ * only the environment adapter.
+ */
 export async function installSkillPack(
   workspace: Workspace,
   runner: OpenLedgerRunner,
 ): Promise<Result<SkillPack>> {
-  const setup = await runner.run(["setup", "--dir", workspace.agent, "--json"]);
-  if (!setup.ok) return { ok: false, error: `oled setup did not run: ${setup.message}` };
-  if (setup.value.exitCode !== 0) {
-    return {
-      ok: false,
-      error: `oled setup exited ${setup.value.exitCode}: ${setup.value.stderr.trim()}`,
-    };
-  }
+  const setup = await runOk(runner, "oled setup", ["setup", "--dir", workspace.agent, "--json"]);
+  if (!setup.ok) return setup;
 
   const dir = join(workspace.agent, "openledger");
   const pack = tryExecute(() => {
@@ -120,11 +112,16 @@ export async function installSkillPack(
       path: join(dir, "SKILL.md"),
       version: readFileSync(join(dir, "VERSION"), "utf8").trim(),
       sha256: createHash("sha256").update(text).digest("hex"),
-      length: text.length,
       text,
     };
   });
   if (!pack.ok) return { ok: false, error: `cannot read the installed skill: ${pack.error}` };
+  if (pack.value.text.trim() === "") {
+    return {
+      ok: false,
+      error: `the installed skill at ${pack.value.path} is empty, so every run would measure only the environment adapter`,
+    };
+  }
   return pack;
 }
 
@@ -134,26 +131,22 @@ function disposeWorkspace(workspace: Workspace): void {
 
 export interface WorkspaceGuard {
   register(workspace: Workspace): void;
-  /**
-   * A directory removed on exit however the process ends. A signal exits
-   * through process.exit, which skips pending finally blocks, so a caller's
-   * own cleanup cannot be trusted to run.
-   */
-  registerPath(path: string): void;
   /** Call on a clean finish, once the workspace has nothing left to answer for. */
   release(workspace: Workspace): void;
 }
 
-/** Holds every live workspace, so a run that fans out concurrently still cleans up all of them on exit. */
+/**
+ * Holds every live workspace, so a run that fans out concurrently still
+ * cleans up all of them on exit — however the process ends. A signal exits
+ * through process.exit, which skips pending finally blocks, so a caller's own
+ * cleanup cannot be trusted to run.
+ */
 export function createWorkspaceGuard(): WorkspaceGuard {
   const live = new Set<Workspace>();
-  const paths = new Set<string>();
 
   const cleanupAll = (): void => {
     for (const workspace of live) disposeWorkspace(workspace);
     live.clear();
-    for (const path of paths) rmSync(path, { recursive: true, force: true });
-    paths.clear();
   };
 
   process.on("exit", cleanupAll);
@@ -167,9 +160,6 @@ export function createWorkspaceGuard(): WorkspaceGuard {
   return {
     register(workspace) {
       live.add(workspace);
-    },
-    registerPath(path) {
-      paths.add(path);
     },
     release(workspace) {
       if (!live.delete(workspace)) return;

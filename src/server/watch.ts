@@ -1,20 +1,22 @@
 import { existsSync, watch, type FSWatcher } from "node:fs";
 import { join } from "node:path";
 import { debounce } from "es-toolkit";
-import { FEED_FILE, type FeedLine } from "../report/feed.js";
+import type { FeedLine } from "../shared/feed.js";
 import type { Channel } from "../shared/protocol.js";
 import type {
   FeedPayload,
   LivePayload,
   ProcessesPayload,
+  ProcInfo,
   SandboxesPayload,
 } from "../shared/payloads.js";
+import { FEED_FILE } from "../shared/paths.js";
 import type { Source } from "./channels.js";
 import { createFeedTail, type FeedTail } from "./feed-tail.js";
-import type { Launcher } from "./launch.js";
+import type { Launcher } from "./launch/launcher.js";
 import { liveState, staysLive } from "./live-state.js";
-import { groupOf, inGroup, listProcesses, nest, type ProcInfo, type ProcNode } from "./procs.js";
-import { findIteration, newestLive, type LiveSnapshot } from "./reports-fs.js";
+import { groupOf, inGroup, listProcesses, nest, type ProcNode } from "./procs.js";
+import { findIteration, newestLive } from "./reports-fs.js";
 import { listSandboxes, reclaimableBytes, sandboxRoot } from "./sandboxes.js";
 
 // Where the dashboard learns that anything changed. The runner writes files and
@@ -48,8 +50,7 @@ export interface WatchDeps {
 /** Everything the live payload is built from, gathered in one place per rescan. */
 function readLivePayload(deps: WatchDeps): LivePayload {
   const now = deps.now();
-  const snapshot = newestLive(deps.reportsRoot);
-  const live: LiveSnapshot | null = snapshot.ok ? snapshot.value : null;
+  const live = newestLive(deps.reportsRoot);
   const slot = deps.launcher.view();
   const found = live === null ? null : findIteration(deps.reportsRoot, live.slug);
   // Asked once and answered three times. Each of these used to probe for itself,
@@ -93,7 +94,7 @@ function activeGroup(deps: WatchDeps, procs: ProcInfo[]): number | null {
   if (owned !== null) return owned;
 
   const snapshot = newestLive(deps.reportsRoot);
-  const pid = snapshot.ok ? snapshot.value?.doc.pid : undefined;
+  const pid = snapshot?.doc.pid;
   return pid === undefined ? null : groupOf(procs, pid);
 }
 
@@ -110,75 +111,71 @@ function every(ms: number, run: () => void): () => void {
 }
 
 /**
- * Publishes only what is new, and remembers the latest either way. Polling
- * sources sample on a timer whether or not anything moved — an idle `ps` every
- * two seconds is the common case — so a socket that carries only news is much
- * easier to reason about from the other end. `sampledAt` is left out of the
- * comparison, since it always differs.
+ * Publishes only what is new, and remembers the latest either way. Sources
+ * sample whether or not anything moved — an idle `ps` every two seconds is the
+ * common case — so a socket that carries only news is much easier to reason
+ * about from the other end. `print` is what "new" means for that payload: the
+ * fields that always differ are left out of it.
  *
  * `latest` is what the registry hands a subscriber that arrived after the last
  * change: without it, staying quiet would leave that reader with nothing at all.
  */
-function distinct<T extends { sampledAt: string }>(
+function distinct<T>(
   publish: (payload: unknown) => void,
+  print: (payload: T) => string,
 ): { emit: (payload: T) => void; latest: () => T | null } {
-  let print = "";
+  let seen = "";
   let last: T | null = null;
   return {
     emit(payload) {
       last = payload;
-      const next = JSON.stringify({ ...payload, sampledAt: "" });
-      if (next === print) return;
-      print = next;
+      const next = print(payload);
+      if (next === seen) return;
+      seen = next;
       publish(payload);
     },
     latest: () => last,
   };
 }
 
+/** A poll's own timestamp always differs, and differing is not the same as having moved. */
+function sampledPrint(payload: { sampledAt: string }): string {
+  return JSON.stringify({ ...payload, sampledAt: "" });
+}
+
 function liveSource(deps: WatchDeps): Source {
   return (publish) => {
-    let print = "";
-    let last: LivePayload | null = null;
-    const emit = (): void => {
-      const payload = readLivePayload(deps);
-      last = payload;
-      const next = livePrint(payload);
-      if (next === print) return;
-      print = next;
-      publish(payload);
-    };
+    const { emit: emitDistinct, latest } = distinct<LivePayload>(publish, livePrint);
+    const emit = (): void => emitDistinct(readLivePayload(deps));
 
     const rescan = debounce(() => emit(), DEBOUNCE_MS, { edges: ["leading", "trailing"] });
 
     // Two watches, never one recursive sweep of reports/. A recursive watch would
     // fire on every runs/**/*.json the matrix writes — up to 129 KB apiece,
     // continuously — to learn something live.json already says.
-    const watchers: FSWatcher[] = [];
+    let iterationWatcher: FSWatcher | null = null;
     let watchedSlug: string | null = null;
 
     const repoint = (): void => {
       const snapshot = newestLive(deps.reportsRoot);
-      const slug = snapshot.ok ? (snapshot.value?.slug ?? null) : null;
+      const slug = snapshot?.slug ?? null;
       if (slug === watchedSlug) return;
       watchedSlug = slug;
-      // Index 1 by convention: the shallow watch on reports/ is index 0 and never
-      // moves; only the iteration watch is torn down and re-aimed.
-      watchers[1]?.close();
-      watchers.length = 1;
+      iterationWatcher?.close();
+      iterationWatcher = null;
       if (slug === null) return;
       const dir = join(deps.reportsRoot, slug);
-      if (existsSync(dir)) watchers.push(watch(dir, () => rescan()));
+      if (existsSync(dir)) iterationWatcher = watch(dir, () => rescan());
     };
 
-    if (existsSync(deps.reportsRoot)) {
-      watchers.push(
-        watch(deps.reportsRoot, () => {
+    // The shallow watch on reports/ never moves; only the iteration watch above
+    // is torn down and re-aimed, at whichever run is newest.
+    const rootWatcher = existsSync(deps.reportsRoot)
+      ? watch(deps.reportsRoot, () => {
           repoint();
           rescan();
-        }),
-      );
-    }
+        })
+      : null;
     repoint();
 
     // The floor under fs.watch, and the clock that turns a silent run stale.
@@ -190,9 +187,10 @@ function liveSource(deps: WatchDeps): Source {
         rescan.cancel();
         stopFloor();
         stopClock();
-        for (const watcher of watchers) watcher.close();
+        rootWatcher?.close();
+        iterationWatcher?.close();
       },
-      current: () => last,
+      current: latest,
     };
   };
 }
@@ -209,10 +207,11 @@ function feedSource(deps: WatchDeps): Source {
     // thing at once.
     let ring: FeedLine[] = [];
     let offset = 0;
+    let error: string | null = null;
 
     const emit = (): void => {
       const snapshot = newestLive(deps.reportsRoot);
-      const next = snapshot.ok ? (snapshot.value?.slug ?? null) : null;
+      const next = snapshot?.slug ?? null;
       // A new iteration is a new file: start its reader from byte zero and tell
       // the client to replace rather than append.
       const changed = next !== slug;
@@ -220,35 +219,46 @@ function feedSource(deps: WatchDeps): Source {
         slug = next;
         tail = createFeedTail();
         ring = [];
+        error = null;
       }
       if (slug === null) return;
 
       const read = tail.read(join(deps.reportsRoot, slug, FEED_FILE));
-      if (!read.ok) return;
-      if (read.value.lines.length === 0 && !changed) return;
+      // A file that cannot be read stays unreadable while whatever broke it
+      // lasts, so a failure is said once and so is its ending, rather than
+      // either being repeated at every poll.
+      if (!read.ok) {
+        const news = read.error !== error;
+        error = read.error;
+        if (news) publish({ slug, lines: [], offset, reset: false, error } satisfies FeedPayload);
+        return;
+      }
+      const recovered = error !== null;
+      error = null;
+      if (read.value.lines.length === 0 && !changed && !recovered) return;
 
       const reset = changed || read.value.reset;
       ring = (reset ? read.value.lines : [...ring, ...read.value.lines]).slice(-RING_MAX);
       offset = read.value.offset;
-      publish({ slug, lines: read.value.lines, offset, reset } satisfies FeedPayload);
+      publish({ slug, lines: read.value.lines, offset, reset, error: null } satisfies FeedPayload);
     };
 
     const stop = every(RESCAN_MS, emit);
     return {
       stop,
-      current: () => (slug === null ? null : ({ slug, lines: ring, offset, reset: true } satisfies FeedPayload)),
+      current: () =>
+        slug === null ? null : ({ slug, lines: ring, offset, reset: true, error } satisfies FeedPayload),
     };
   };
 }
 
 function processesSource(deps: WatchDeps): Source {
   return (publish) => {
-    const { emit: emitDistinct, latest } = distinct<ProcessesPayload>(publish);
+    const { emit: emitDistinct, latest } = distinct<ProcessesPayload>(publish, sampledPrint);
     const emit = async (): Promise<void> => {
       const now = deps.now();
       const slot = deps.launcher.view();
-      const snapshot = newestLive(deps.reportsRoot);
-      const live = snapshot.ok ? snapshot.value : null;
+      const live = newestLive(deps.reportsRoot);
 
       // Nothing is running, so nothing is worth a `ps`. One empty tree says so.
       if (!staysLive(liveState(slot, live, now), slot)) {
@@ -273,7 +283,7 @@ function processesSource(deps: WatchDeps): Source {
 
 function sandboxesSource(deps: WatchDeps): Source {
   return (publish) => {
-    const { emit: emitDistinct, latest } = distinct<SandboxesPayload>(publish);
+    const { emit: emitDistinct, latest } = distinct<SandboxesPayload>(publish, sampledPrint);
     const emit = async (): Promise<void> => {
       const now = deps.now();
       const procs = await listProcesses();

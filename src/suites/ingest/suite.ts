@@ -32,6 +32,9 @@ const RESOLVE: SuitePhase = {
     "Resolve every open question, and recategorize anything that is still uncategorized. Nothing should be left open, deferred or uncategorized when you are done.",
 };
 
+// Hashed into the suite fingerprint: this is the model's whole ask, so a reword here must move the hash.
+export const PROMPTS = [INGEST.prompt, RESOLVE.prompt];
+
 function cases(fixturesDir: string): Result<IngestCase[]> {
   const pdf = join(fixturesDir, "ingest", STATEMENT);
   if (!existsSync(pdf)) return { ok: false, error: `no ingest fixture at ${pdf}` };

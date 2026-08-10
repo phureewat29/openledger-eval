@@ -22,11 +22,14 @@ function submitTool(sink: AnswerSink): Tool {
   return tool;
 }
 
-test("loads the checked-in questions, goldens self-checked", () => {
+test("loads the checked-in questions, with no answer to any of them yet", () => {
   const cases = querySuite.cases(FIXTURES);
   assert.ok(cases.ok, cases.ok ? "" : cases.error);
   assert.equal(cases.value.length, 12);
   assert.equal(querySuite.id, "query");
+  // The goldens arrive from a seeded ledger, through `resolve`, before any spend.
+  assert.ok(querySuite.resolve, "the query suite states no way to answer its questions");
+  for (const kase of cases.value) assert.ok(!("golden" in kase), `${kase.id} carries a golden`);
 });
 
 test("builds a system prompt from the skill text plus the submit paragraph", () => {

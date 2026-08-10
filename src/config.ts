@@ -1,13 +1,11 @@
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { omitBy, uniq } from "es-toolkit";
 import * as z from "zod";
-import { tryExecute, type Result } from "./core/result.js";
+import { readJsonFile } from "./core/fs.js";
+import type { Result } from "./core/result.js";
 import { MODALITIES, MODALITIES_ENV, type Modality } from "./model/capabilities.js";
-import { ITERATION_SLUG_RE } from "./shared/vocabulary.js";
-
-export type SuiteId = "ingest" | "record" | "query";
+import { ITERATION_SLUG_RE, SUITE_IDS, type SuiteId } from "./shared/vocabulary.js";
 
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
@@ -42,7 +40,6 @@ type ConfigResult = { ok: true; value: Config } | ConfigFailure;
 
 /** This repo's own root: fixtures, models.json and reports all hang off it. */
 export const EVAL_ROOT = fileURLToPath(new URL("..", import.meta.url));
-export const SUITE_IDS: SuiteId[] = ["ingest", "record", "query"];
 
 /**
  * One run per case, and no way to ask for more: a second trial doubles a
@@ -57,11 +54,8 @@ const CANDIDATES = z.array(z.string().min(1)).min(1);
 
 /** The candidate list every entry point starts from: the CLI when no --model is passed, the dashboard form always. */
 export function readModelIds(): Result<string[]> {
-  const text = tryExecute(() => readFileSync(MODELS_FILE, "utf8"));
-  if (!text.ok) return { ok: false, error: `cannot read ${MODELS_FILE}: ${text.error}` };
-
-  const json = tryExecute(() => JSON.parse(text.value) as unknown);
-  if (!json.ok) return { ok: false, error: `${MODELS_FILE} is not JSON: ${json.error}` };
+  const json = readJsonFile(MODELS_FILE);
+  if (!json.ok) return json;
 
   const parsed = CANDIDATES.safeParse(json.value);
   if (!parsed.success) return { ok: false, error: `${MODELS_FILE}: ${z.prettifyError(parsed.error)}` };
@@ -90,8 +84,6 @@ interface Flags {
   concurrency: number | null;
 }
 
-const VALUE_FLAGS = new Set(["--suite", "--model", "--case", "--into", "--concurrency"]);
-
 function usage(message: string): ConfigFailure {
   return { ok: false, message };
 }
@@ -106,6 +98,51 @@ function parsePositiveInt(value: string): number | null {
   const n = Number(value);
   return Number.isInteger(n) && n > 0 ? n : null;
 }
+
+function setSuite(flags: Flags, value: string): string | null {
+  const suites = parseSuite(value);
+  if (!suites) return `--suite must be ${SUITE_IDS.join(", ")}, or all, got ${value}`;
+  flags.suites = uniq([...flags.suites, ...suites]);
+  return null;
+}
+
+function addModel(flags: Flags, value: string): string | null {
+  flags.models.push(value);
+  return null;
+}
+
+function addCase(flags: Flags, value: string): string | null {
+  flags.cases.push(value);
+  return null;
+}
+
+function setInto(flags: Flags, value: string): string | null {
+  // Checked here rather than where it is joined onto a path: a slug is the
+  // one flag that names a directory, and a bad one must never reach one.
+  if (!ITERATION_SLUG_RE.test(value)) {
+    return `--into must be an iteration like 2026-08-09-0051, got ${value}`;
+  }
+  flags.into = value;
+  return null;
+}
+
+function setConcurrency(flags: Flags, value: string): string | null {
+  const concurrency = parsePositiveInt(value);
+  if (!concurrency) return `--concurrency must be a positive integer, got ${value}`;
+  flags.concurrency = concurrency;
+  return null;
+}
+
+/** One handler per recognized flag: a flag missing here is refused rather than silently accepted. */
+const FLAGS: Record<string, (flags: Flags, value: string) => string | null> = {
+  "--suite": setSuite,
+  "--model": addModel,
+  "--case": addCase,
+  "--into": setInto,
+  "--concurrency": setConcurrency,
+};
+
+const VALUE_FLAGS = new Set(Object.keys(FLAGS));
 
 function parseFlags(argv: string[]): { ok: true; value: Flags } | ConfigFailure {
   const flags: Flags = {
@@ -123,26 +160,8 @@ function parseFlags(argv: string[]): { ok: true; value: Flags } | ConfigFailure 
     if (value === undefined || value.startsWith("-")) return usage(`${arg} needs a value`);
     i++;
 
-    if (arg === "--suite") {
-      const suites = parseSuite(value);
-      if (!suites) return usage(`--suite must be ${SUITE_IDS.join(", ")}, or all, got ${value}`);
-      flags.suites = uniq([...flags.suites, ...suites]);
-    }
-    if (arg === "--model") flags.models.push(value);
-    if (arg === "--case") flags.cases.push(value);
-    if (arg === "--into") {
-      // Checked here rather than where it is joined onto a path: a slug is the
-      // one flag that names a directory, and a bad one must never reach one.
-      if (!ITERATION_SLUG_RE.test(value)) {
-        return usage(`--into must be an iteration like 2026-08-09-0051, got ${value}`);
-      }
-      flags.into = value;
-    }
-    if (arg === "--concurrency") {
-      const concurrency = parsePositiveInt(value);
-      if (!concurrency) return usage(`--concurrency must be a positive integer, got ${value}`);
-      flags.concurrency = concurrency;
-    }
+    const error = FLAGS[arg]!(flags, value);
+    if (error) return usage(error);
   }
   return { ok: true, value: flags };
 }
@@ -177,6 +196,3 @@ export function loadConfig(argv: string[], env: NodeJS.ProcessEnv): ConfigResult
     },
   };
 }
-
-/** Lives in shared/ so the browser can use it too; re-exported here for every existing caller. */
-export { modelSlug } from "./shared/vocabulary.js";

@@ -12,7 +12,7 @@ import {
   uncategorizedAccount,
   type AccountType,
 } from "../../core/accounts.js";
-import { minorUnits } from "../../core/money.js";
+import { minorUnits, money } from "../../core/money.js";
 import { tryExecute, type Result } from "../../core/result.js";
 import type { LedgerPosting } from "../../oled/ledger.js";
 import type { EvalCase } from "../types.js";
@@ -114,10 +114,6 @@ interface LoadedFixture {
 }
 
 const SIDES = ["debit", "credit"] as const;
-
-function money(amount: number): string {
-  return amount.toFixed(2);
-}
 
 /** The grammar already proved the second segment is a type, so a null here is a broken invariant. */
 function accountType(accountId: string): AccountType {

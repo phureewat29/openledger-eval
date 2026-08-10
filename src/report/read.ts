@@ -1,6 +1,8 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { readJsonFile } from "../core/fs.js";
 import { tryExecute, type Result } from "../core/result.js";
+import { RUNS_DIR } from "../shared/paths.js";
 import type { RunRecord } from "./record.js";
 
 // Reading back what a report left on disk. The runner needs this to merge a
@@ -27,11 +29,8 @@ export function isRunRecord(value: unknown): value is RunRecord {
 }
 
 export function readRecordFile(path: string): Result<RunRecord> {
-  const text = tryExecute(() => readFileSync(path, "utf8"));
-  if (!text.ok) return { ok: false, error: `cannot read ${path}: ${text.error}` };
-
-  const json = tryExecute(() => JSON.parse(text.value) as unknown);
-  if (!json.ok) return { ok: false, error: `${path} is not JSON: ${json.error}` };
+  const json = readJsonFile(path);
+  if (!json.ok) return json;
 
   if (!isRunRecord(json.value)) return { ok: false, error: `${path}: not a run record` };
   return { ok: true, value: json.value };
@@ -65,7 +64,7 @@ function jsonFilesUnder(dir: string): string[] {
 export function readReportRecords(reportDir: string): ReportRecords {
   const records: RunRecord[] = [];
   const unreadable: string[] = [];
-  for (const path of jsonFilesUnder(join(reportDir, "runs"))) {
+  for (const path of jsonFilesUnder(join(reportDir, RUNS_DIR))) {
     const record = readRecordFile(path);
     if (record.ok) records.push(record.value);
     else unreadable.push(record.error);

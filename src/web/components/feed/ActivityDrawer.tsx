@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { FeedKind, FeedLine } from "../../../report/feed.js";
+import type { FeedKind, FeedLine } from "../../../shared/feed.js";
 import type { FeedPayload, LivePayload } from "../../../shared/payloads.js";
 import { useChannel } from "../../lib/channel.js";
 
@@ -99,6 +99,7 @@ export function ActivityDrawer() {
   const payload = useChannel<FeedPayload>("feed");
   const lines = useFeedLines(payload);
   const [open, setOpen] = useOpensOnLaunch();
+  const error = payload?.error ?? null;
 
   const newest = lines.at(-1);
   const Chevron = open ? ChevronDown : ChevronUp;
@@ -112,7 +113,9 @@ export function ActivityDrawer() {
         className="flex h-8 w-full items-center gap-2 px-3 text-left transition-colors hover:bg-surface-2"
       >
         <Chevron size={13} strokeWidth={2} className="shrink-0 text-accent/60" aria-hidden />
-        {newest === undefined ? (
+        {error !== null ? (
+          <span className="truncate text-bad">{error}</span>
+        ) : newest === undefined ? (
           <span className="text-subtle">nothing said yet</span>
         ) : (
           <>

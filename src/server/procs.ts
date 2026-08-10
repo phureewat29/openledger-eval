@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
+import { execCapture } from "../core/exec.js";
 import { tryExecute, type Result } from "../core/result.js";
-import { execCapture } from "../oled/command.js";
+import type { ProcInfo } from "../shared/payloads.js";
 
 // Everything a run is actually made of. A matrix is `npm` over `tsx` over the
 // runner, which in turn spawns `npm install` per sandbox and one `oled` per tool
@@ -17,19 +18,6 @@ const PS_LINE = /^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+([\d.]+)\s+(\d+)\s+(\S+)\s+
 
 /** `rss` is kibibytes on darwin and linux alike; the wire carries bytes so no reader has to know that. */
 const RSS_UNIT = 1_024;
-
-export interface ProcInfo {
-  pid: number;
-  ppid: number;
-  pgid: number;
-  /** The `stat` column verbatim — `S`, `Ss`, `R+`, `T`, `Z` — read by isStopped and shown as-is. */
-  state: string;
-  /** Percent of one core, as ps reports it. */
-  cpu: number;
-  rssBytes: number;
-  elapsedSec: number;
-  command: string;
-}
 
 export interface ProcNode extends ProcInfo {
   children: ProcNode[];

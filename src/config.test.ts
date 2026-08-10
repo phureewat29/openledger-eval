@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { loadConfig, SUITE_IDS } from "./config.js";
+import { loadConfig } from "./config.js";
+import { SUITE_IDS } from "./shared/vocabulary.js";
 
 /** The one env value with no default, so every case here is about argv alone. */
 const ENV = { OPENROUTER_API_KEY: "sk-test" };

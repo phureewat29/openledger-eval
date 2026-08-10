@@ -89,6 +89,19 @@ test("asks the model list twice before giving up on it", async () => {
   assert.equal(gaveUp.calls, 2);
 });
 
+function failingStatus(status: number): () => Promise<unknown> {
+  return async () => ({ ok: false, status, json: async () => ({}) });
+}
+
+/** A second attempt would answer exactly the same, so it is never made. */
+test("gives up after one try on a 4xx", async () => {
+  const { value, calls } = await withFetch([failingStatus(400)], () =>
+    fetchModelRows("https://openrouter.ai/api/v1"),
+  );
+  assert.equal(value.ok, false);
+  assert.equal(calls, 1);
+});
+
 function row(patch: Partial<ModelRow> & { id: string }): ModelRow {
   return {
     inputModalities: ["text"],
@@ -113,7 +126,6 @@ test("keeps a listed model that calls tools and reads text", () => {
     id: "vendor/model",
     modalities: ["text"],
     contextLength: 128_000,
-    supportsTools: true,
     pricing: { promptUsdPerTok: 0.000_003, completionUsdPerTok: 0.000_015 },
   });
 });
@@ -198,7 +210,6 @@ function validated(patch: Partial<ValidatedModel> = {}): ValidatedModel {
     id: "vendor/model",
     modalities: ["text"],
     contextLength: 128_000,
-    supportsTools: true,
     pricing: null,
     ...patch,
   };
@@ -211,16 +222,10 @@ test("a declared modality list outranks the row, and leaves the window alone", (
   assert.equal(capabilities.contextLength, 128_000);
 });
 
-test("a model nothing described is assumed to read text and images", () => {
-  const capabilities = resolveCapabilities(validated({ modalities: [] }), null);
-  assert.equal(capabilities.source, "assumed");
-  assert.deepEqual(capabilities.modalities, ["text", "image"]);
-});
-
 function capabilities(contextLength: number | null): ModelCapabilities {
   return {
     modalities: ["text"],
-    source: contextLength === null ? "assumed" : "openrouter",
+    source: "openrouter",
     contextLength,
     detail: "test",
   };

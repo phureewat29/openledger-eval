@@ -2,9 +2,10 @@ import { sumBy } from "es-toolkit";
 import { readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { execCapture } from "../core/exec.js";
 import { tryExecute, type Result } from "../core/result.js";
-import { execCapture } from "../oled/command.js";
-import { runnersIn, type ProcInfo } from "./procs.js";
+import type { Owner, ProcInfo, SandboxInfo } from "../shared/payloads.js";
+import { runnersIn } from "./procs.js";
 
 // Every run mkdtemps a workspace under the system temp directory and the
 // workspace guard removes it on the way out. A SIGKILL never reaches that guard,
@@ -20,19 +21,6 @@ const DU_TIMEOUT_MS = 20_000;
 const DU_UNIT = 1_024;
 
 const DU_LINE = /^(\d+)\s+(.*)$/;
-
-/** How a sandbox was judged to belong to something, so the panel can say why. */
-export type Owner = "argv" | "runner" | "none";
-
-export interface SandboxInfo {
-  path: string;
-  name: string;
-  bytes: number;
-  /** Since the directory was made, which for an abandoned sandbox is when its run began. */
-  ageMs: number;
-  /** Whatever still owns it, or `none` — the only value cleanup will act on. */
-  owner: Owner;
-}
 
 export function isOrphan(entry: SandboxInfo): boolean {
   return entry.owner === "none";
@@ -68,21 +56,23 @@ export function ownerOf(path: string, birthMs: number, procs: ProcInfo[], now: D
 }
 
 /** Sizes for many paths in one `du`, because eighty separate walks is the slow way to say 271 MB. */
-async function sizesOf(paths: string[]): Promise<Map<string, number>> {
+async function sizesOf(paths: string[]): Promise<Result<Map<string, number>>> {
   const sizes = new Map<string, number>();
-  if (paths.length === 0) return sizes;
+  if (paths.length === 0) return { ok: true, value: sizes };
 
   const result = await execCapture("du", ["-sk", ...paths], { timeoutMs: DU_TIMEOUT_MS });
   // du exits nonzero on a directory it could not fully read and still prints the
   // rest, so its output is read either way and a missing path simply has no size.
-  if (!result.ok) return sizes;
+  // A du that never ran at all is a different thing: every sandbox would read as
+  // empty and the panel would say there is nothing here to reclaim.
+  if (!result.ok) return { ok: false, error: `du did not run: ${result.message}` };
   for (const line of result.value.stdout.split("\n")) {
     const match = DU_LINE.exec(line);
     if (match === null) continue;
     const [, kib, path] = match;
     if (path !== undefined) sizes.set(path, Number(kib) * DU_UNIT);
   }
-  return sizes;
+  return { ok: true, value: sizes };
 }
 
 export function sandboxRoot(): string {
@@ -103,6 +93,8 @@ export async function listSandboxes(
     .map((entry) => join(root, entry.name));
 
   const sizes = await sizesOf(paths);
+  if (!sizes.ok) return sizes;
+
   const found: SandboxInfo[] = [];
   for (const path of paths) {
     const stat = tryExecute(() => statSync(path));
@@ -115,7 +107,7 @@ export async function listSandboxes(
     found.push({
       path,
       name: path.slice(root.length + 1),
-      bytes: sizes.get(path) ?? 0,
+      bytes: sizes.value.get(path) ?? 0,
       ageMs: Math.max(0, now.getTime() - birthMs),
       owner: ownerOf(path, birthMs, procs, now),
     });

@@ -9,7 +9,6 @@ import {
   readModelIds,
   TRIALS,
   type Config,
-  type SuiteId,
 } from "./config.js";
 import { tryExecute, type Result } from "./core/result.js";
 import {
@@ -18,17 +17,18 @@ import {
   type SkippedModel,
   type ValidatedModel,
 } from "./model/capabilities.js";
-import type { OpenLedgerRunner } from "./oled/command.js";
+import { runOk, type OpenLedgerRunner } from "./oled/command.js";
 import type { Benchmark, ConfigEcho } from "./report/benchmark.js";
-import { createFeedWriter, formatEvent, formatRunFinish, formatRunStart } from "./report/feed.js";
-import { buildLiveDoc, createLiveWriter, reopenLiveDoc } from "./report/live.js";
+import { formatEvent, formatRunFinish, formatRunStart } from "./report/feed.js";
 import { identityDrift, mergeEcho } from "./report/merge.js";
 import { readReportRecords } from "./report/read.js";
 import type { RunIdentity, RunRecord } from "./report/record.js";
-import { createReportSink } from "./report/sink.js";
+import { printRunLine } from "./report/run-line.js";
 import { resolveReportDir, tallyStates } from "./report/write.js";
-import { expandPlan, printRunLine, runMatrix } from "./runner/matrix.js";
-import { createSandboxRunner, runOne, type RunEnvironment } from "./runner/run-one.js";
+import { createReportWriters, type PriorReport } from "./report/writers.js";
+import { expandPlan, runMatrix } from "./runner/matrix.js";
+import { runOne, type RunEnvironment } from "./runner/run.js";
+import { createSandboxRunner } from "./sandbox/session.js";
 import {
   createWorkspace,
   createWorkspaceGuard,
@@ -36,17 +36,13 @@ import {
   type SkillPack,
   type WorkspaceGuard,
 } from "./sandbox/workspace.js";
-import { ingestSuite } from "./suites/ingest/suite.js";
-import { querySuite } from "./suites/query/suite.js";
-import { recordSuite } from "./suites/record/suite.js";
+import type { SuiteId } from "./shared/vocabulary.js";
 import { suiteFingerprint } from "./suites/fingerprint.js";
+import { SUITES } from "./suites/registry.js";
 import type { AnySuite, EvalCase } from "./suites/types.js";
 
 const FIXTURES_DIR = join(EVAL_ROOT, "fixtures");
 const REPORTS_ROOT = join(EVAL_ROOT, "reports");
-
-/** A selected suite with no entry here is skipped, never fatal. */
-const SUITES: AnySuite[] = [ingestSuite, recordSuite, querySuite];
 
 function say(line: string): void {
   process.stdout.write(`${line}\n`);
@@ -71,15 +67,14 @@ function readEvalVersion(): string {
   return parsed.ok ? parsed.value.version : "unknown";
 }
 
-function selectSuites(ids: SuiteId[]): { suites: AnySuite[]; missing: SuiteId[] } {
+/** Every id here is already validated against SUITE_IDS, and the registry parity test guarantees the registry covers it. */
+function selectSuites(ids: SuiteId[]): AnySuite[] {
   const suites: AnySuite[] = [];
-  const missing: SuiteId[] = [];
   for (const id of ids) {
     const suite = SUITES.find((candidate) => candidate.id === id);
     if (suite) suites.push(suite);
-    else missing.push(id);
   }
-  return { suites, missing };
+  return suites;
 }
 
 /** Fixture self-checks run here, before anything is packed or spent. */
@@ -128,14 +123,8 @@ interface Bootstrap {
 }
 
 async function readCliVersion(runner: OpenLedgerRunner): Promise<Result<string>> {
-  const result = await runner.run(["--version"]);
-  if (!result.ok) return { ok: false, error: `oled --version did not run: ${result.message}` };
-  if (result.value.exitCode !== 0) {
-    return {
-      ok: false,
-      error: `oled --version exited ${result.value.exitCode}: ${result.value.stderr.trim()}`,
-    };
-  }
+  const result = await runOk(runner, "oled --version", ["--version"]);
+  if (!result.ok) return result;
   return { ok: true, value: result.value.stdout.trim() };
 }
 
@@ -163,6 +152,29 @@ async function bootstrap(guard: WorkspaceGuard): Promise<Result<Bootstrap>> {
   } finally {
     guard.release(workspace);
   }
+}
+
+/**
+ * A suite whose cases are only complete once a real ledger has answered them
+ * says so here: after bootstrap, because it needs the installed CLI, and before
+ * the plan, because a refusal must cost nothing.
+ */
+async function resolveCases(
+  suites: AnySuite[],
+  casesBySuite: ReadonlyMap<SuiteId, EvalCase[]>,
+  guard: WorkspaceGuard,
+): Promise<Result<Map<SuiteId, EvalCase[]>>> {
+  const resolved = new Map(casesBySuite);
+  for (const suite of suites) {
+    const cases = resolved.get(suite.id) ?? [];
+    if (!suite.resolve || cases.length === 0) continue;
+
+    say(chalk.dim(`${suite.id}: deriving its goldens from a seeded ledger`));
+    const answered = await suite.resolve(cases, guard);
+    if (!answered.ok) return { ok: false, error: `${suite.id} suite: ${answered.error}` };
+    resolved.set(suite.id, answered.value);
+  }
+  return { ok: true, value: resolved };
 }
 
 interface Invocation {
@@ -211,12 +223,19 @@ function planLine(planSize: number, concurrency: number): string {
 }
 
 /** What the operator is told at startup, so the feed opens with the same facts the console did. */
-function headerLines(invocation: Invocation, identity: RunIdentity, planSize: number): string[] {
+function headerLines(
+  invocation: Invocation,
+  identity: RunIdentity,
+  planSize: number,
+  priorRuns: number,
+): string[] {
+  const into = invocation.config.into;
   return [
     identityLine(identity),
     modelsLine(invocation.models),
     ...invocation.skipped.map(skippedLine),
     planLine(planSize, invocation.concurrency),
+    ...(into === null ? [] : [`rerun into ${into}, merging with ${priorRuns} runs`]),
   ];
 }
 
@@ -232,16 +251,13 @@ function reportOutcome(records: RunRecord[]): number {
   return states.endpoint_error + states.sandbox_error > 0 ? 1 : 0;
 }
 
-/** What an existing report brings to an invocation merging into it. */
-interface Merge {
+/** What the writers need of an existing report, plus the benchmark whose config echo this invocation merges into. */
+interface Merge extends PriorReport {
   benchmark: Benchmark;
-  records: RunRecord[];
-  /** How this invocation differs from what the report holds, or null when it does not. */
-  drift: string | null;
 }
 
 /**
- * Admits this invocation into an existing report, or says why not.
+ * Admits this invocation into an existing report, and says how the two differ.
  *
  * The drift check is the whole of it: a report's identity block promises that
  * every number in it was measured against one build of oled and one SKILL.md,
@@ -249,7 +265,7 @@ interface Merge {
  * quietly breaking its meaning. Refusing costs a fresh iteration; merging costs
  * a regression trail nobody can trust again.
  */
-function openMerge(dir: string, benchmark: Benchmark, identity: RunIdentity): Result<Merge> {
+function openMerge(dir: string, benchmark: Benchmark, identity: RunIdentity): Merge {
   const drift = identityDrift(benchmark.identity, identity);
   // Said out loud and then merged anyway. A rerun always lands in the report it
   // came from, so refusing here would leave nowhere for it to go; what the
@@ -261,7 +277,7 @@ function openMerge(dir: string, benchmark: Benchmark, identity: RunIdentity): Re
   // the leaderboard, and the operator is the only one who can tell whether that
   // matters more than the rerun they asked for.
   for (const reason of unreadable) warn(`${reason}; it will be missing from the merged benchmark`);
-  return { ok: true, value: { benchmark, records, drift } };
+  return { benchmark, records, drift };
 }
 
 async function runInvocation(invocation: Invocation): Promise<number> {
@@ -283,12 +299,10 @@ async function runInvocation(invocation: Invocation): Promise<number> {
   };
   say(identityLine(identity));
 
-  const plan = expandPlan(
-    invocation.models,
-    invocation.suites,
-    invocation.casesBySuite,
-    TRIALS,
-  );
+  const casesBySuite = await resolveCases(invocation.suites, invocation.casesBySuite, guard);
+  if (!casesBySuite.ok) return fail(casesBySuite.error);
+
+  const plan = expandPlan(invocation.models, invocation.suites, casesBySuite.value, TRIALS);
   if (plan.length === 0) return fail("the selected suites carry no cases, so there is nothing to run");
   say(planLine(plan.length, concurrency));
 
@@ -296,41 +310,18 @@ async function runInvocation(invocation: Invocation): Promise<number> {
   if (!resolved.ok) return fail(resolved.error);
   const { dir, prior } = resolved.value;
 
-  let merged: Merge | null = null;
-  if (prior !== null) {
-    const opened = openMerge(dir, prior, identity);
-    if (!opened.ok) return fail(opened.error);
-    merged = opened.value;
-  }
-
-  const echo = toConfigEcho(invocation.config, invocation.modelsRequested, invocation.concurrency);
-  const configEcho = merged === null ? echo : mergeEcho(merged.benchmark.config, echo);
-  const priorRecords = merged?.records ?? [];
-  const reportIdentity = merged?.benchmark.identity ?? identity;
-
-  const sink = createReportSink(dir, reportIdentity, configEcho, invocation.skipped, priorRecords, merged?.drift ?? null);
-  // A signal leaves through process.exit (see the workspace guard), which runs
-  // exit handlers but resolves no promise: the benchmark of an interrupted
-  // matrix is written synchronously here or not at all.
-  process.on("exit", () => sink.closeOnExit());
-
-  const doc =
-    merged === null
-      ? buildLiveDoc(identity, configEcho, plan, invocation.startedAt)
-      : reopenLiveDoc(
-          reportIdentity,
-          configEcho,
-          priorRecords,
-          plan,
-          reportIdentity.startedAt,
-          invocation.startedAt,
-        );
-  const live = createLiveWriter(dir, doc);
-  const feed = createFeedWriter(dir);
-  feed.header([
-    ...headerLines(invocation, identity, plan.length),
-    ...(config.into === null ? [] : [`rerun into ${config.into}, merging with ${priorRecords.length} runs`]),
-  ]);
+  const merged = prior === null ? null : openMerge(dir, prior, identity);
+  const echo = toConfigEcho(config, invocation.modelsRequested, concurrency);
+  const writers = createReportWriters({
+    dir,
+    identity: merged?.benchmark.identity ?? identity,
+    config: merged === null ? echo : mergeEcho(merged.benchmark.config, echo),
+    skippedModels: invocation.skipped,
+    plan,
+    openedAt: invocation.startedAt,
+    prior: merged,
+    header: headerLines(invocation, identity, plan.length, merged?.records.length ?? 0),
+  });
 
   const env: RunEnvironment = {
     apiKey: config.apiKey,
@@ -342,35 +333,33 @@ async function runInvocation(invocation: Invocation): Promise<number> {
     guard,
     onEvent: (planned, event) => {
       const line = formatEvent(planned, event, new Date());
-      if (line) feed.line(line);
+      if (line) writers.feed.line(line);
     },
   };
-  // The sink holds what finished, so an interrupt reports from the same records
-  // a clean finish does; the matrix's own plan-ordered array is not needed here.
   await runMatrix(
     plan,
     {
       runOne: (planned) => runOne(planned, env),
       onStart: (planned) => {
-        live.start(planned);
-        feed.line(formatRunStart(planned, new Date()));
+        writers.live.start(planned);
+        writers.feed.line(formatRunStart(planned, new Date()));
       },
       onProgress: (record) => {
-        sink.add(record);
+        writers.sink.add(record);
         printRunLine(record);
-        live.finish(record);
-        feed.line(formatRunFinish(record, new Date()));
+        writers.live.finish(record);
+        writers.feed.line(formatRunFinish(record, new Date()));
       },
     },
     concurrency,
   );
-  live.finalize();
 
-  const closed = sink.close();
+  const closed = writers.close();
   if (!closed.ok) return fail(closed.error);
   say(chalk.dim(`report: ${dir}`));
   say(closed.value);
-  return reportOutcome(sink.records());
+  // The sink holds what finished, so an interrupt reports from the same records a clean finish does.
+  return reportOutcome(writers.sink.records());
 }
 
 /** Nothing is packed, installed or spent until every candidate and fixture has been answered for. */
@@ -386,13 +375,9 @@ async function run(config: Config, startedAt: Date): Promise<number> {
   if (validated.length === 0) return fail("no candidate model is usable, so there is nothing to run");
   say(modelsLine(validated));
 
-  const selected = selectSuites(config.suites);
-  for (const id of selected.missing) warn(`skipped the ${id} suite: no suite is registered under that id`);
-  if (selected.suites.length === 0) {
-    return fail("no selected suite is registered, so there is nothing to run");
-  }
+  const suites = selectSuites(config.suites);
 
-  const loaded = loadCases(selected.suites);
+  const loaded = loadCases(suites);
   if (!loaded.ok) return fail(loaded.error);
 
   const casesBySuite = selectCases(loaded.value, config.cases);
@@ -416,7 +401,7 @@ async function run(config: Config, startedAt: Date): Promise<number> {
     startedAt,
     models: validated,
     skipped,
-    suites: selected.suites,
+    suites,
     casesBySuite: casesBySuite.value,
     modelsRequested: ids.value,
     concurrency,

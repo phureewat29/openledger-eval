@@ -3,9 +3,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import type { SuiteId } from "../config.js";
 import type { ValidatedModel } from "../model/capabilities.js";
 import { runMatrix, type PlannedRun } from "../runner/matrix.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import { gradeOf, type AnySuite } from "../suites/types.js";
 import type { Benchmark, ConfigEcho } from "./benchmark.js";
 import { buildCounters } from "./counters.js";
@@ -46,7 +46,7 @@ function record(patch: Partial<RunRecord> = {}): RunRecord {
 }
 
 function model(id: string): ValidatedModel {
-  return { id, modalities: ["text"], contextLength: 128_000, supportsTools: true, pricing: null };
+  return { id, modalities: ["text"], contextLength: 128_000, pricing: null };
 }
 
 function suite(id: SuiteId): AnySuite {
@@ -104,7 +104,7 @@ test("a run whose files cannot be written warns once and does not stop the matri
     const sink = sinkAt(dir);
     const plan = [planned("a/one", "c1"), planned("b/two", "c1"), planned("a/one", "c2"), planned("b/two", "c2")];
 
-    const records = await runMatrix(
+    await runMatrix(
       plan,
       {
         runOne: async (run) => record({ model: run.model.id, caseId: run.kase.id }),
@@ -114,7 +114,7 @@ test("a run whose files cannot be written warns once and does not stop the matri
       2,
     );
 
-    assert.equal(records.length, 4, "every planned run still ran");
+    assert.equal(sink.records().length, 4, "every planned run still ran");
     assert.equal(stderr.mock.callCount(), 1, "one warning, then silence");
     assert.match(String(stderr.mock.calls[0]?.arguments[0]), /cannot write .*c\d\.json/);
     assert.ok(existsSync(join(dir, "runs", "b-two", "record", "c1.json")), "the writable runs are unaffected");

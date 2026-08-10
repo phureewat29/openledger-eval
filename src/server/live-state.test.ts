@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { LiveDoc } from "../report/live.js";
 import type { RunIdentity } from "../report/record.js";
-import { IDLE_SLOT } from "./launch.js";
+import { IDLE_SLOT } from "./launch/slot.js";
 import { liveState, staysLive } from "./live-state.js";
 import type { LiveSnapshot } from "./reports-fs.js";
 

@@ -1,27 +1,19 @@
 import { Square } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { LivePayload } from "../../shared/payloads.js";
+import { duration } from "../../shared/format.js";
+import type { LivePayload, LiveStateKind } from "../../shared/payloads.js";
+import { RUN_STATE_LEGEND } from "../../shared/vocabulary.js";
 import { post } from "../lib/api.js";
+import { elapsedOf, progressOf } from "../lib/format.js";
+import { useNow } from "../lib/hooks.js";
 import { Badge, type Tone } from "./Badge.js";
 import { HoldButton } from "./HoldButton.js";
-import { duration, elapsedOf, progressOf } from "../lib/format.js";
 
 // The run's vitals, and the one control that stops it. Progress is the bar's own
 // bottom edge rather than a component of its own: it is always there, it costs
 // no vertical space, and it reads at a glance from across the room.
 
-const STATE_LABEL: Record<string, string> = {
-  none: "No runs yet",
-  starting: "Starting",
-  failed: "Launch failed",
-  "running-fresh": "Running",
-  "running-paused": "Paused",
-  "running-stale": "No heartbeat",
-  done: "Finished",
-};
-
 /** Green is alive, yellow is uncertain, red is broken; a finished run needs no colour at all. */
-const STATE_TONE: Record<string, Tone> = {
+const STATE_TONE: Record<LiveStateKind, Tone> = {
   none: "muted",
   starting: "accent",
   failed: "bad",
@@ -33,26 +25,13 @@ const STATE_TONE: Record<string, Tone> = {
   done: "muted",
 };
 
-/** Ticks only while something is moving, so a finished run costs no renders. */
-function useNow(active: boolean): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!active) return;
-    const timer = setInterval(() => setNow(Date.now()), 1_000);
-    return () => clearInterval(timer);
-  }, [active]);
-  return now;
-}
-
 export function TopBar({ live }: { live: LivePayload | null }) {
   const kind = live?.kind ?? "none";
   const moving = kind === "running-fresh" || kind === "starting";
   const now = useNow(moving);
 
   // Neither cost nor tokens are here: live.json carries neither, they are figures
-  // a benchmark computes once a run is scored. The bar showed a placeholder
-  // em-dash for one and hid the other behind a constant zero, which is a promise
-  // of two numbers and the delivery of none. The iteration page has both.
+  // a benchmark computes once a run is scored. The iteration page has both.
   const { done, total, percent } = progressOf(live?.doc ?? null);
   const spent = live?.doc?.items.length ? elapsedOf(live.doc, now) : 0;
   const stoppable = live?.stop.kind !== undefined && live.stop.kind !== "none";
@@ -61,8 +40,8 @@ export function TopBar({ live }: { live: LivePayload | null }) {
     <header className="relative flex h-12 shrink-0 items-center gap-4 border-b border-line px-4">
       <span className="tnum truncate text-muted">{live?.slug ?? "—"}</span>
 
-      <Badge tone={STATE_TONE[kind] ?? "muted"} dot pulse={moving}>
-        {STATE_LABEL[kind] ?? kind}
+      <Badge tone={STATE_TONE[kind]} dot pulse={moving}>
+        {RUN_STATE_LEGEND[kind].label}
       </Badge>
 
       <div className="flex-1" />

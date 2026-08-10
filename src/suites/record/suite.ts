@@ -36,6 +36,11 @@ const RESOLVE: SuitePhase = {
     "Where the text did not settle something, my ledger will have flagged it: a question waiting on an answer, or a row it could not put anywhere. Settle all of it. Nothing should be left open, deferred or uncategorized when you are done.",
 };
 
+// Hashed into the suite fingerprint: the fixed half of the ask. The per-case
+// statement text is not here — it is hashed by its own bytes, as one of the
+// record fixture files.
+export const PROMPTS = [INSTRUCTION, RESOLVE.prompt];
+
 function chartLines(accounts: ChartAccount[]): string {
   return accounts.map((account) => `- ${account.id} — ${account.name}`).join("\n");
 }

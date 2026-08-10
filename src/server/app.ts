@@ -3,17 +3,21 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { bodyLimit } from "hono/body-limit";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { WebSocketServer, type WebSocket } from "ws";
 import * as z from "zod";
-import { readModelIds, SUITE_IDS } from "../config.js";
+import { readModelIds } from "../config.js";
 import { finalizeDoc, isRunningFresh, writeLive } from "../report/live.js";
 import { parseClientMessage, type ServerMessage } from "../shared/protocol.js";
+import { SUITE_IDS } from "../shared/vocabulary.js";
 import { createRegistry, type Client } from "./channels.js";
 import { digestOf } from "./digest.js";
 import { isLocalRequest, isLocalUpgrade, parsePort } from "./http-guard.js";
-import { launcher, parseLaunchRequest, parseRerunRequest } from "./launch.js";
+import type { LaunchOutcome, StopOutcome } from "./launch/launcher.js";
+import { launcher } from "./launch/process.js";
+import { parseLaunchRequest, parseRerunRequest } from "./launch/request.js";
 import { listProcesses, processExists } from "./procs.js";
 import {
   findIteration,
@@ -77,6 +81,31 @@ const RERUN_BODY = z.object({
 
 const CLEANUP_BODY = z.object({ names: z.array(z.string()).min(1) });
 
+/** A body in a shape the route cannot use is null, so each route refuses it in its own words. */
+async function parseBody<S extends z.ZodType>(c: Context, schema: S): Promise<z.infer<S> | null> {
+  const parsed = schema.safeParse(await c.req.json().catch(() => null));
+  return parsed.success ? parsed.data : null;
+}
+
+type Outcome = LaunchOutcome | StopOutcome;
+
+/**
+ * A refusal about the state of the world is a conflict the page can answer for
+ * by asking again; one about the machinery is this process admitting a fault.
+ */
+const REFUSED: Record<Extract<Outcome, { ok: false }>["reason"], ContentfulStatusCode> = {
+  busy: 409,
+  idle: 409,
+  spawn: 500,
+  signal: 500,
+};
+
+/** Every route that asks the launcher to do something answers the same way. */
+function respond(c: Context, outcome: Outcome): Response {
+  if (!outcome.ok) return c.json({ error: outcome.message }, REFUSED[outcome.reason]);
+  return c.json({ ok: true });
+}
+
 app.get("/api/bootstrap", (c) => {
   const iterations = listIterations(REPORTS_ROOT);
   const models = readModelIds();
@@ -124,23 +153,20 @@ app.get("/api/iterations/:slug/runs/:model/:suite/:stem", (c) => {
 });
 
 app.post("/api/launch", async (c) => {
-  const body = LAUNCH_BODY.safeParse(await c.req.json().catch(() => null));
-  if (!body.success) return c.json({ error: "a launch needs suites and models" }, 422);
+  const body = await parseBody(c, LAUNCH_BODY);
+  if (body === null) return c.json({ error: "a launch needs suites and models" }, 422);
 
   const models = readModelIds();
   if (!models.ok) return c.json({ error: models.error }, 500);
 
   const form = new URLSearchParams();
-  for (const suite of body.data.suites) form.append("suite", suite);
-  for (const model of body.data.models) form.append("model", model);
+  for (const suite of body.suites) form.append("suite", suite);
+  for (const model of body.models) form.append("model", model);
 
   const request = parseLaunchRequest(form, models.value);
   if (!request.ok) return c.json({ error: request.error }, 422);
 
-  const snapshot = newestLive(REPORTS_ROOT);
-  const outcome = launcher.launch(request.value, snapshot.ok ? snapshot.value : null, new Date());
-  if (!outcome.ok) return c.json({ error: outcome.message }, outcome.reason === "busy" ? 409 : 500);
-  return c.json({ ok: true });
+  return respond(c, launcher.launch(request.value, newestLive(REPORTS_ROOT), new Date()));
 });
 
 /**
@@ -150,8 +176,8 @@ app.post("/api/launch", async (c) => {
  */
 app.post("/api/iterations/:slug/rerun", async (c) => {
   const slug = c.req.param("slug");
-  const body = RERUN_BODY.safeParse(await c.req.json().catch(() => null));
-  if (!body.success) return c.json({ error: "a rerun needs a model and a suite" }, 422);
+  const body = await parseBody(c, RERUN_BODY);
+  if (body === null) return c.json({ error: "a rerun needs a model and a suite" }, 422);
 
   const found = findIteration(REPORTS_ROOT, slug);
   if (!found.ok) return c.json({ error: found.error }, 500);
@@ -165,21 +191,13 @@ app.post("/api/iterations/:slug/rerun", async (c) => {
   const models = readModelIds();
   if (!models.ok) return c.json({ error: models.error }, 500);
 
-  const request = parseRerunRequest(slug, body.data, models.value);
+  const request = parseRerunRequest(slug, body, models.value);
   if (!request.ok) return c.json({ error: request.error }, 422);
 
-  const snapshot = newestLive(REPORTS_ROOT);
-  const outcome = launcher.rerun(request.value, snapshot.ok ? snapshot.value : null, new Date());
-  if (!outcome.ok) return c.json({ error: outcome.message }, outcome.reason === "busy" ? 409 : 500);
-  return c.json({ ok: true });
+  return respond(c, launcher.rerun(request.value, newestLive(REPORTS_ROOT), new Date()));
 });
 
-app.post("/api/stop", (c) => {
-  const snapshot = newestLive(REPORTS_ROOT);
-  const outcome = launcher.stop(snapshot.ok ? snapshot.value : null, new Date());
-  if (!outcome.ok) return c.json({ error: outcome.message }, outcome.reason === "idle" ? 409 : 500);
-  return c.json({ ok: true });
-});
+app.post("/api/stop", (c) => respond(c, launcher.stop(newestLive(REPORTS_ROOT), new Date())));
 
 /**
  * Freezing a run and letting it go again. Both are one signal to the whole
@@ -189,10 +207,7 @@ app.post("/api/stop", (c) => {
  */
 app.post("/api/run/:action{pause|resume}", (c) => {
   const action = c.req.param("action") === "pause" ? "pause" : "resume";
-  const snapshot = newestLive(REPORTS_ROOT);
-  const outcome = launcher.hold(action, snapshot.ok ? snapshot.value : null, new Date());
-  if (!outcome.ok) return c.json({ error: outcome.message }, outcome.reason === "idle" ? 409 : 500);
-  return c.json({ ok: true });
+  return respond(c, launcher.hold(action, newestLive(REPORTS_ROOT), new Date()));
 });
 
 /**
@@ -222,8 +237,8 @@ app.post("/api/iterations/:slug/finish", (c) => {
 });
 
 app.post("/api/sandboxes/cleanup", async (c) => {
-  const body = CLEANUP_BODY.safeParse(await c.req.json().catch(() => null));
-  if (!body.success) return c.json({ error: "name the sandboxes to remove" }, 422);
+  const body = await parseBody(c, CLEANUP_BODY);
+  if (body === null) return c.json({ error: "name the sandboxes to remove" }, 422);
 
   // The orphan set is re-derived here and the client's list is only ever
   // filtered against it: a name that is in use, or that no longer exists, is
@@ -236,7 +251,7 @@ app.post("/api/sandboxes/cleanup", async (c) => {
   const orphans = new Map(listed.value.filter(isOrphan).map((entry) => [entry.name, entry.path]));
   const removed: string[] = [];
   const failed: { name: string; error: string }[] = [];
-  for (const name of body.data.names) {
+  for (const name of body.names) {
     const path = orphans.get(name);
     if (path === undefined) {
       failed.push({ name, error: "not an orphaned sandbox" });

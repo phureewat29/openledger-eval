@@ -4,17 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import type { PlannedRun } from "../runner/matrix.js";
+import type { FeedLine } from "../shared/feed.js";
 import { gradeOf, type AssertionResult } from "../suites/types.js";
 import { buildCounters } from "./counters.js";
 import type { RunEvent } from "./events.js";
-import {
-  createFeedWriter,
-  formatEvent,
-  formatHeader,
-  formatRunFinish,
-  formatRunStart,
-  type FeedLine,
-} from "./feed.js";
+import { createFeedWriter, formatEvent, formatHeader, formatRunFinish, formatRunStart } from "./feed.js";
 import type { RunRecord } from "./record.js";
 import { createRecorder } from "./recorder.js";
 
@@ -22,7 +16,7 @@ const NOW = new Date("2026-08-06T09:05:00.000Z");
 
 function planned(modelId = "google/gemini-3.6-flash", caseId = "q01", trial = 1): PlannedRun {
   return {
-    model: { id: modelId, modalities: ["text"], contextLength: 128_000, supportsTools: true, pricing: null },
+    model: { id: modelId, modalities: ["text"], contextLength: 128_000, pricing: null },
     suite: {
       id: "query",
       cases: () => ({ ok: true, value: [] }),

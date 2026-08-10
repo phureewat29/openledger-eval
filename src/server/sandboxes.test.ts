@@ -3,15 +3,8 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import type { ProcInfo } from "./procs.js";
-import {
-  listSandboxes,
-  ownerOf,
-  reclaimableBytes,
-  removeSandbox,
-  SANDBOX_PREFIX,
-  type SandboxInfo,
-} from "./sandboxes.js";
+import type { ProcInfo, SandboxInfo } from "../shared/payloads.js";
+import { listSandboxes, ownerOf, reclaimableBytes, removeSandbox, SANDBOX_PREFIX } from "./sandboxes.js";
 
 const NOW = new Date("2026-08-08T05:00:00.000Z");
 

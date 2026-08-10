@@ -3,9 +3,9 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mock, test } from "node:test";
-import type { SuiteId } from "../config.js";
 import type { ValidatedModel } from "../model/capabilities.js";
 import type { PlannedRun } from "../runner/matrix.js";
+import type { SuiteId } from "../shared/vocabulary.js";
 import { gradeOf, notApplicable, type AnySuite, type AssertionResult } from "../suites/types.js";
 import type { ConfigEcho } from "./benchmark.js";
 import { buildCounters } from "./counters.js";
@@ -39,7 +39,7 @@ function config(patch: Partial<ConfigEcho> = {}): ConfigEcho {
 }
 
 function model(id: string): ValidatedModel {
-  return { id, modalities: ["text"], contextLength: 128_000, supportsTools: true, pricing: null };
+  return { id, modalities: ["text"], contextLength: 128_000, pricing: null };
 }
 
 function suite(id: SuiteId): AnySuite {

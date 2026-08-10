@@ -174,7 +174,6 @@ test("carries the balances into the probe without disturbing the rest of it", as
     filesIngested: 1,
     filesPending: 0,
     postedRows: 1,
-    linkedRows: 1,
     uncategorizedRows: 0,
     questionsOpen: 0,
     questionsDeferred: 0,

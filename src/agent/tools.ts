@@ -1,11 +1,10 @@
 import { createHash } from "node:crypto";
-import { difference } from "es-toolkit";
 import * as z from "zod";
 import type { ChatCompletionTool } from "openai/resources/chat/completions";
 import { tryExecute, type Result } from "../core/result.js";
 import { artifactsOf, type ArtifactScan, type OpenLedgerArtifacts } from "../oled/artifacts.js";
 import type { OpenLedgerRunner } from "../oled/command.js";
-import { carriesOutput, EXIT, HOST_APPENDED_FLAGS } from "../oled/contract.js";
+import { carriesOutput, EXIT } from "../oled/contract.js";
 import { parseNdjson } from "../oled/ndjson.js";
 import type {
   CommitCounters,
@@ -14,6 +13,16 @@ import type {
   ToolObservation,
 } from "../report/events.js";
 import type { AnswerSink } from "../suites/types.js";
+import { normalizeArgv, nounOf, subcommandOf, tokenize } from "./argv.js";
+import {
+  DENIED_NOUNS,
+  PLACEHOLDER,
+  refusedObservation,
+  REFUSED_PLACEHOLDER,
+  REFUSED_SHELL,
+  SHELL_METACHARACTERS,
+  type RefusedCall,
+} from "./refusals.js";
 
 /**
  * A tool never throws: bad args and refusals come back as a normal ToolResult,
@@ -55,12 +64,6 @@ const MAX_STDIN_ECHO = 4_000;
 // 64 bits of sha256: two different batches are two different keys, and every
 // event still carries one short field rather than a second copy of the payload.
 const STDIN_DIGEST_CHARS = 16;
-
-// Shell operators would let one tool call become several commands.
-const SHELL_METACHARACTERS = /[|&;<>`$]/;
-
-// oled dispatches on at most `noun verb`.
-const MAX_SUBCOMMAND_WORDS = 2;
 
 // The one subcommand that reads a batch of rows from stdin.
 const COMMIT_SUBCOMMAND = "ingest commit";
@@ -148,15 +151,6 @@ function hostArtifacts(scan: ArtifactScan, command: string): HostArtifacts {
   };
 }
 
-function subcommandOf(argv: string[], fallback: string): string {
-  const words: string[] = [];
-  for (const token of argv) {
-    if (token.startsWith("-") || words.length === MAX_SUBCOMMAND_WORDS) break;
-    words.push(token);
-  }
-  return words.join(" ") || fallback;
-}
-
 function toolResult(
   content: string,
   observation: Omit<ToolObservation, "result">,
@@ -169,25 +163,8 @@ function toolResult(
   };
 }
 
-/** A refused call ran nothing, so it sent no stdin and has no exit code of its own. */
-function refuse(
-  type: RejectionType,
-  spec: { tool: string; subcommand: string; args: string; command: string },
-  message: string,
-): ToolResult {
-  return toolResult(message, {
-    ...spec,
-    ok: false,
-    exitCode: null,
-    rejected: type,
-    message,
-    hint: null,
-    stdin: false,
-    stdinPreview: null,
-    stdinDigest: null,
-    rows: null,
-    commit: null,
-  });
+function refuse(type: RejectionType, call: RefusedCall, message: string): ToolResult {
+  return toolResult(message, refusedObservation(type, call, message));
 }
 
 function parseArgs<T extends z.ZodType>(schema: T, rawArgs: string): Result<z.infer<T>> {
@@ -199,57 +176,6 @@ function parseArgs<T extends z.ZodType>(schema: T, rawArgs: string): Result<z.in
   if (!parsed.success) return { ok: false, error: z.prettifyError(parsed.error) };
   return { ok: true, value: parsed.data as z.infer<T> };
 }
-
-function tokenize(input: string): Result<string[]> {
-  const tokens: string[] = [];
-  let current = "";
-  let started = false;
-  let quote: string | null = null;
-  for (const char of input) {
-    if (quote !== null) {
-      if (char === quote) quote = null;
-      else current += char;
-      continue;
-    }
-    if (char === '"' || char === "'") {
-      quote = char;
-      started = true;
-      continue;
-    }
-    if (/\s/.test(char)) {
-      if (started) tokens.push(current);
-      current = "";
-      started = false;
-      continue;
-    }
-    current += char;
-    started = true;
-  }
-  if (quote !== null) return { ok: false, error: "unterminated quote in args" };
-  if (started) tokens.push(current);
-  if (tokens.length === 0) return { ok: false, error: "args was empty" };
-  return { ok: true, value: tokens };
-}
-
-/** Tolerates a leading `oled` and guarantees --json, so NDJSON is never optional. */
-function normalizeArgv(tokens: string[]): string[] {
-  const argv = tokens[0] === "oled" ? tokens.slice(1) : tokens;
-  return [...argv, ...difference(HOST_APPENDED_FLAGS, argv)];
-}
-
-/** The noun oled dispatches on, before any flag or its value can be mistaken for one. */
-function nounOf(argv: string[]): string {
-  return argv.find((token) => !token.startsWith("-")) ?? "";
-}
-
-/**
- * Commands whose effect lands outside the sandbox. The refusal says which
- * machine it would have touched, so the model can tell it apart from a command
- * that does not exist.
- */
-const DENIED_NOUNS: Record<string, string> = {
-  open: "refused: `oled open` opens a file-manager window on the machine running this eval, which nobody is watching. Read what oled knows through its own commands instead.",
-};
 
 interface RunSpec {
   tool: string;
@@ -312,15 +238,6 @@ async function runArgv(runner: OpenLedgerRunner, spec: RunSpec): Promise<ToolRes
       : { artifacts: null, notes: [] },
   );
 }
-
-const REFUSED_SHELL =
-  "refused: args cannot contain | & ; < > ` or $. Run one oled command per call and send a batch through the `stdin` field instead of a pipe.";
-
-// Docs write placeholders as <pattern>; a model copying one verbatim needs a different correction than a pipe.
-const PLACEHOLDER = /<[a-z][a-z0-9:_-]*>/i;
-
-const REFUSED_PLACEHOLDER =
-  "refused: args contain a <placeholder>. Replace every <...> from the docs with a real value from a previous command's output.";
 
 function countRows(ndjson: string): number {
   return ndjson.split("\n").filter((line) => line.trim().length > 0).length;

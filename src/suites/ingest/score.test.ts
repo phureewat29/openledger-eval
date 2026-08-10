@@ -27,7 +27,6 @@ const PERFECT: LedgerProbe = {
   filesIngested: 1,
   filesPending: 0,
   postedRows: 126,
-  linkedRows: 126,
   uncategorizedRows: 0,
   questionsOpen: 0,
   questionsDeferred: 0,
@@ -208,7 +207,6 @@ test("scores no ratio when no rows posted, and counts it in neither column", () 
     }),
     filesIngested: 0,
     postedRows: 0,
-    linkedRows: 0,
     netWorth: 0,
   };
   const grade = gradeIngest("case", FACTS, empty);

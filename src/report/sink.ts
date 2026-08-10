@@ -4,6 +4,7 @@ import { buildBenchmark, type ConfigEcho } from "./benchmark.js";
 import { renderLeaderboard } from "./leaderboard.js";
 import { mergeRecords } from "./merge.js";
 import type { RunIdentity, RunRecord } from "./record.js";
+import { warnOnce } from "./warn.js";
 import { writeBenchmark, writeLeaderboard, writeRunFiles } from "./write.js";
 
 // Where finished runs drain to. A run's files are written the moment it is
@@ -44,15 +45,13 @@ export function createReportSink(
   buildDrift: string | null = null,
 ): ReportSink {
   const finished: RunRecord[] = [];
-  let warned = false;
+  const warn = warnOnce();
   let closed = false;
 
   function add(record: RunRecord): void {
     finished.push(record);
     const written = writeRunFiles(dir, record, config.trials);
-    if (written.ok || warned) return;
-    warned = true;
-    process.stderr.write(`${written.error}; the run still counts, and later run files fail silently\n`);
+    if (!written.ok) warn(`${written.error}; the run still counts, and later run files fail silently`);
   }
 
   function close(): Result<string> {

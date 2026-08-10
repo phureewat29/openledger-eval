@@ -69,14 +69,13 @@ const PREPARED = z.discriminatedUnion("kind", [
 
 /** Each path is filtered by extension rather than trusted: the host carries text and images, nothing else. */
 function pageImages(pages: { page: number; path: string }[]): PageImageArtifact[] {
-  const found: { page: number; path: string; mediaType: string }[] = [];
-  for (const page of pages) {
-    const mediaType = IMAGE_MEDIA_TYPES[extname(page.path).toLowerCase()];
-    if (!mediaType) continue;
-    found.push({ page: page.page, path: page.path, mediaType });
-  }
-  found.sort((left, right) => left.page - right.page);
-  return found.map(({ path, mediaType }) => ({ path, mediaType }));
+  return pages
+    .flatMap((page) => {
+      const mediaType = IMAGE_MEDIA_TYPES[extname(page.path).toLowerCase()];
+      return mediaType ? [{ page: page.page, path: page.path, mediaType }] : [];
+    })
+    .toSorted((left, right) => left.page - right.page)
+    .map(({ path, mediaType }) => ({ path, mediaType }));
 }
 
 function readPrepared(row: Record<string, unknown>): ArtifactScan {

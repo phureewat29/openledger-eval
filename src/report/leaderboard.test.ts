@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { duration, tokens } from "../shared/format.js";
 import type { Benchmark, BenchmarkEntry, ConfigEcho } from "./benchmark.js";
-import { humanDuration, humanTokens, LEADERBOARD_COLUMNS, renderLeaderboard, suiteRows } from "./leaderboard.js";
+import { LEADERBOARD_COLUMNS, renderLeaderboard, suiteRows } from "./leaderboard.js";
 import type { RunIdentity } from "./record.js";
 
 const IDENTITY: RunIdentity = {
@@ -138,7 +139,7 @@ test("prints the identity block: versions, truncated shas, and the config echo",
   const markdown = renderLeaderboard(benchmark());
   assert.ok(markdown.startsWith("# openledger eval — 2026-08-06T09:05:00.000Z\n"));
   assert.ok(markdown.includes("oled `1.2.3`"));
-  assert.ok(markdown.includes("questions `a1b2c3d4e5f6`"));
+  assert.ok(markdown.includes("prompts `a1b2c3d4e5f6`"));
   assert.ok(!markdown.includes(IDENTITY.suiteSha256), "the full 64-char sha should not appear, only its prefix");
   assert.ok(markdown.includes("skill `2.0.0` `f6e5d4c3b2a1`"));
   assert.ok(markdown.includes("eval `1.0.0`"));
@@ -156,18 +157,18 @@ test("suiteRows returns one cell per column, ranked by position, using the rankC
   assert.deepEqual(rows[1], ["2 🥈", "b/model", "8/9", "83.3%", "58s", "375K / 10K", "—", "6.3", "⚠ 2 failed runs"]);
 });
 
-test("humanTokens keeps small counts verbatim and abbreviates with K/M above 1000", () => {
-  assert.equal(humanTokens(999), "999");
-  assert.equal(humanTokens(1_000), "1K");
-  assert.equal(humanTokens(1_500_000), "1.5M");
-  assert.equal(humanTokens(375_000), "375K");
+test("tokens keeps small counts verbatim and abbreviates with K/M above 1000", () => {
+  assert.equal(tokens(999), "999");
+  assert.equal(tokens(1_000), "1K");
+  assert.equal(tokens(1_500_000), "1.5M");
+  assert.equal(tokens(375_000), "375K");
 });
 
-test("humanDuration steps from seconds to minutes to hours, dropping the smaller unit each time", () => {
-  assert.equal(humanDuration(59_000), "59s");
-  assert.equal(humanDuration(60_000), "1m00s");
-  assert.equal(humanDuration(83_000), "1m23s");
-  assert.equal(humanDuration(3_661_000), "1h01m");
+test("duration steps from seconds to minutes to hours, dropping the smaller unit each time", () => {
+  assert.equal(duration(59_000), "59s");
+  assert.equal(duration(60_000), "1m00s");
+  assert.equal(duration(83_000), "1m23s");
+  assert.equal(duration(3_661_000), "1h01m");
 });
 
 /**

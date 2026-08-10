@@ -2,15 +2,22 @@ import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { IterationDigest, IterationStatus } from "../../server/digest.js";
+import { duration, usd } from "../../shared/format.js";
+import { RUN_STATE_LEGEND } from "../../shared/vocabulary.js";
 import { Badge, type Tone } from "../components/Badge.js";
 import { Empty } from "../components/Empty.js";
 import { TableBox, TD, TH } from "../components/Table.js";
 import { get } from "../lib/api.js";
-import { duration, shortModel, usd } from "../lib/format.js";
+import { shortModel } from "../lib/format.js";
 
 // Every iteration on disk, with enough of each to choose between them. A list of
 // slugs is a list of navigation targets; what a reader wants to know first is how
 // big the run was, how it went and what it cost.
+
+type LoadState =
+  | { kind: "loading" }
+  | { kind: "error"; error: string }
+  | { kind: "loaded"; iterations: IterationDigest[] };
 
 const STATUS_TONE: Record<IterationStatus, Tone> = {
   running: "accent",
@@ -19,9 +26,10 @@ const STATUS_TONE: Record<IterationStatus, Tone> = {
   unknown: "muted",
 };
 
+/** `crashed` reads the same word running-stale does everywhere else: both name a run whose heartbeat stopped. */
 const STATUS_WORD: Record<IterationStatus, string> = {
   running: "Running",
-  crashed: "Crashed",
+  crashed: RUN_STATE_LEGEND["running-stale"].label,
   done: "Done",
   unknown: "Unknown",
 };
@@ -63,15 +71,20 @@ function rateTone(rate: number | null): string {
 }
 
 export function Reports() {
-  const [iterations, setIterations] = useState<IterationDigest[] | null>(null);
+  const [state, setState] = useState<LoadState>({ kind: "loading" });
 
   useEffect(() => {
     void get<{ iterations: IterationDigest[] }>("/api/iterations").then((result) => {
-      setIterations(result.ok ? result.value.iterations : []);
+      setState(
+        result.ok ? { kind: "loaded", iterations: result.value.iterations } : { kind: "error", error: result.error },
+      );
     });
   }, []);
 
-  if (iterations === null) return <Empty title="Reading reports/" />;
+  if (state.kind === "loading") return <Empty title="Reading reports/" />;
+  if (state.kind === "error") return <Empty title="couldn't load reports" hint={state.error} />;
+
+  const { iterations } = state;
   if (iterations.length === 0) {
     return <Empty title="No iterations yet" hint="reports/ is empty — launch a run to fill it" />;
   }

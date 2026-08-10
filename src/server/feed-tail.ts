@@ -1,37 +1,30 @@
 import { closeSync, fstatSync, openSync, readSync } from "node:fs";
 import { StringDecoder } from "node:string_decoder";
 import { tryExecute, type Result } from "../core/result.js";
-import type { FeedLine } from "../report/feed.js";
-import { parseFeedLine } from "./reports-fs.js";
+import { parseFeedLine, type FeedLine } from "../shared/feed.js";
 
 // feed.ndjson is appended to and never rewritten, so a reader that remembers how
-// far it has read never has to look at the same byte twice. That is the whole
-// design: the old dashboard re-read the last 64 KB on every request from every
-// client, and this reads only what arrived.
+// far it has read never has to look at the same byte twice.
 
-export interface FeedChunk {
+export interface FeedRead {
   lines: FeedLine[];
-  /** Where the next read starts; hand it back on the next call. */
+  /** How far into the file this reader has got, which the payload carries so a client can place its lines. */
   offset: number;
-}
-
-/**
- * A file that shrank was truncated or replaced, which for an append-only log
- * means it is not the file we were reading. Starting over is the only honest
- * answer, and the caller is told so it can replace rather than append.
- */
-export interface FeedRead extends FeedChunk {
+  /**
+   * A file that shrank was truncated or replaced, which for an append-only log
+   * means it is not the file we were reading. Starting over is the only honest
+   * answer, and the caller is told so it can replace rather than append.
+   */
   reset: boolean;
 }
 
 /** Holds the byte offset and the partial line the last read stopped inside. */
 export interface FeedTail {
   read(path: string): Result<FeedRead>;
-  offset(): number;
 }
 
-export function createFeedTail(startAt = 0): FeedTail {
-  let offset = startAt;
+export function createFeedTail(): FeedTail {
+  let offset = 0;
   let carry = "";
   // Kept across reads: a multi-byte character can be split across the boundary,
   // and decoding each chunk on its own would turn it into replacement bytes.
@@ -44,7 +37,6 @@ export function createFeedTail(startAt = 0): FeedTail {
   }
 
   return {
-    offset: () => offset,
     read(path) {
       const opened = tryExecute(() => openSync(path, "r"));
       // No file yet is the ordinary state before a run writes its first line.
@@ -71,11 +63,8 @@ export function createFeedTail(startAt = 0): FeedTail {
         // or a line the writer has not finished appending. Held back either way.
         carry = parts.pop() ?? "";
 
-        const lines: FeedLine[] = [];
-        for (const part of parts) {
-          const line = parseFeedLine(part);
-          if (line !== null) lines.push(line);
-        }
+        // A line in a shape this does not know is dropped, never guessed at.
+        const lines = parts.map((part) => parseFeedLine(part)).filter((line) => line !== null);
         return { ok: true, value: { lines, offset, reset } };
       } finally {
         closeSync(fd);

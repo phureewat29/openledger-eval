@@ -34,7 +34,6 @@ export interface ValidatedModel {
   id: string;
   modalities: Modality[];
   contextLength: number | null;
-  supportsTools: boolean;
   pricing: ModelPricing | null;
 }
 
@@ -87,37 +86,62 @@ function toRow(raw: unknown): ModelRow | null {
   };
 }
 
-async function requestRows(url: string): Promise<Result<ModelRow[]>> {
+type RowsAttempt = { ok: true; value: ModelRow[] } | { ok: false; error: string; retryable: boolean };
+
+/** 5xx and a dead connection may clear on their own; a 4xx or a malformed body will look the same twice. */
+function isRetryableStatus(status: number): boolean {
+  return status >= 500;
+}
+
+async function requestRows(url: string): Promise<RowsAttempt> {
   const response = await tryExecute(() =>
     fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }),
   );
-  if (!response.ok) return { ok: false, error: `the model list did not answer: ${response.error}` };
+  if (!response.ok) {
+    return { ok: false, error: `the model list did not answer: ${response.error}`, retryable: true };
+  }
   if (!response.value.ok) {
-    return { ok: false, error: `the model list answered ${response.value.status}` };
+    return {
+      ok: false,
+      error: `the model list answered ${response.value.status}`,
+      retryable: isRetryableStatus(response.value.status),
+    };
   }
 
   const body = await tryExecute(() => response.value.json());
-  if (!body.ok) return { ok: false, error: `the model list was unreadable: ${body.error}` };
+  if (!body.ok) {
+    return { ok: false, error: `the model list was unreadable: ${body.error}`, retryable: false };
+  }
 
   const parsed = MODEL_LIST.safeParse(body.value);
   if (!parsed.success) {
     return {
       ok: false,
       error: `the model list had an unexpected shape: ${z.prettifyError(parsed.error)}`,
+      retryable: false,
     };
   }
 
   const rows = parsed.data.data.map(toRow).filter((row): row is ModelRow => row !== null);
-  if (rows.length === 0) return { ok: false, error: "the model list carried no readable rows" };
+  if (rows.length === 0) {
+    return { ok: false, error: "the model list carried no readable rows", retryable: false };
+  }
   return { ok: true, value: rows };
 }
 
-/** Fetched once per invocation: every candidate is answered from this one list. */
+/**
+ * Fetched once per invocation: every candidate is answered from this one
+ * list. Retried once, but only when the trouble looks transient — a 4xx or a
+ * malformed body would just answer the same way again.
+ */
 export async function fetchModelRows(baseUrl: string): Promise<Result<ModelRow[]>> {
   const url = `${baseUrl.replace(/\/+$/, "")}${MODELS_PATH}`;
   const first = await requestRows(url);
   if (first.ok) return first;
-  return requestRows(url);
+  if (!first.retryable) return { ok: false, error: first.error };
+
+  const second = await requestRows(url);
+  return second.ok ? second : { ok: false, error: second.error };
 }
 
 /** OpenRouter serves variants as `<id>:free`; a variant runs the base model's weights at its own price. */
@@ -149,7 +173,6 @@ function validateOne(byId: Map<string, ModelRow>, id: string): Candidate {
       id,
       modalities,
       contextLength: shape.contextLength,
-      supportsTools: true,
       // Only from the exact row: a variant priced off its base would bill the run wrongly.
       pricing: exact?.pricing ?? null,
     },
@@ -172,8 +195,8 @@ export function validateCandidates(
   return { validated, skipped };
 }
 
-/** env: declared by hand. openrouter: read from the model list. assumed: no row described it. */
-export type ModalitySource = "env" | "openrouter" | "assumed";
+/** env: declared by hand. openrouter: read from the model list. */
+export type ModalitySource = "env" | "openrouter";
 
 export interface ModelCapabilities {
   modalities: Modality[];
@@ -182,9 +205,11 @@ export interface ModelCapabilities {
   detail: string;
 }
 
-const ASSUMED: Modality[] = ["text", "image"];
-
-/** The declared list wins: it is the only way past a model list that describes the endpoint wrongly. */
+/**
+ * The declared list wins: it is the only way past a model list that
+ * describes the endpoint wrongly. Every ValidatedModel reaching here already
+ * cleared validateOne's modality check, so model.modalities is never empty.
+ */
 export function resolveCapabilities(
   model: ValidatedModel,
   override: Modality[] | null,
@@ -195,14 +220,6 @@ export function resolveCapabilities(
       source: "env",
       contextLength: model.contextLength,
       detail: `declared by ${MODALITIES_ENV}`,
-    };
-  }
-  if (model.modalities.length === 0) {
-    return {
-      modalities: ASSUMED,
-      source: "assumed",
-      contextLength: model.contextLength,
-      detail: `nothing describes ${model.id}; assumed text and image, override with ${MODALITIES_ENV}`,
     };
   }
   return {
