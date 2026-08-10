@@ -1,11 +1,15 @@
 <h1 align="center">OpenLedger Evaluation</h1>
 
 <p align="center">
-  <strong>Measures how fit the OpenLedger CLI and SKILL.md are for AI models</strong>
+  <strong>Measures how fit the <a href="https://github.com/phureewat29/openledger">OpenLedger</a> CLI and SKILL.md are for AI models</strong>
 </p>
 
 <p align="center">
   Every eval run drives a ladder of models through OpenRouter against the real CLI in a sandbox, grades the results deterministically, and writes a cross-model performance.
+</p>
+
+<p align="center">
+  <a href="https://github.com/phureewat29/openledger">The CLI under test →</a>
 </p>
 
 <p align="center">
@@ -52,7 +56,8 @@ re-derived from the seed rows at startup; a mismatch refuses to run.
 ## Setup
 
 1. `npm install -g @aquartier/openledger`, so the CLI under test is on your PATH. For a local
-   build, run `npm run build && npm link` in the openledger checkout instead.
+   build, run `npm run build && npm link` in an
+   [openledger](https://github.com/phureewat29/openledger) checkout instead.
    The eval takes whichever `oled` it finds, exactly as a user would.
 2. `cp .env.example .env` and set `OPENROUTER_API_KEY`.
 3. `npm install`.

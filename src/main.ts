@@ -143,7 +143,7 @@ async function bootstrap(guard: WorkspaceGuard): Promise<Result<Bootstrap>> {
     const runner = createSandboxRunner(workspace);
     const version = await readCliVersion(runner);
     if (!version.ok) {
-      return { ok: false, error: `${version.error}; install it with \`npm install -g oled\`, or \`npm link\` a local build` };
+      return { ok: false, error: `${version.error}; install it with \`npm install -g @aquartier/openledger\`, or \`npm link\` a local build` };
     }
 
     const skill = await installSkillPack(workspace, runner);
