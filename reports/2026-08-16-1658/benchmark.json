@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "startedAt": "2026-08-16T09:58:02.127Z",
+    "oledVersion": "0.23.3",
+    "skillVersion": "0.23.3",
+    "skillSha256": "4f29b02f43459b92109d2a84bf65d992b3e59380a4ddbfc0dd8050be86de69b6",
+    "suiteSha256": "5127b3c3f839e7826983c6e67c037f255f5271f389dae644a7c1adf13c5c4e7d",
+    "evalVersion": "0.3.0"
+  },
+  "config": {
+    "suites": [
+      "ingest",
+      "record",
+      "query"
+    ],
+    "trials": 1,
+    "concurrency": 2,
+    "modelsRequested": [
+      "deepseek/deepseek-v4-flash",
+      "qwen/qwen3.8-27b",
+      "x-ai/grok-4.6"
+    ]
+  },
+  "entries": [
+    {
+      "model": "x-ai/grok-4.6",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 303094,
+      "avgTokens": {
+        "in": 312208,
+        "out": 24891
+      },
+      "avgToolCalls": 22,
+      "totalCostUsd": 0.773762,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 386432,
+      "avgTokens": {
+        "in": 729992,
+        "out": 39145
+      },
+      "avgToolCalls": 47,
+      "totalCostUsd": 0.04967701172,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 2400488,
+      "avgTokens": {
+        "in": 819772,
+        "out": 59748
+      },
+      "avgToolCalls": 31,
+      "totalCostUsd": 0.560091,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 504912.2,
+      "avgTokens": {
+        "in": 121417.8,
+        "out": 12887.2
+      },
+      "avgToolCalls": 60.6,
+      "totalCostUsd": 0.47938525,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.6",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 82645,
+      "avgTokens": {
+        "in": 141303.8,
+        "out": 5379.6
+      },
+      "avgToolCalls": 53.4,
+      "totalCostUsd": 1.5744259999999999,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 129326.8,
+      "avgTokens": {
+        "in": 176039.4,
+        "out": 10230.8
+      },
+      "avgToolCalls": 64.4,
+      "totalCostUsd": 0.060384757299999994,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 13572.583333333334,
+      "avgTokens": {
+        "in": 17190.583333333332,
+        "out": 1092.8333333333333
+      },
+      "avgToolCalls": 3.75,
+      "totalCostUsd": 0.0142903719,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.6",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 12747.5,
+      "avgTokens": {
+        "in": 18864.083333333332,
+        "out": 636.8333333333334
+      },
+      "avgToolCalls": 6.916666666666667,
+      "totalCostUsd": 0.49859000000000003,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 73788.91666666667,
+      "avgTokens": {
+        "in": 18533.583333333332,
+        "out": 1461.25
+      },
+      "avgToolCalls": 5,
+      "totalCostUsd": 0.15619335,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    }
+  ],
+  "skippedModels": [],
+  "buildDrift": null
+}

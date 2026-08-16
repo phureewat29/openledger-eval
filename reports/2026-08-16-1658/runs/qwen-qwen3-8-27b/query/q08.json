@@ -1,0 +1,268 @@
+{
+  "model": "qwen/qwen3.8-27b",
+  "suite": "query",
+  "caseId": "q08",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "q08",
+    "assertions": [
+      {
+        "id": "submit_called",
+        "label": "answer submitted",
+        "passed": true,
+        "evidence": {
+          "want": "one submit_answer call",
+          "got": "an answer was submitted"
+        }
+      },
+      {
+        "id": "answer_correct",
+        "label": "answer",
+        "passed": true,
+        "evidence": {
+          "want": "2000.00 THB ±0.01",
+          "got": "2000.00 THB"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 5,
+    "toolCalls": 6,
+    "tokensIn": 30428,
+    "tokensOut": 1169,
+    "tokensEstimated": false,
+    "llmMs": 68287,
+    "toolMs": 629,
+    "durationMs": 68916,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 1,
+    "repeatedCommands": 0,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": 0.017433399999999998,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "answer",
+      "title": "Across the whole ledger, what is the total amount I have spent at the merchant Grab? Answer with the amount in `value` and its currency code in `unit`."
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 1,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 2,
+      "usage": {
+        "promptTokens": 1859,
+        "completionTokens": 106,
+        "estimated": false
+      },
+      "durationMs": 3784
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 134,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status --json",
+      "command": "oled status --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-atyKkx/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-atyKkx/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":25,\"transactions\":40,\"merchants\":22,\"notes\":0},\"files\":{\"new\":0,\"ingested\":0,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{\"THB\":159780,\"USD\":-65},\"liabilities\":{\"THB\":2097},\"net_worth\":{\"THB\":157683,\"USD\":-65}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-atyKkx/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-atyKkx/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":25,\\\"transactions\\\":40,\\\"merchants\\\":22,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":0,\\\"ingested\\\":0,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{\\\"THB\\\":159780,\\\"USD\\\":-65},\\\"liabilities\\\":{\\\"THB\\\":2097},\\\"net_worth\\\":{\\\"THB\\\":157683,\\\"USD\\\":-65}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 97,
+      "tool": "oled",
+      "subcommand": "merchants list",
+      "args": "merchants list --json",
+      "command": "oled merchants list --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"m:cc92d6f1-1f51-456b-9496-2fc9b3143e0b\",\"canonical_name\":\"7-Eleven\",\"default_account_id\":null,\"created_at\":\"2026-08-16T10:36:51.883Z\",\"alias_count\":0}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"m:cc92d6f1-1f51-456b-9496-2fc9b3143e0b\\\",\\\"canonical_name\\\":\\\"7-Eleven\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.883Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:09cd52ee-d877-453b-98c3-7f8c37d39139\\\",\\\"canonical_name\\\":\\\"AIS\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.888Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:f485e834-35e9-4bfd-bc0f-66e1030c83c6\\\",\\\"canonical_name\\\":\\\"BTS\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.891Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:40d32b4a-bf6f-481e-a042-5ad5a0c85754\\\",\\\"canonical_name\\\":\\\"Big C\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.880Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:ca538a0e-607c-4741-a717-d2413638afa8\\\",\\\"canonical_name\\\":\\\"Bolt\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.893Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:02ac685b-7fea-43b6-9d1f-56c68fb03ca1\\\",\\\"canonical_name\\\":\\\"Cafe Amazon\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.881Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:bf07309a-60ac-40dd-8a8e-61f311c64794\\\",\\\"canonical_name\\\":\\\"Figma\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.883Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:cc6283be-935c-4e56-9f21-60b2c271f269\\\",\\\"canonical_name\\\":\\\"GitHub\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.890Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:d9fee68b-aede-4c48-ae46-1eb3ba1e894c\\\",\\\"canonical_name\\\":\\\"Grab\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.881Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:77d72dd2-93f8-4c8b-81e4-d59773fe4bbd\\\",\\\"canonical_name\\\":\\\"MEA\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.886Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:5d5971dd-f72e-4ecd-929c-de7a4d47bc5d\\\",\\\"canonical_name\\\":\\\"MK Restaurant\\\",\\\"default_account_id\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.893Z\\\",\\\"alias_count\\\":0}\\n{\\\"id\\\":\\\"m:2c5754f0-16cd-49c0-a229-9e74e342692b\\\",\\\"canonical_name\\\":\\\"M\n…[truncated 1958 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4074,
+        "completionTokens": 104,
+        "estimated": false
+      },
+      "durationMs": 4234
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 2,
+      "durationMs": 121,
+      "tool": "oled",
+      "subcommand": "transactions list",
+      "args": "transactions list --help",
+      "command": "oled transactions list --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled transactions list [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled transactions list [options]\\n\\nList transactions with optional filters\\n\\nOptions:\\n  --account <id>      filter by account id (matches either side)\\n  --from <date>       filter from date\\n  --to <date>         filter to date\\n  --query <text>      filter by search text\\n  --amount <decimal>  filter by exact amount (decimal)\\n  --currency <code>   scope rows to that currency's ledger, and the unit\\n                      --amount is given in; --account names a ledger of its own\\n                      and wins\\n  --limit <n>         max rows (default 50, max 500)\\n  --offset <n>        rows to skip; repeat with offset += returned while the\\n                      summary says has_more\\n  --group             fold linked transactions into their group clusters\\n  --include-void      include mirrors voided by `transactions merge` (hidden by\\n                      default)\\n  --no-redact         skip PII redaction (on by default)\\n  --json              Emit NDJSON (machine-readable) instead of human output\\n  --no-color          Disable ANSI color output\\n  --config <path>     Config file to use (default ~/.oled/config.json)\\n  -h, --help          display help for command\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 3,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 4413,
+        "completionTokens": 61,
+        "estimated": false
+      },
+      "durationMs": 3398
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 3,
+      "durationMs": 137,
+      "tool": "oled",
+      "subcommand": "transactions list",
+      "args": "transactions list --query Grab --limit 500 --json",
+      "command": "oled transactions list --query Grab --limit 500 --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"tx:045a1b18-395a-426a-9e1d-f41a0539a495\",\"group_id\":null,\"date\":\"2026-05-19\",\"description\":\"Grab ride home\",\"merchant_id\":\"m:d9fee68b-aede-4c48-ae46-1eb3ba1e894c\",\"raw_descriptor\":null,\"source_file_id\":null,\"source_page\":null,\"debit_account_id\":\"thb:expense:transport\",\"credit_account_id\":\"thb:asset:bank:kbank\",\"amount\":150,\"currency\":\"THB\",\"void_of\":null,\"created_at\":\"2026-08-16T10:36:51.890Z\",\"debit_account_name\":\"Transport\",\"credit_account_name\":\"Kbank\",\"merchant_name\":\"Grab\"}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"tx:045a1b18-395a-426a-9e1d-f41a0539a495\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-19\\\",\\\"description\\\":\\\"Grab ride home\\\",\\\"merchant_id\\\":\\\"m:d9fee68b-aede-4c48-ae46-1eb3ba1e894c\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:transport\\\",\\\"credit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":150,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.890Z\\\",\\\"debit_account_name\\\":\\\"Transport\\\",\\\"credit_account_name\\\":\\\"Kbank\\\",\\\"merchant_name\\\":\\\"Grab\\\"}\\n{\\\"id\\\":\\\"tx:b9ccbad4-912d-4107-b19b-3cdb4156628e\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-16\\\",\\\"description\\\":\\\"Grab food, biryani\\\",\\\"merchant_id\\\":\\\"m:d9fee68b-aede-4c48-ae46-1eb3ba1e894c\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:food:restaurants\\\",\\\"credit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":350,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.889Z\\\",\\\"debit_account_name\\\":\\\"Restaurants\\\",\\\"credit_account_name\\\":\\\"Kbank\\\",\\\"merchant_name\\\":\\\"Grab\\\"}\\n{\\\"id\\\":\\\"tx:61ad84b1-d480-4dda-9784-8a8af4cf5a5d\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-12\\\",\\\"description\\\":\\\"Grab ride to Ari\\\",\\\"merchant_id\\\":\\\"m:d9fee68b-aede-4c48-ae46-1eb3ba1e894c\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:transport\\\",\\\"credit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":240,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.887Z\\\",\\\"debit_account_name\\\":\\\"Transport\\\",\\\"credit_account_name\\\":\\\"Kbank\\\",\\\"merchant_name\\\":\\\"Grab\\\"}\\n{\\\"id\\\":\\\"tx:3e180ba6-3844-4140-9f9d-f69e5d5fd6e1\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-09\\\",\\\"description\\\":\\\"Grab food, khao soi\\\",\\\"merchant_id\\\":\\\"m:d9fee68b-aede-4c48-ae46-1eb3ba1e894c\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:food:restaurants\\\",\n…[truncated 2028 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 4,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 5924,
+        "completionTokens": 210,
+        "estimated": false
+      },
+      "durationMs": 4724
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 4,
+      "durationMs": 140,
+      "tool": "oled",
+      "subcommand": "transactions list",
+      "args": "transactions list --limit 500 --json",
+      "command": "oled transactions list --limit 500 --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"id\":\"tx:d26d2e1d-f9d3-461c-80b4-0436de63e8c8\",\"group_id\":null,\"date\":\"2026-05-31\",\"description\":\"May salary\",\"merchant_id\":null,\"raw_descriptor\":null,\"source_file_id\":null,\"source_page\":null,\"debit_account_id\":\"thb:asset:bank:kbank\",\"credit_account_id\":\"thb:income:salary\",\"amount\":85000,\"currency\":\"THB\",\"void_of\":null,\"created_at\":\"2026-08-16T10:36:51.894Z\",\"debit_account_name\":\"Kbank\",\"credit_account_name\":\"Salary\",\"merchant_name\":null}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"id\\\":\\\"tx:d26d2e1d-f9d3-461c-80b4-0436de63e8c8\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-31\\\",\\\"description\\\":\\\"May salary\\\",\\\"merchant_id\\\":null,\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"credit_account_id\\\":\\\"thb:income:salary\\\",\\\"amount\\\":85000,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.894Z\\\",\\\"debit_account_name\\\":\\\"Kbank\\\",\\\"credit_account_name\\\":\\\"Salary\\\",\\\"merchant_name\\\":null}\\n{\\\"id\\\":\\\"tx:d26462e3-29ab-4fad-9ad9-40224fc011ca\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-30\\\",\\\"description\\\":\\\"7-Eleven snacks\\\",\\\"merchant_id\\\":\\\"m:cc92d6f1-1f51-456b-9496-2fc9b3143e0b\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:food:groceries\\\",\\\"credit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":180,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.894Z\\\",\\\"debit_account_name\\\":\\\"Groceries\\\",\\\"credit_account_name\\\":\\\"Kbank\\\",\\\"merchant_name\\\":\\\"7-Eleven\\\"}\\n{\\\"id\\\":\\\"tx:4190a74b-e337-486d-adea-1a4ef2d58d3e\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-29\\\",\\\"description\\\":\\\"Filter coffee\\\",\\\"merchant_id\\\":\\\"m:79ce9ada-1f89-40e1-ac6f-50b4a0d428f0\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:food:coffee\\\",\\\"credit_account_id\\\":\\\"thb:asset:bank:kbank\\\",\\\"amount\\\":55,\\\"currency\\\":\\\"THB\\\",\\\"void_of\\\":null,\\\"created_at\\\":\\\"2026-08-16T10:36:51.893Z\\\",\\\"debit_account_name\\\":\\\"Coffee\\\",\\\"credit_account_name\\\":\\\"Kbank\\\",\\\"merchant_name\\\":\\\"Roots\\\"}\\n{\\\"id\\\":\\\"tx:3e317df3-dcb3-4d61-be2d-e15753dbbeec\\\",\\\"group_id\\\":null,\\\"date\\\":\\\"2026-05-28\\\",\\\"description\\\":\\\"MK dinner, family\\\",\\\"merchant_id\\\":\\\"m:5d5971dd-f72e-4ecd-929c-de7a4d47bc5d\\\",\\\"raw_descriptor\\\":null,\\\"source_file_id\\\":null,\\\"source_page\\\":null,\\\"debit_account_id\\\":\\\"thb:expense:food:restaurants\\\",\\\"credit_account_id\\\":\\\"thb:liability:card:visa\\\",\\\"amount\\\"\n…[truncated 20179 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 5,
+      "content": "I've verified all 40 transactions in the ledger. The Grab merchant appears in 7 transactions, all in THB, all active (no voids):\n\n- 2026-04-24: Grab ride to Asok — 200\n- 2026-05-02: Grab food, pad thai — 420\n- 2026-05-06: Grab ride to Silom — 260\n- 2026-05-09: Grab food, khao soi — 380\n- 2026-05-12: Grab ride to Ari — 240\n- 2026-05-16: Grab food, biryani — 350\n- 2026-05-19: Grab ride home — 150\n\nTotal: 2000 + 800 = 2000... let me recompute: 200+420+260+380+240+350+150 = 2000 THB.",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 14158,
+        "completionTokens": 688,
+        "estimated": false
+      },
+      "durationMs": 52147
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 5,
+      "durationMs": 0,
+      "tool": "submit_answer",
+      "subcommand": "submit_answer",
+      "args": "{\"value\": 2000, \"unit\": \"THB\", \"answer\": \"Total spent at Grab across the ledger: 2,000 THB (7 transactions, Apr–May 2026)\"}",
+      "command": "submit_answer",
+      "ok": true,
+      "exitCode": null,
+      "rejected": null,
+      "message": "Total spent at Grab across the ledger: 2,000 THB (7 transactions, Apr–May 2026)",
+      "hint": null,
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "commit": null,
+      "result": "answer recorded"
+    },
+    {
+      "type": "phase_end",
+      "phase": "answer",
+      "reply": "I've verified all 40 transactions in the ledger. The Grab merchant appears in 7 transactions, all in THB, all active (no voids):\n\n- 2026-04-24: Grab ride to Asok — 200\n- 2026-05-02: Grab food, pad thai — 420\n- 2026-05-06: Grab ride to Silom — 260\n- 2026-05-09: Grab food, khao soi — 380\n- 2026-05-12: Grab ride to Ari — 240\n- 2026-05-16: Grab food, biryani — 350\n- 2026-05-19: Grab ride home — 150\n\nTotal: 2000 + 800 = 2000... let me recompute: 200+420+260+380+240+350+150 = 2000 THB.",
+      "exit": "answered"
+    }
+  ]
+}
