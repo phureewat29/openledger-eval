@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "startedAt": "2026-08-18T07:32:09.536Z",
+    "oledVersion": "0.23.3",
+    "skillVersion": "0.23.3",
+    "skillSha256": "4f29b02f43459b92109d2a84bf65d992b3e59380a4ddbfc0dd8050be86de69b6",
+    "suiteSha256": "5127b3c3f839e7826983c6e67c037f255f5271f389dae644a7c1adf13c5c4e7d",
+    "evalVersion": "0.3.0"
+  },
+  "config": {
+    "suites": [
+      "ingest",
+      "record",
+      "query"
+    ],
+    "trials": 1,
+    "concurrency": 2,
+    "modelsRequested": [
+      "deepseek/deepseek-v4-flash",
+      "qwen/qwen3.8-27b",
+      "anthropic/claude-haiku-4.5",
+      "openai/gpt-5.6-luna",
+      "x-ai/grok-4.6"
+    ]
+  },
+  "entries": [
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 145087,
+      "avgTokens": {
+        "in": 597099,
+        "out": 14716
+      },
+      "avgToolCalls": 24,
+      "totalCostUsd": 0.137079,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 3542733,
+      "avgTokens": {
+        "in": 650603,
+        "out": 56620
+      },
+      "avgToolCalls": 27,
+      "totalCostUsd": 0.47395535,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 1,
+        "total": 1
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": null,
+      "avgDurationMs": 946387,
+      "avgTokens": {
+        "in": 683084,
+        "out": 43655
+      },
+      "avgToolCalls": 34,
+      "totalCostUsd": 0.06363454439999999,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.6",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 0,
+        "total": 1
+      },
+      "meanPassRate": 0.9166666666666666,
+      "stddevPassRate": null,
+      "avgDurationMs": 353262,
+      "avgTokens": {
+        "in": 406960,
+        "out": 26362
+      },
+      "avgToolCalls": 36,
+      "totalCostUsd": 0.972092,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "anthropic/claude-haiku-4.5",
+      "suite": "ingest",
+      "trials": 1,
+      "cases": {
+        "passed": 0,
+        "total": 1
+      },
+      "meanPassRate": 0.16666666666666666,
+      "stddevPassRate": null,
+      "avgDurationMs": 410616,
+      "avgTokens": {
+        "in": 1711032,
+        "out": 34832
+      },
+      "avgToolCalls": 19,
+      "totalCostUsd": 1.885192,
+      "terminal": {
+        "graded": 1,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 46676.6,
+      "avgTokens": {
+        "in": 100614.8,
+        "out": 3474.2
+      },
+      "avgToolCalls": 36.4,
+      "totalCostUsd": 0.12145999999999998,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.6",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 80710.6,
+      "avgTokens": {
+        "in": 103981,
+        "out": 5088.8
+      },
+      "avgToolCalls": 44,
+      "totalCostUsd": 1.192474,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 541536.4,
+      "avgTokens": {
+        "in": 121340.6,
+        "out": 8682.6
+      },
+      "avgToolCalls": 63.6,
+      "totalCostUsd": 0.41193795,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 5,
+        "total": 5
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 231321.6,
+      "avgTokens": {
+        "in": 122275.8,
+        "out": 8609.6
+      },
+      "avgToolCalls": 49.8,
+      "totalCostUsd": 0.057611434999999996,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "anthropic/claude-haiku-4.5",
+      "suite": "record",
+      "trials": 1,
+      "cases": {
+        "passed": 4,
+        "total": 5
+      },
+      "meanPassRate": 0.9888888888888889,
+      "stddevPassRate": 0.024845199749997673,
+      "avgDurationMs": 58162,
+      "avgTokens": {
+        "in": 170016.8,
+        "out": 6053.4
+      },
+      "avgToolCalls": 10,
+      "totalCostUsd": 1.001419,
+      "terminal": {
+        "graded": 5,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 10857.166666666666,
+      "avgTokens": {
+        "in": 16702.5,
+        "out": 370.5833333333333
+      },
+      "avgToolCalls": 6.333333333333333,
+      "totalCostUsd": 0.045422399999999995,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 35649.416666666664,
+      "avgTokens": {
+        "in": 19728.333333333332,
+        "out": 1066
+      },
+      "avgToolCalls": 3.75,
+      "totalCostUsd": 0.021667962399999997,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "x-ai/grok-4.6",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 14759.583333333334,
+      "avgTokens": {
+        "in": 20276.833333333332,
+        "out": 673.4166666666666
+      },
+      "avgToolCalls": 7.333333333333333,
+      "totalCostUsd": 0.5351299999999999,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 12,
+        "total": 12
+      },
+      "meanPassRate": 1,
+      "stddevPassRate": 0,
+      "avgDurationMs": 106045.41666666667,
+      "avgTokens": {
+        "in": 26851.083333333332,
+        "out": 1446
+      },
+      "avgToolCalls": 4.583333333333333,
+      "totalCostUsd": 0.20052224999999999,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    },
+    {
+      "model": "anthropic/claude-haiku-4.5",
+      "suite": "query",
+      "trials": 1,
+      "cases": {
+        "passed": 9,
+        "total": 12
+      },
+      "meanPassRate": 0.875,
+      "stddevPassRate": 0.22613350843332272,
+      "avgDurationMs": 9074.333333333334,
+      "avgTokens": {
+        "in": 18959.75,
+        "out": 647.3333333333334
+      },
+      "avgToolCalls": 2.9166666666666665,
+      "totalCostUsd": 0.266357,
+      "terminal": {
+        "graded": 12,
+        "endpoint_error": 0,
+        "sandbox_error": 0
+      }
+    }
+  ],
+  "skippedModels": [],
+  "buildDrift": null
+}

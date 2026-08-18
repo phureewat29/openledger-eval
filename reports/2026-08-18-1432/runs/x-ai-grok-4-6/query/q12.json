@@ -1,0 +1,219 @@
+{
+  "model": "x-ai/grok-4.6",
+  "suite": "query",
+  "caseId": "q12",
+  "trial": 1,
+  "state": "graded",
+  "error": null,
+  "grade": {
+    "caseId": "q12",
+    "assertions": [
+      {
+        "id": "submit_called",
+        "label": "answer submitted",
+        "passed": true,
+        "evidence": {
+          "want": "one submit_answer call",
+          "got": "an answer was submitted"
+        }
+      },
+      {
+        "id": "answer_correct",
+        "label": "answer",
+        "passed": true,
+        "evidence": {
+          "want": "THB 10522.00, USD 50.00, and no single fused total",
+          "got": "THB 10522.00, USD 50.00"
+        }
+      }
+    ],
+    "passRate": 1,
+    "passed": true
+  },
+  "metrics": {
+    "llmCalls": 3,
+    "toolCalls": 5,
+    "tokensIn": 7653,
+    "tokensOut": 470,
+    "tokensEstimated": false,
+    "llmMs": 10347,
+    "toolMs": 648,
+    "durationMs": 10995,
+    "contextTrims": 0
+  },
+  "counters": {
+    "rejected": {
+      "unknown_tool": 0,
+      "bad_tool_args": 0,
+      "refused_shell": 0,
+      "refused_placeholder": 0,
+      "refused_command": 0
+    },
+    "nonzeroExits": {},
+    "helpCalls": 2,
+    "repeatedCommands": 0,
+    "contextTrims": 0
+  },
+  "questionsRaised": 0,
+  "costUsd": 0.018126,
+  "events": [
+    {
+      "type": "phase_start",
+      "phase": "answer",
+      "title": "Give me one single number for everything I spent in May 2026 across all my accounts, counting every expense category. If one number is not meaningful here, say so and give the per-currency totals instead."
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 1,
+      "content": "I'll start by checking the ledger status and how reports work so I can total May 2026 expenses.",
+      "finishReason": "tool_calls",
+      "toolCalls": 3,
+      "usage": {
+        "promptTokens": 1842,
+        "completionTokens": 121,
+        "estimated": false
+      },
+      "durationMs": 2810
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 156,
+      "tool": "oled",
+      "subcommand": "status",
+      "args": "status",
+      "command": "oled status --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"type\":\"status\",\"configured\":true,\"config_path\":\"~/.oled/config.json\",\"data_dir\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-nPP2DF/data\",\"locale\":\"th-TH\",\"currency\":\"THB\",\"user_name\":\"User\",\"db\":{\"path\":\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-nPP2DF/db.sqlite\",\"reachable\":true,\"error\":null},\"counts\":{\"accounts\":25,\"transactions\":40,\"merchants\":22,\"notes\":0},\"files\":{\"new\":0,\"ingested\":0,\"pending\":0,\"failed\":0},\"questions\":{\"open\":0,\"deferred\":0},\"net_worth\":{\"assets\":{\"THB\":159780,\"USD\":-65},\"liabilities\":{\"THB\":2097},\"net_worth\":{\"THB\":157683,\"USD\":-65}}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"type\\\":\\\"status\\\",\\\"configured\\\":true,\\\"config_path\\\":\\\"~/.oled/config.json\\\",\\\"data_dir\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-nPP2DF/data\\\",\\\"locale\\\":\\\"th-TH\\\",\\\"currency\\\":\\\"THB\\\",\\\"user_name\\\":\\\"User\\\",\\\"db\\\":{\\\"path\\\":\\\"/var/folders/lr/w1rwvgd94mj89ynnv8v4tsx80000gn/T/oled-eval-nPP2DF/db.sqlite\\\",\\\"reachable\\\":true,\\\"error\\\":null},\\\"counts\\\":{\\\"accounts\\\":25,\\\"transactions\\\":40,\\\"merchants\\\":22,\\\"notes\\\":0},\\\"files\\\":{\\\"new\\\":0,\\\"ingested\\\":0,\\\"pending\\\":0,\\\"failed\\\":0},\\\"questions\\\":{\\\"open\\\":0,\\\"deferred\\\":0},\\\"net_worth\\\":{\\\"assets\\\":{\\\"THB\\\":159780,\\\"USD\\\":-65},\\\"liabilities\\\":{\\\"THB\\\":2097},\\\"net_worth\\\":{\\\"THB\\\":157683,\\\"USD\\\":-65}}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 110,
+      "tool": "oled",
+      "subcommand": "report",
+      "args": "report --help",
+      "command": "oled report --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "Usage: oled report [options]",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"Usage: oled report [options]\\n\\nIncome, expenses, and net worth\\n\\nOptions:\\n  --from <date>    start date\\n  --to <date>      end date\\n  --json           Emit NDJSON (machine-readable) instead of human output\\n  --no-color       Disable ANSI color output\\n  --config <path>  Config file to use (default ~/.oled/config.json)\\n  -h, --help       display help for command\\n\\nBehavior: sums income, expenses, and net worth over a date range. For net worth use oled status.\\nBoth dates are required and ISO (YYYY-MM-DD).\\nExample: oled report --from 2025-01-01 --to 2025-03-31 --json\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 1,
+      "durationMs": 147,
+      "tool": "oled",
+      "subcommand": "oled",
+      "args": "--help",
+      "command": "oled --help --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "OpenLedger  ·  A reliable, deterministic ledger for your AI",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"\\nOpenLedger  ·  A reliable, deterministic ledger for your AI\\n\\nAbout\\n  Place financial statements in a folder; your AI posts each row to a local ledger.\\n  Ask for net worth, spending, subscriptions, or debt payoff. Answers always come from the ledger.\\n  Every entry is double-entry and data stays safely on your machine.\\n\\nUsage\\n  oled               <command> [OPTIONS]\\n\\nCommands\\n  status             Status: config, database, ledger counts, net worth (default)\\n  doctor             Diagnose the harness environment\\n  setup              Install the skill for an agent CLI (--dir <path>)\\n  config             OpenLedger configuration\\n  ingest             Ingest pipeline: list / prepare / commit / done / fail\\n  files              Browse ingested files (list / show / drop)\\n  transactions       Transactions: list / show / add / update / delete / recategorize / dedupe / merge\\n  accounts           Manage the chart of accounts\\n  merchants          Manage merchants and their default accounts\\n  questions          List, answer, and defer open questions\\n  report             Income, expenses, and net worth\\n  notes              Manage freeform notes\\n  datasets           Reference datasets\\n  open               Open the data folder in file explorer\\n\\nOptions\\n  --json             Emit NDJSON (machine-readable) instead of human output\\n  --no-color         Disable ANSI color output\\n  --config <path>    Config file to use (default ~/.oled/config.json)\\n  --version          Show the version and exit\\n  --help             Show this help screen\\n\\nContract\\n  Exit codes: 0 ok · 1 error · 2 usage · 3 not ready · 4 input required · 5 not found · 6 invalid · 7 partial.\\n  Under --json every stdout line is one JSON object, and list reads end with a {\\\"type\\\":\\\"summary\\\"} row.\\n  Errors are one stderr JSON object with a hint; read output masks PII as [USER]/[CARD], masks are not data.\\n\\nOpenLedger is a tool, it only summarizes financial statements:\n…[truncated 79 characters]"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 2,
+      "content": "",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2853,
+        "completionTokens": 59,
+        "estimated": false
+      },
+      "durationMs": 1827
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 2,
+      "durationMs": 235,
+      "tool": "oled",
+      "subcommand": "report",
+      "args": "report --from 2026-05-01 --to 2026-05-31",
+      "command": "oled report --from 2026-05-01 --to 2026-05-31 --json",
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "ok": true,
+      "exitCode": 0,
+      "rejected": null,
+      "message": "{\"from\":\"2026-05-01\",\"to\":\"2026-05-31\",\"income\":{\"THB\":85000},\"expenses\":{\"THB\":10522,\"USD\":50},\"net\":{\"THB\":74478,\"USD\":-50}}",
+      "hint": null,
+      "commit": null,
+      "result": "{\"exit_code\":0,\"stdout\":\"{\\\"from\\\":\\\"2026-05-01\\\",\\\"to\\\":\\\"2026-05-31\\\",\\\"income\\\":{\\\"THB\\\":85000},\\\"expenses\\\":{\\\"THB\\\":10522,\\\"USD\\\":50},\\\"net\\\":{\\\"THB\\\":74478,\\\"USD\\\":-50}}\\n\",\"stderr\":\"\"}"
+    },
+    {
+      "type": "llm_call",
+      "phase": "answer",
+      "turn": 3,
+      "content": "Expenses span THB and USD, so a single combined number is not meaningful. Submitting the per-currency totals from the May 2026 report.",
+      "finishReason": "tool_calls",
+      "toolCalls": 1,
+      "usage": {
+        "promptTokens": 2958,
+        "completionTokens": 290,
+        "estimated": false
+      },
+      "durationMs": 5710
+    },
+    {
+      "type": "tool_call",
+      "phase": "answer",
+      "turn": 3,
+      "durationMs": 0,
+      "tool": "submit_answer",
+      "subcommand": "submit_answer",
+      "args": "{\"answer\":\"One number is not meaningful: May 2026 expenses are THB 10,522 and USD 50.\",\"per_currency\":{\"THB\":10522,\"USD\":50}}",
+      "command": "submit_answer",
+      "ok": true,
+      "exitCode": null,
+      "rejected": null,
+      "message": "One number is not meaningful: May 2026 expenses are THB 10,522 and USD 50.",
+      "hint": null,
+      "stdin": false,
+      "stdinPreview": null,
+      "stdinDigest": null,
+      "rows": null,
+      "commit": null,
+      "result": "answer recorded"
+    },
+    {
+      "type": "phase_end",
+      "phase": "answer",
+      "reply": "Expenses span THB and USD, so a single combined number is not meaningful. Submitting the per-currency totals from the May 2026 report.",
+      "exit": "answered"
+    }
+  ]
+}
