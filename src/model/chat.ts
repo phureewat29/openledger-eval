@@ -6,7 +6,7 @@ import type {
   ChatCompletionMessageToolCall,
   ChatCompletionTool,
 } from "openai/resources/chat/completions";
-import { errorMessage } from "../core/result.js";
+import { errorMessage, tryExecute } from "../core/result.js";
 import type { TokenUsage } from "../report/events.js";
 import { estimateTextTokens, estimateTokens } from "./tokens.js";
 
@@ -54,10 +54,17 @@ export interface ModelEndpoint {
 
 const RETRYABLE_STATUS = new Set([408, 409, 429]);
 
-function isFunctionCall(
-  call: ChatCompletionMessageToolCall,
-): call is Extract<ChatCompletionMessageToolCall, { type: "function" }> {
+type FunctionToolCall = Extract<ChatCompletionMessageToolCall, { type: "function" }>;
+
+function isFunctionCall(call: ChatCompletionMessageToolCall): call is FunctionToolCall {
   return call.type === "function";
+}
+
+function sanitizeForHistory(call: FunctionToolCall): FunctionToolCall {
+  // Mirrors parseArgs in agent/tools.ts: an empty string reads as `{}`.
+  const parsed = tryExecute(() => JSON.parse(call.function.arguments || "{}") as unknown);
+  if (parsed.ok) return call;
+  return { ...call, function: { ...call.function, arguments: "{}" } };
 }
 
 function classify(cause: unknown): ChatFailure {
@@ -91,7 +98,7 @@ function toReply(
   const assistant: ChatCompletionAssistantMessageParam = {
     role: "assistant",
     content: content || null,
-    ...(rawCalls.length > 0 ? { tool_calls: rawCalls } : {}),
+    ...(rawCalls.length > 0 ? { tool_calls: rawCalls.map(sanitizeForHistory) } : {}),
   };
   const usage = completion.usage
     ? {

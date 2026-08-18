@@ -79,6 +79,15 @@ test("a refused call and an in-process tool both record no preview", async () =>
   assert.equal(submitted.observation.stdinPreview, null);
 });
 
+test("arguments cut off mid-JSON refuse as bad_tool_args and quote what was sent", async () => {
+  const truncated =
+    '{"args":"ingest commit --file x --input -","stdin":"{\\"date\\":\\"2026-05-12\\",\\"deb';
+  const result = await oledTool().invoke(truncated);
+  assert.equal(result.observation.rejected, "bad_tool_args");
+  assert.match(result.observation.message ?? "", /not valid JSON/);
+  assert.match(result.observation.message ?? "", /ingest commit --file x/);
+});
+
 /**
  * The description used to ask only for "a one-line summary in `answer`", which
  * is what a model obligingly wrote for a question wanting a bare merchant name
